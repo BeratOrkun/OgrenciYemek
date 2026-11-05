@@ -496,9 +496,10 @@ const Screens = {
     _categorizeDishName(dish) {
         const lower = dish.toLowerCase();
         if (lower.includes('çorba')) return 'Çorba';
-        if (lower.includes('pilav') || lower.includes('makarna') || lower.includes('spagetti')) return 'Yardımcı Yemek';
-        if (lower.includes('salata') || lower.includes('cacık') || lower.includes('ezme') || lower.includes('haydari') || lower.includes('yoğurt') || lower.includes('turşu')) return 'Salata / Meze';
+        if (lower.includes('pilav') || lower.includes('makarna') || lower.includes('spagetti') || lower.includes('bulgur')) return 'Yardımcı Yemek';
+        if (lower.includes('tavuk') || lower.includes('köfte') || lower.includes('et') || lower.includes('kavurma') || lower.includes('tantuni') || lower.includes('fajita') || lower.includes('rosto') || lower.includes('kebap') || lower.includes('gulaş') || lower.includes('pane') || lower.includes('şnitzel') || lower.includes('nohut') || lower.includes('fasulye') || lower.includes('balık') || lower.includes('dolma') || lower.includes('sarma') || lower.includes('yahni')) return 'Ana Yemek';
         if (lower.includes('tatlı') || lower.includes('helva') || lower.includes('baklava') || lower.includes('pasta') || lower.includes('sütlaç') || lower.includes('trileçe') || lower.includes('şekerpare') || lower.includes('supangle') || lower.includes('kadayıf') || lower.includes('kalburabastı') || lower.includes('browni')) return 'Tatlı';
+        if (lower.includes('salata') || lower.includes('cacık') || lower.includes('ezme') || lower.includes('haydari') || lower.includes('yoğurt') || lower.includes('turşu')) return 'Salata / Meze';
         if (lower.includes('su') || lower.includes('ayran') || lower.includes('meyve suyu')) return 'İçecek';
         if (lower.includes('ekmek')) return 'Ekmek';
         return 'Ana Yemek';

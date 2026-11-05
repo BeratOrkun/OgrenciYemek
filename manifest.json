@@ -1,0 +1,21 @@
+{
+    "name": "ÖğrenciYemek",
+    "short_name": "ÖğrenciYemek",
+    "description": "Öğrenciler için ücretsiz ve uygun fiyatlı yemek imkanları",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0a0a1a",
+    "theme_color": "#f97316",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "tr",
+    "icons": [
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        }
+    ],
+    "categories": ["food", "education", "lifestyle"]
+}

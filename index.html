@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a1a">
+    <meta name="description" content="Öğrenciler için ücretsiz ve uygun fiyatlı yemek imkanları. Üniversite yemekleri, KYK menüleri, Gençlik Sofrası ve daha fazlası.">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ÖğrenciYemek">
+
+    <title>ÖğrenciYemek — Öğrenci Yemek Rehberi</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>" type="image/svg+xml">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="app">
+
+    <!-- ===================================================
+         ONBOARDING SCREEN
+         =================================================== -->
+    <section id="onboarding-screen" class="screen">
+        <div class="onboarding-logo">🍽️</div>
+        <h1 class="onboarding-title">ÖğrenciYemek</h1>
+        <p class="onboarding-subtitle">Ücretsiz ve uygun fiyatlı yemek imkanlarını keşfet!</p>
+
+        <!-- University Selection -->
+        <div id="onboarding-step" class="onboarding-step active">
+            <p style="color: var(--text-secondary); margin-bottom: var(--space-lg); font-size: 0.95rem;">
+                Üniversiteni seç
+            </p>
+
+            <div class="select-wrapper">
+                <select id="onboarding-uni-select" onchange="if(this.value) App.selectUniversity(this.value)">
+                    <option value="" disabled selected>Üniversite seçin...</option>
+                    <!-- Dynamically populated -->
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         HOME SCREEN
+         =================================================== -->
+    <section id="home-screen" class="screen">
+        <!-- Settings Button -->
+        <button class="settings-btn" onclick="App.openSettings()" aria-label="Ayarlar" id="settings-btn">
+            ⚙️
+        </button>
+
+        <!-- Scrollable Content -->
+        <div class="home-scroll">
+            <!-- Header -->
+            <div class="home-header">
+                <p class="home-greeting" id="home-greeting">Merhaba 👋</p>
+                <h1 class="home-title" id="home-title">
+                    <span>Öğrenci</span>, bugün ne yiyelim?
+                </h1>
+            </div>
+
+            <!-- Quick Info -->
+            <div class="quick-info">
+                <span class="quick-info-icon">📅</span>
+                <div class="quick-info-text" id="quick-info-text">
+                    <strong>Yükleniyor...</strong>
+                </div>
+            </div>
+
+            <!-- Menu Cards -->
+            <div class="menu-grid">
+                <!-- Üniversite Yemekleri -->
+                <div class="menu-card" data-accent="orange" onclick="App.showScreen('universities')">
+                    <div class="menu-card-glow"></div>
+                    <div class="menu-card-inner">
+                        <div class="menu-card-icon">🎓</div>
+                        <div class="menu-card-content">
+                            <h3 class="menu-card-title">Üniversite Yemekleri</h3>
+                            <p class="menu-card-desc">10 Ankara üniversitesinin yemek menüleri</p>
+                        </div>
+                        <span class="menu-card-arrow">›</span>
+                    </div>
+                </div>
+
+                <!-- KYK Yemekleri -->
+                <div class="menu-card" data-accent="green" onclick="App.showScreen('kyk')">
+                    <div class="menu-card-glow"></div>
+                    <div class="menu-card-inner">
+                        <div class="menu-card-icon">🏠</div>
+                        <div class="menu-card-content">
+                            <h3 class="menu-card-title">KYK Yemekleri</h3>
+                            <p class="menu-card-desc">KYK yurt menüleri ve bilgileri</p>
+                        </div>
+                        <span class="menu-card-arrow">›</span>
+                    </div>
+                </div>
+
+                <!-- Gençlik Sofrası -->
+                <div class="menu-card" data-accent="blue" onclick="App.showScreen('genclik')">
+                    <div class="menu-card-glow"></div>
+                    <div class="menu-card-inner">
+                        <div class="menu-card-icon">🍲</div>
+                        <div class="menu-card-content">
+                            <h3 class="menu-card-title">Gençlik Sofrası</h3>
+                            <p class="menu-card-desc">ABB ücretsiz yemek hizmeti</p>
+                        </div>
+                        <span class="menu-card-arrow">›</span>
+                    </div>
+                </div>
+
+                <!-- Millet Kütüphanesi -->
+                <div class="menu-card" data-accent="purple" onclick="App.showScreen('millet')">
+                    <div class="menu-card-glow"></div>
+                    <div class="menu-card-inner">
+                        <div class="menu-card-icon">🏛️</div>
+                        <div class="menu-card-content">
+                            <h3 class="menu-card-title">Millet Kütüphanesi</h3>
+                            <p class="menu-card-desc">Ücretsiz çorba ve kek ikramı</p>
+                        </div>
+                        <span class="menu-card-arrow">›</span>
+                    </div>
+                </div>
+
+                <!-- Çankaya Belediyesi -->
+                <div class="menu-card" data-accent="cyan" onclick="App.showScreen('cankaya')">
+                    <div class="menu-card-glow"></div>
+                    <div class="menu-card-inner">
+                        <div class="menu-card-icon">🏢</div>
+                        <div class="menu-card-content">
+                            <h3 class="menu-card-title">Çankaya Belediyesi</h3>
+                            <p class="menu-card-desc">Çankaya Belediyesi yemek menüleri</p>
+                        </div>
+                        <span class="menu-card-arrow">›</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <p class="home-footer">ÖğrenciYemek v1.0 — Öğrenciler için yapıldı ❤️</p>
+        </div>
+    </section>
+
+    <!-- ===================================================
+         SUB SCREEN (Dynamic)
+         =================================================== -->
+    <section id="sub-screen" class="screen">
+        <!-- Content injected dynamically by Screens module -->
+    </section>
+
+</div>
+
+<!-- ===================================================
+     SETTINGS MODAL
+     =================================================== -->
+<div id="settings-modal" class="modal-overlay" onclick="if(event.target===this)App.closeSettings()">
+    <div class="modal-content">
+        <div class="modal-handle"></div>
+        <h3 class="modal-title">⚙️ Ayarlar</h3>
+
+        <div class="modal-field">
+            <div class="modal-field-label">Şehir</div>
+            <div class="modal-field-value" id="settings-city">-</div>
+        </div>
+
+        <div class="modal-field">
+            <div class="modal-field-label">Üniversite</div>
+            <div class="modal-field-value" id="settings-uni">-</div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-secondary" style="flex:1;" onclick="App.closeSettings()">Kapat</button>
+            <button class="btn btn-primary" style="flex:1;" onclick="App.resetOnboarding()">🔄 Değiştir</button>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts (order matters) -->
+<script src="js/data.js"></script>
+<script src="js/screens.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

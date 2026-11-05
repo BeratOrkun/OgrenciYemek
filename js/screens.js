@@ -331,7 +331,7 @@ const Screens = {
             return this.kykMenuMemoryCache[cacheKey];
         }
 
-        // Try Kepçe API directly (timeout 2.5s)
+        // 1. Try Kepçe API directly (timeout 2.5s)
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 2500);
@@ -351,7 +351,47 @@ const Screens = {
             }
         } catch (e) {}
 
-        // Try GitHub Raw (CORS is open: *)
+        // 2. Try Our Own Public GitHub Raw CDN (kyk-yemek-api - today's menus)
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2500);
+            const res = await fetch('https://raw.githubusercontent.com/BeratOrkun/kyk-yemek-api/main/data/kyk_today.json', {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+                const todayJson = await res.json();
+                if (todayJson && todayJson.date === dateStr && todayJson.menus && todayJson.menus[citySlug]) {
+                    const parsed = this._parseOurApiMenu(todayJson.menus[citySlug]);
+                    if (parsed) {
+                        this.kykMenuMemoryCache[cacheKey] = parsed;
+                        return parsed;
+                    }
+                }
+            }
+        } catch (e) {}
+
+        // 3. Try Our Archive GitHub Raw CDN (kyk-yemek-api - historical archive)
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2500);
+            const res = await fetch('https://raw.githubusercontent.com/BeratOrkun/kyk-yemek-api/main/data/kyk_menus.json', {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+                const archiveJson = await res.json();
+                if (archiveJson && archiveJson.by_date && archiveJson.by_date[dateStr] && archiveJson.by_date[dateStr][citySlug]) {
+                    const parsed = this._parseOurApiMenu(archiveJson.by_date[dateStr][citySlug]);
+                    if (parsed) {
+                        this.kykMenuMemoryCache[cacheKey] = parsed;
+                        return parsed;
+                    }
+                }
+            }
+        } catch (e) {}
+
+        // 4. Try Syrblo GitHub Raw Fallback (CORS is open: *)
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 2500);
@@ -373,6 +413,77 @@ const Screens = {
         } catch (e) {}
 
         return null;
+    },
+
+    _parseOurApiMenu(cityData) {
+        if (!cityData) return null;
+        let breakfast = null;
+        let dinner = null;
+        let botCommentary = null;
+
+        if (cityData.breakfast && Array.isArray(cityData.breakfast.items) && cityData.breakfast.items.length > 0) {
+            const b = cityData.breakfast;
+            const items = b.items.map(name => ({
+                name: name,
+                category: this._categorizeDishName(name),
+                icon: this._categorizeDishIcon(name),
+                tags: []
+            }));
+            breakfast = {
+                title: 'Sabah Kahvaltısı',
+                hours: '06:30 - 12:00',
+                calories: b.calories ? `${b.calories} kcal` : '650 - 850 kcal',
+                subsidy: '110 ₺',
+                items: items
+            };
+        }
+
+        if (cityData.dinner && Array.isArray(cityData.dinner.items) && cityData.dinner.items.length > 0) {
+            const d = cityData.dinner;
+            const items = d.items.map(name => ({
+                name: name,
+                category: this._categorizeDishName(name),
+                icon: this._categorizeDishIcon(name),
+                tags: []
+            }));
+            dinner = {
+                title: 'Akşam Yemeği',
+                hours: '16:00 - 22:30',
+                calories: d.calories ? `${d.calories} kcal` : '850 - 1100 kcal',
+                subsidy: '190 ₺',
+                items: items
+            };
+            if (d.bot_commentary) {
+                try {
+                    const parsedComment = typeof d.bot_commentary === 'string' ? JSON.parse(d.bot_commentary) : d.bot_commentary;
+                    if (parsedComment && parsedComment.yorum) {
+                        botCommentary = parsedComment.yorum;
+                    }
+                } catch(e) {}
+            }
+        }
+
+        if (!breakfast) {
+            breakfast = {
+                title: 'Sabah Kahvaltısı',
+                hours: '06:30 - 12:00',
+                calories: '650 - 850 kcal',
+                subsidy: '110 ₺',
+                items: [
+                    { name: 'Sucuklu Omlet / Haşlanmış Yumurta', category: 'Sıcak', icon: '🍳' },
+                    { name: 'Patates Kızartması / Karışık Kızartma', category: 'Sıcak', icon: '🍟' },
+                    { name: 'Taze Simit & Açma', category: 'Unlu Mamul', icon: '🥯' },
+                    { name: 'Beyaz Peynir / Kaşar Peynir', category: 'Şarküteri', icon: '🧀' },
+                    { name: 'Siyah ve Yeşil Zeytin', category: 'Kahvaltılık', icon: '🫒' },
+                    { name: 'Süzme Bal / Çilek Reçeli', category: 'Tatlı', icon: '🍯' },
+                    { name: 'Sıcak Çay / Süt', category: 'İçecek', icon: '☕' },
+                    { name: 'Çeyrek Ekmek & 500 ml Su', category: 'Temel', icon: '🍞' }
+                ]
+            };
+        }
+
+        if (!dinner) return null;
+        return { breakfast, dinner, botCommentary };
     },
 
     _parseKepceResponse(jsonList, dateStr) {

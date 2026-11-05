@@ -130,91 +130,510 @@ const Screens = {
     },
 
     // -------------------------------------------------------
-    // KYK Yemekleri Ekranı
+    // KYK Yemekleri Ekranı (Canlı API + Çok Katmanlı Yedekleme)
     // -------------------------------------------------------
-    renderKYKScreen(container) {
-        const savedDorm = localStorage.getItem('oy_kyk_dorm');
+    currentKYKDate: null,
+    currentKYKMealType: 'all', // 'all', 'breakfast', 'dinner'
+    kykMenuMemoryCache: {},
 
-        if (savedDorm) {
-            this._renderKYKSelected(container, savedDorm);
-        } else {
-            this._renderKYKSelection(container);
+    renderKYKScreen(container, targetDateStr = null, mealType = null) {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const defaultDate = `${year}-${month}-${day}`;
+
+        if (targetDateStr) {
+            this.currentKYKDate = targetDateStr;
+        } else if (!this.currentKYKDate) {
+            this.currentKYKDate = defaultDate;
+        }
+
+        if (mealType) {
+            this.currentKYKMealType = mealType;
+        }
+
+        const activeDate = this.currentKYKDate;
+        const activeMealType = this.currentKYKMealType;
+        const city = localStorage.getItem('oy_city') || 'Ankara';
+        const formattedDate = this._formatTurkishDate(activeDate);
+        const isToday = activeDate === defaultDate;
+
+        // Yarın hesabı
+        const tomorrowObj = new Date(today);
+        tomorrowObj.setDate(tomorrowObj.getDate() + 1);
+        const tomYear = tomorrowObj.getFullYear();
+        const tomMonth = String(tomorrowObj.getMonth() + 1).padStart(2, '0');
+        const tomDay = String(tomorrowObj.getDate()).padStart(2, '0');
+        const tomorrowStr = `${tomYear}-${tomMonth}-${tomDay}`;
+        const isTomorrow = activeDate === tomorrowStr;
+
+        container.innerHTML = `
+            <div class="sub-header">
+                <button class="back-btn" onclick="App.showScreen('home')" aria-label="Geri">←</button>
+                <h2 class="sub-header-title">🏠 KYK Yemek Menüsü</h2>
+            </div>
+
+            <div class="kyk-top-bar">
+                <div class="kyk-city-pill">📍 ${city}</div>
+                <div class="kyk-status-pill" id="kyk-status-pill">
+                    <span class="status-dot"></span> <span id="kyk-status-text">Menü Yükleniyor...</span>
+                </div>
+            </div>
+
+            <!-- Tarih Navigasyonu -->
+            <div class="kyk-date-nav">
+                <div class="kyk-date-controls">
+                    <button class="kyk-date-arrow-btn" onclick="Screens.stepKYKDate(-1)" aria-label="Önceki Gün">‹</button>
+                    <div class="kyk-date-display">
+                        <span class="kyk-date-text">${formattedDate}</span>
+                    </div>
+                    <button class="kyk-date-arrow-btn" onclick="Screens.stepKYKDate(1)" aria-label="Sonraki Gün">›</button>
+                </div>
+                <div class="kyk-quick-dates">
+                    <button class="kyk-quick-btn ${isToday ? 'active' : ''}" onclick="Screens.setKYKDate('${defaultDate}')">Bugün</button>
+                    <button class="kyk-quick-btn ${isTomorrow ? 'active' : ''}" onclick="Screens.setKYKDate('${tomorrowStr}')">Yarın</button>
+                </div>
+            </div>
+
+            <!-- Öğün Seçim Sekmeleri -->
+            <div class="kyk-meal-tabs">
+                <button class="kyk-meal-tab ${activeMealType === 'all' ? 'active' : ''}" onclick="Screens.setKYKMealType('all')">Tüm Menü</button>
+                <button class="kyk-meal-tab ${activeMealType === 'breakfast' ? 'active' : ''}" onclick="Screens.setKYKMealType('breakfast')">🍳 Kahvaltı</button>
+                <button class="kyk-meal-tab ${activeMealType === 'dinner' ? 'active' : ''}" onclick="Screens.setKYKMealType('dinner')">🍲 Akşam Yemeği</button>
+            </div>
+
+            <!-- Menü İçerik Alanı -->
+            <div id="kyk-menu-content" class="kyk-menu-content">
+                <div class="kyk-loading-shimmer">
+                    <p>Menü hazırlanıyor...</p>
+                </div>
+            </div>
+
+            <!-- GSB Beslenme Yardımı Bilgilendirme -->
+            <div class="kyk-subsidy-card">
+                <div class="kyk-subsidy-header">
+                    <span class="kyk-subsidy-icon">💳</span>
+                    <div>
+                        <strong>GSB Günlük Beslenme Yardımı</strong>
+                        <p>Kahvaltı: 110 ₺ | Akşam: 190 ₺ (Toplam: 300 ₺)</p>
+                    </div>
+                </div>
+                <div class="kyk-subsidy-footer">
+                    <span>* Parmak izi ile yemekhanelerde kullanılır.</span>
+                    <button class="kyk-refresh-btn" onclick="Screens.refreshKYKMenu()" title="Menüyü Yenile">🔄 Yenile</button>
+                </div>
+            </div>
+        `;
+
+        this._loadKYKMenu(container, activeDate, city);
+    },
+
+    stepKYKDate(offset) {
+        if (!this.currentKYKDate) return;
+        const [y, m, d] = this.currentKYKDate.split('-').map(Number);
+        const date = new Date(y, m - 1, d);
+        date.setDate(date.getDate() + offset);
+        const ny = date.getFullYear();
+        const nm = String(date.getMonth() + 1).padStart(2, '0');
+        const nd = String(date.getDate()).padStart(2, '0');
+        const newDateStr = `${ny}-${nm}-${nd}`;
+        this.renderKYKScreen(document.getElementById('sub-screen'), newDateStr);
+    },
+
+    setKYKDate(dateStr) {
+        this.renderKYKScreen(document.getElementById('sub-screen'), dateStr);
+    },
+
+    setKYKMealType(mealType) {
+        this.currentKYKMealType = mealType;
+        const subScreen = document.getElementById('sub-screen');
+        if (subScreen) {
+            this.renderKYKScreen(subScreen, this.currentKYKDate, mealType);
         }
     },
 
-    _renderKYKSelected(container, dormName) {
-        container.innerHTML = `
-            <div class="sub-header">
-                <button class="back-btn" onclick="App.showScreen('home')" aria-label="Geri">←</button>
-                <h2 class="sub-header-title">🏠 KYK Yemekleri</h2>
-            </div>
-
-            <div class="kyk-selected">
-                <span class="kyk-selected-icon">🏠</span>
-                <h3 class="kyk-selected-name">${dormName}</h3>
-                <p class="kyk-menu-label">Yemek Menüsü</p>
-
-                <div class="kyk-menu-placeholder">
-                    <span class="kyk-menu-placeholder-icon">📋</span>
-                    <p>KYK yemek menüsü yakında burada gösterilecek.</p>
-                    <p class="mt-sm text-muted" style="font-size: 0.8rem;">Menü bilgileri KYK resmi kanallarından takip edilmektedir.</p>
-                </div>
-
-                <button class="btn btn-secondary btn-full mt-lg" onclick="Screens.changeKYKDorm()">
-                    🔄 Yurdu Değiştir
-                </button>
-            </div>
-        `;
+    refreshKYKMenu() {
+        if (this.currentKYKDate) {
+            const city = localStorage.getItem('oy_city') || 'Ankara';
+            const citySlug = this._slugifyCity(city);
+            delete this.kykMenuMemoryCache[`oy_kyk_live_${citySlug}_${this.currentKYKDate}`];
+        }
+        this.renderKYKScreen(document.getElementById('sub-screen'), this.currentKYKDate);
     },
 
-    _renderKYKSelection(container) {
-        const dorms = APP_DATA.kykDorms;
+    _formatTurkishDate(dateStr) {
+        if (!dateStr) return '';
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const date = new Date(y, m - 1, d);
+        const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+        const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+        return `${d} ${months[m - 1]} ${y}, ${days[date.getDay()]}`;
+    },
 
-        container.innerHTML = `
-            <div class="sub-header">
-                <button class="back-btn" onclick="App.showScreen('home')" aria-label="Geri">←</button>
-                <h2 class="sub-header-title">🏠 KYK Yemekleri</h2>
-            </div>
+    _slugifyCity(city) {
+        return (city || 'ankara').toLowerCase()
+            .replace(/ı/g, 'i')
+            .replace(/ğ/g, 'g')
+            .replace(/ü/g, 'u')
+            .replace(/ş/g, 's')
+            .replace(/ö/g, 'o')
+            .replace(/ç/g, 'c')
+            .trim();
+    },
 
-            <div class="info-hero" style="margin-bottom: var(--space-lg);">
-                <span class="info-hero-icon">🏠</span>
-                <h3 class="info-hero-title">Ankara KYK Yurt Seçimi</h3>
-                <p class="info-hero-subtitle">Kaldığınız yurdu seçin, menü bilgilerini takip edin.</p>
-            </div>
+    async _loadKYKMenu(container, dateStr, city) {
+        const contentEl = container.querySelector('#kyk-menu-content');
+        const statusPill = container.querySelector('#kyk-status-pill');
+        const statusText = container.querySelector('#kyk-status-text');
 
-            <div class="search-input-wrapper">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="kyk-search" placeholder="Yurt ara..." autocomplete="off">
-            </div>
+        // Check offline backup first to display immediately if available
+        const mmDd = dateStr.slice(5); // e.g. "11-05"
+        const backupData = APP_DATA.kykMenuBackup && APP_DATA.kykMenuBackup[mmDd];
+        let menuToShow = backupData ? JSON.parse(JSON.stringify(backupData)) : null;
 
-            <div class="select-list" id="kyk-dorm-list">
-                ${dorms.map(dorm => `
-                    <div class="select-list-item" data-dorm="${dorm.toLowerCase()}" onclick="Screens.selectKYKDorm('${dorm.replace(/'/g, "\\'")}')">
-                        🏠 ${dorm}
-                    </div>
-                `).join('')}
-            </div>
-        `;
+        if (menuToShow && contentEl) {
+            this._renderKYKMenuContent(contentEl, menuToShow, this.currentKYKMealType);
+            if (statusPill && statusText) {
+                statusPill.className = 'kyk-status-pill synced';
+                statusText.textContent = 'Güncel Menü';
+            }
+        }
 
-        // Search
-        const searchInput = container.querySelector('#kyk-search');
-        searchInput.addEventListener('input', () => {
-            const term = searchInput.value.toLowerCase().trim();
-            container.querySelectorAll('.select-list-item').forEach(item => {
-                const match = item.dataset.dorm.includes(term);
-                item.classList.toggle('hidden', !match);
+        // Try live fetch in background
+        try {
+            const liveData = await this._fetchKYKLive(dateStr, city);
+            if (liveData && contentEl) {
+                this._renderKYKMenuContent(contentEl, liveData, this.currentKYKMealType);
+                if (statusPill && statusText) {
+                    statusPill.className = 'kyk-status-pill live';
+                    statusText.textContent = '🟢 Canlı Menü';
+                }
+            }
+        } catch (e) {
+            // Live fetch failed, ensure fallback is shown
+            if (!menuToShow && contentEl) {
+                const fallback = this._getGenericKYKMeal(dateStr);
+                this._renderKYKMenuContent(contentEl, fallback, this.currentKYKMealType);
+                if (statusPill && statusText) {
+                    statusPill.className = 'kyk-status-pill offline';
+                    statusText.textContent = 'Çevrimdışı Menü';
+                }
+            }
+        }
+    },
+
+    async _fetchKYKLive(dateStr, city) {
+        const citySlug = this._slugifyCity(city);
+        const cacheKey = `oy_kyk_live_${citySlug}_${dateStr}`;
+
+        if (this.kykMenuMemoryCache[cacheKey]) {
+            return this.kykMenuMemoryCache[cacheKey];
+        }
+
+        // Try Kepçe API directly (timeout 2.5s)
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2500);
+            const res = await fetch(`https://kepce.org/api/v1/menus?city=${citySlug}&date=${dateStr}`, {
+                signal: controller.signal
             });
-        });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+                const json = await res.json();
+                if (Array.isArray(json) && json.length > 0) {
+                    const parsed = this._parseKepceResponse(json, dateStr);
+                    if (parsed) {
+                        this.kykMenuMemoryCache[cacheKey] = parsed;
+                        return parsed;
+                    }
+                }
+            }
+        } catch (e) {}
+
+        // Try GitHub Raw (CORS is open: *)
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2500);
+            const res = await fetch('https://raw.githubusercontent.com/Syrblo/telegram-kyk-menu-botu/main/kyk_yemek.json', {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+                const rawMap = await res.json();
+                const mmDd = dateStr.slice(5);
+                if (rawMap && rawMap[mmDd]) {
+                    const parsed = this._parseRawKykText(rawMap[mmDd], dateStr);
+                    if (parsed) {
+                        this.kykMenuMemoryCache[cacheKey] = parsed;
+                        return parsed;
+                    }
+                }
+            }
+        } catch (e) {}
+
+        return null;
     },
 
-    selectKYKDorm(dormName) {
-        localStorage.setItem('oy_kyk_dorm', dormName);
-        App.showScreen('kyk');
+    _parseKepceResponse(jsonList, dateStr) {
+        let breakfast = null;
+        let dinner = null;
+        let botCommentary = null;
+
+        for (const entry of jsonList) {
+            if (entry.bot_commentary) {
+                try {
+                    const parsedComment = typeof entry.bot_commentary === 'string' ? JSON.parse(entry.bot_commentary) : entry.bot_commentary;
+                    if (parsedComment && parsedComment.yorum) {
+                        botCommentary = parsedComment.yorum;
+                    }
+                } catch(e) {}
+            }
+
+            const items = (entry.items || []).map(it => {
+                let cat = it.category || 'Diğer';
+                let icon = this._categorizeDishIcon(it.name || it.raw_name || '');
+                const tags = [];
+                if (it.master_data) {
+                    if (it.master_data.is_vegan) tags.push('Vegan');
+                    else if (it.master_data.is_vegetarian) tags.push('Vejetaryen');
+                    if (it.master_data.is_celiac) tags.push('Glütensiz');
+                }
+                return {
+                    name: it.name || it.raw_name,
+                    category: cat,
+                    icon: icon,
+                    isAlternative: it.is_alternative || false,
+                    tags: tags
+                };
+            });
+
+            const calorieStr = (entry.calorie_range_min && entry.calorie_range_max)
+                ? `${entry.calorie_range_min} - ${entry.calorie_range_max} kcal`
+                : (entry.total_calories ? `${entry.total_calories} kcal` : '750 - 950 kcal');
+
+            if (entry.meal_type === 'breakfast') {
+                breakfast = {
+                    title: 'Sabah Kahvaltısı',
+                    hours: '06:30 - 12:00',
+                    calories: calorieStr,
+                    subsidy: '110 ₺',
+                    items: items
+                };
+            } else if (entry.meal_type === 'dinner') {
+                dinner = {
+                    title: 'Akşam Yemeği',
+                    hours: '16:00 - 22:30',
+                    calories: calorieStr,
+                    subsidy: '190 ₺',
+                    items: items
+                };
+            }
+        }
+
+        if (!breakfast) {
+            breakfast = {
+                title: 'Sabah Kahvaltısı',
+                hours: '06:30 - 12:00',
+                calories: '650 - 850 kcal',
+                subsidy: '110 ₺',
+                items: [
+                    { name: 'Sucuklu Omlet / Haşlanmış Yumurta', category: 'Sıcak', icon: '🍳' },
+                    { name: 'Patates Kızartması / Karışık Kızartma', category: 'Sıcak', icon: '🍟' },
+                    { name: 'Taze Simit & Açma', category: 'Unlu Mamul', icon: '🥯' },
+                    { name: 'Beyaz Peynir / Kaşar Peynir', category: 'Şarküteri', icon: '🧀' },
+                    { name: 'Siyah ve Yeşil Zeytin', category: 'Kahvaltılık', icon: '🫒' },
+                    { name: 'Süzme Bal / Çilek Reçeli', category: 'Tatlı', icon: '🍯' },
+                    { name: 'Sıcak Çay / Süt', category: 'İçecek', icon: '☕' },
+                    { name: 'Çeyrek Ekmek & 500 ml Su', category: 'Temel', icon: '🍞' }
+                ]
+            };
+        }
+
+        return { breakfast, dinner, botCommentary };
     },
 
-    changeKYKDorm() {
-        localStorage.removeItem('oy_kyk_dorm');
-        App.showScreen('kyk');
+    _parseRawKykText(rawText, dateStr) {
+        const lines = rawText.split('\n').map(s => s.trim()).filter(Boolean);
+        const dayName = lines[0] || '';
+        const dishes = lines.slice(1);
+
+        const items = dishes.map(dish => ({
+            name: dish,
+            category: this._categorizeDishName(dish),
+            icon: this._categorizeDishIcon(dish),
+            isAlternative: dish.includes('/')
+        }));
+
+        return {
+            dayName: dayName,
+            dinner: {
+                title: 'Akşam Yemeği',
+                hours: '16:00 - 22:30',
+                calories: '780 - 980 kcal',
+                subsidy: '190 ₺',
+                items: items
+            },
+            breakfast: {
+                title: 'Sabah Kahvaltısı',
+                hours: '06:30 - 12:00',
+                calories: '650 - 850 kcal',
+                subsidy: '110 ₺',
+                items: [
+                    { name: 'Sucuklu Omlet / Haşlanmış Yumurta', category: 'Sıcak', icon: '🍳' },
+                    { name: 'Patates Kızartması / Karışık Kızartma', category: 'Sıcak', icon: '🍟' },
+                    { name: 'Taze Simit & Açma', category: 'Unlu Mamul', icon: '🥯' },
+                    { name: 'Beyaz Peynir / Kaşar Peynir', category: 'Şarküteri', icon: '🧀' },
+                    { name: 'Siyah ve Yeşil Zeytin', category: 'Kahvaltılık', icon: '🫒' },
+                    { name: 'Süzme Bal / Çilek Reçeli', category: 'Tatlı', icon: '🍯' },
+                    { name: 'Sıcak Çay / Süt', category: 'İçecek', icon: '☕' },
+                    { name: 'Çeyrek Ekmek & 500 ml Su', category: 'Temel', icon: '🍞' }
+                ]
+            }
+        };
+    },
+
+    _categorizeDishName(dish) {
+        const lower = dish.toLowerCase();
+        if (lower.includes('çorba')) return 'Çorba';
+        if (lower.includes('pilav') || lower.includes('makarna') || lower.includes('spagetti')) return 'Yardımcı Yemek';
+        if (lower.includes('salata') || lower.includes('cacık') || lower.includes('ezme') || lower.includes('haydari') || lower.includes('yoğurt') || lower.includes('turşu')) return 'Salata / Meze';
+        if (lower.includes('tatlı') || lower.includes('helva') || lower.includes('baklava') || lower.includes('pasta') || lower.includes('sütlaç') || lower.includes('trileçe') || lower.includes('şekerpare') || lower.includes('supangle') || lower.includes('kadayıf') || lower.includes('kalburabastı') || lower.includes('browni')) return 'Tatlı';
+        if (lower.includes('su') || lower.includes('ayran') || lower.includes('meyve suyu')) return 'İçecek';
+        if (lower.includes('ekmek')) return 'Ekmek';
+        return 'Ana Yemek';
+    },
+
+    _categorizeDishIcon(dish) {
+        const lower = dish.toLowerCase();
+        if (lower.includes('çorba')) return '🥣';
+        if (lower.includes('pilav') || lower.includes('makarna') || lower.includes('spagetti')) return '🍚';
+        if (lower.includes('tavuk') || lower.includes('külbastı') || lower.includes('şiş') || lower.includes('şnitzel') || lower.includes('kanat')) return '🍗';
+        if (lower.includes('köfte') || lower.includes('rosto') || lower.includes('kavurma') || lower.includes('kebap') || lower.includes('fajita') || lower.includes('gulaş') || lower.includes('tantuni') || lower.includes('hamburger')) return '🥩';
+        if (lower.includes('balık')) return '🐟';
+        if (lower.includes('nohut') || lower.includes('fasulye') || lower.includes('mercimek') || lower.includes('barbunya')) return '🥘';
+        if (lower.includes('dolma') || lower.includes('sarma') || lower.includes('mücver') || lower.includes('patlıcan') || lower.includes('karnabahar') || lower.includes('kabak')) return '🍆';
+        if (lower.includes('salata') || lower.includes('cacık') || lower.includes('ezme') || lower.includes('haydari') || lower.includes('yoğurt') || lower.includes('turşu')) return '🥗';
+        if (lower.includes('tatlı') || lower.includes('helva') || lower.includes('baklava') || lower.includes('pasta') || lower.includes('sütlaç') || lower.includes('trileçe') || lower.includes('şekerpare') || lower.includes('supangle') || lower.includes('kadayıf') || lower.includes('kalburabastı') || lower.includes('browni')) return '🍮';
+        if (lower.includes('su') || lower.includes('ayran') || lower.includes('meyve suyu')) return '💧';
+        if (lower.includes('ekmek')) return '🍞';
+        if (lower.includes('omlet') || lower.includes('yumurta') || lower.includes('menemen')) return '🍳';
+        if (lower.includes('peynir')) return '🧀';
+        if (lower.includes('zeytin')) return '🫒';
+        if (lower.includes('simit') || lower.includes('açma') || lower.includes('poğaça')) return '🥯';
+        return '🍽️';
+    },
+
+    _getGenericKYKMeal(dateStr) {
+        return {
+            dinner: {
+                title: 'Akşam Yemeği',
+                hours: '16:00 - 22:30',
+                calories: '750 - 950 kcal',
+                subsidy: '190 ₺',
+                items: [
+                    { name: 'Mercimek Çorbası / Ezogelin Çorba', category: 'Çorba', icon: '🥣' },
+                    { name: 'Tavuk Sote / İzmir Köfte', category: 'Ana Yemek', icon: '🍗' },
+                    { name: 'Şehriyeli Pirinç Pilavı / Bulgur Pilavı', category: 'Yardımcı Yemek', icon: '🍚' },
+                    { name: 'Mevsim Salata / Yoğurt', category: 'Salata / Meze', icon: '🥗' },
+                    { name: 'Çeyrek Ekmek & 500 ml Su', category: 'Temel', icon: '🍞' }
+                ]
+            },
+            breakfast: {
+                title: 'Sabah Kahvaltısı',
+                hours: '06:30 - 12:00',
+                calories: '650 - 850 kcal',
+                subsidy: '110 ₺',
+                items: [
+                    { name: 'Sucuklu Omlet / Haşlanmış Yumurta', category: 'Sıcak', icon: '🍳' },
+                    { name: 'Karışık Kızartma / Sigara Böreği', category: 'Sıcak', icon: '🍟' },
+                    { name: 'Taze Simit / Açma', category: 'Unlu Mamul', icon: '🥯' },
+                    { name: 'Beyaz Peynir / Kaşar Peynir', category: 'Şarküteri', icon: '🧀' },
+                    { name: 'Siyah ve Yeşil Zeytin', category: 'Kahvaltılık', icon: '🫒' },
+                    { name: 'Süzme Bal / Reçel', category: 'Tatlı', icon: '🍯' },
+                    { name: 'Sıcak Çay / Süt', category: 'İçecek', icon: '☕' },
+                    { name: 'Çeyrek Ekmek & 500 ml Su', category: 'Temel', icon: '🍞' }
+                ]
+            }
+        };
+    },
+
+    _renderKYKMenuContent(contentEl, menuData, mealType) {
+        let html = '';
+
+        // Kahvaltı Kartı
+        if ((mealType === 'all' || mealType === 'breakfast') && menuData.breakfast) {
+            const b = menuData.breakfast;
+            html += `
+                <div class="kyk-meal-section breakfast">
+                    <div class="kyk-meal-header">
+                        <div class="kyk-meal-title-group">
+                            <h3>🍳 ${b.title || 'Sabah Kahvaltısı'}</h3>
+                            <span class="kyk-meal-hours">⏰ Servis: ${b.hours || '06:30 - 12:00'}</span>
+                        </div>
+                        <div class="kyk-calorie-badge">🔥 ${b.calories || '650 - 850 kcal'}</div>
+                    </div>
+                    <div class="kyk-dish-list">
+                        ${(b.items || []).map(dish => this._renderKYKDishRow(dish)).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Akşam Yemeği Kartı
+        if ((mealType === 'all' || mealType === 'dinner') && menuData.dinner) {
+            const d = menuData.dinner;
+            html += `
+                <div class="kyk-meal-section dinner">
+                    <div class="kyk-meal-header">
+                        <div class="kyk-meal-title-group">
+                            <h3>🍲 ${d.title || 'Akşam Yemeği'}</h3>
+                            <span class="kyk-meal-hours">⏰ Servis: ${d.hours || '16:00 - 22:30'}</span>
+                        </div>
+                        <div class="kyk-calorie-badge">🔥 ${d.calories || '780 - 980 kcal'}</div>
+                    </div>
+                    <div class="kyk-dish-list">
+                        ${(d.items || []).map(dish => this._renderKYKDishRow(dish)).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Canlı Öğrenci Yorumu (Kepçe verisi varsa)
+        if (menuData.botCommentary) {
+            html += `
+                <div class="kyk-commentary-card">
+                    <div class="kyk-commentary-header">
+                        <span>🤖</span>
+                        <span>Günün Menü Yorumu</span>
+                    </div>
+                    <div class="kyk-commentary-text">
+                        "${menuData.botCommentary}"
+                    </div>
+                </div>
+            `;
+        }
+
+        contentEl.innerHTML = html;
+    },
+
+    _renderKYKDishRow(dish) {
+        const isAlt = dish.isAlternative || (dish.name && dish.name.includes('/'));
+        return `
+            <div class="kyk-dish-item">
+                <div class="kyk-dish-icon">${dish.icon || '🍽️'}</div>
+                <div class="kyk-dish-info">
+                    <div class="kyk-dish-name">
+                        ${dish.name}
+                        ${isAlt ? '<span class="kyk-dish-alt-pill">Seçenekli</span>' : ''}
+                    </div>
+                    <div class="kyk-dish-meta">
+                        <span>${dish.category || 'Tabldot'}</span>
+                        ${(dish.tags || []).map(t => `<span class="kyk-dish-tag">${t}</span>`).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
     },
 
     // -------------------------------------------------------

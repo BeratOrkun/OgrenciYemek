@@ -988,45 +988,396 @@ img {
     color: var(--text-secondary);
 }
 
-/* === KYK === */
-.kyk-selected {
-    text-align: center;
-    padding: var(--space-2xl) var(--space-lg);
-}
-
-.kyk-selected-icon {
-    font-size: 3rem;
+/* === KYK YEMEKLERİ === */
+.kyk-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: var(--space-md);
-    display: block;
+    gap: var(--space-sm);
 }
 
-.kyk-selected-name {
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: var(--space-sm);
-    color: var(--accent-orange);
+.kyk-city-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: var(--accent-green);
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
 }
 
-.kyk-menu-label {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin-bottom: var(--space-lg);
+.kyk-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    color: var(--text-muted);
 }
 
-.kyk-menu-placeholder {
+.kyk-status-pill.live {
+    border-color: rgba(34, 197, 94, 0.4);
+    color: #4ade80;
+}
+
+.kyk-status-pill.synced {
+    border-color: rgba(59, 130, 246, 0.4);
+    color: #60a5fa;
+}
+
+.kyk-status-pill.offline {
+    border-color: rgba(249, 115, 22, 0.4);
+    color: #fb923c;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 8px #4ade80;
+    animation: statusPulse 2s infinite;
+}
+
+@keyframes statusPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.kyk-date-nav {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+.kyk-date-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.kyk-date-arrow-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.kyk-date-arrow-btn:active {
+    transform: scale(0.9);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.kyk-date-display {
+    text-align: center;
+}
+
+.kyk-date-text {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.2px;
+}
+
+.kyk-quick-dates {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.kyk-quick-btn {
+    padding: 5px 14px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.kyk-quick-btn.active {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #4ade80;
+    font-weight: 600;
+}
+
+.kyk-meal-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: var(--space-lg);
+}
+
+.kyk-meal-tab {
+    flex: 1;
+    padding: 10px 8px;
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.kyk-meal-tab.active {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: var(--accent-green);
+    color: #4ade80;
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.15);
+}
+
+.kyk-menu-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.kyk-meal-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+.kyk-meal-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-green);
+}
+
+.kyk-meal-section.breakfast::before {
+    background: linear-gradient(90deg, #f59e0b, #eab308);
+}
+
+.kyk-meal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.kyk-meal-title-group h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.kyk-meal-hours {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.kyk-calorie-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    background: rgba(249, 115, 22, 0.1);
+    border: 1px solid rgba(249, 115, 22, 0.25);
+    color: var(--accent-orange);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.kyk-dish-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.kyk-dish-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: background 0.2s ease;
+}
+
+.kyk-dish-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.kyk-dish-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.kyk-dish-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.kyk-dish-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.3;
+    margin-bottom: 2px;
+    word-break: break-word;
+}
+
+.kyk-dish-alt-pill {
+    display: inline-block;
+    padding: 1px 6px;
+    margin-left: 6px;
+    border-radius: 4px;
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    font-size: 0.65rem;
+    font-weight: 600;
+    vertical-align: middle;
+}
+
+.kyk-dish-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.kyk-dish-tag {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ade80;
+}
+
+.kyk-subsidy-card {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.02) 100%);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md) var(--space-lg);
+    margin-bottom: var(--space-xl);
+}
+
+.kyk-subsidy-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.kyk-subsidy-icon {
+    font-size: 1.8rem;
+}
+
+.kyk-subsidy-header strong {
+    display: block;
+    font-size: 0.95rem;
+    color: #4ade80;
+}
+
+.kyk-subsidy-header p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.kyk-subsidy-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.kyk-refresh-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.kyk-refresh-btn:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.kyk-commentary-card {
+    background: rgba(168, 85, 247, 0.06);
+    border: 1px solid rgba(168, 85, 247, 0.25);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md) var(--space-lg);
+    margin-top: var(--space-md);
+}
+
+.kyk-commentary-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #c084fc;
+    margin-bottom: 6px;
+}
+
+.kyk-commentary-text {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    font-style: italic;
+}
+
+.kyk-loading-shimmer {
     padding: var(--space-xl);
     text-align: center;
     color: var(--text-muted);
-    font-size: 0.9rem;
-}
-
-.kyk-menu-placeholder-icon {
-    font-size: 2rem;
-    display: block;
-    margin-bottom: var(--space-md);
 }
 
 /* === SETTINGS MODAL === */

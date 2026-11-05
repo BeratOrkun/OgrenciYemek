@@ -331,27 +331,7 @@ const Screens = {
             return this.kykMenuMemoryCache[cacheKey];
         }
 
-        // 1. Try Kepçe API directly (timeout 2.5s)
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2500);
-            const res = await fetch(`https://kepce.org/api/v1/menus?city=${citySlug}&date=${dateStr}`, {
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-            if (res.ok) {
-                const json = await res.json();
-                if (Array.isArray(json) && json.length > 0) {
-                    const parsed = this._parseKepceResponse(json, dateStr);
-                    if (parsed) {
-                        this.kykMenuMemoryCache[cacheKey] = parsed;
-                        return parsed;
-                    }
-                }
-            }
-        } catch (e) {}
-
-        // 2. Try Our Own Public GitHub Raw CDN (kyk-yemek-api - today's menus)
+        // 1. Primary: Our Dedicated Public GitHub CDN (kyk-yemek-api - today's live menus)
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 2500);
@@ -371,7 +351,7 @@ const Screens = {
             }
         } catch (e) {}
 
-        // 3. Try Our Archive GitHub Raw CDN (kyk-yemek-api - historical archive)
+        // 2. Secondary: Our Archive GitHub CDN (kyk-yemek-api - historical archive)
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 2500);
@@ -391,7 +371,7 @@ const Screens = {
             }
         } catch (e) {}
 
-        // 4. Try Syrblo GitHub Raw Fallback (CORS is open: *)
+        // 3. Fallback: Syrblo GitHub Raw Fallback (CORS is open: *)
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 2500);
@@ -421,37 +401,52 @@ const Screens = {
         let dinner = null;
         let botCommentary = null;
 
+        const processItems = (mealObj) => {
+            if (!mealObj || !Array.isArray(mealObj.items) || mealObj.items.length === 0) return [];
+            const detailsMap = {};
+            if (Array.isArray(mealObj.item_details)) {
+                mealObj.item_details.forEach(it => {
+                    if (it && it.name) detailsMap[it.name] = it;
+                });
+            }
+
+            return mealObj.items.map(name => {
+                const detail = detailsMap[name] || {};
+                const tags = [];
+                if (detail.master_data) {
+                    if (detail.master_data.is_vegan) tags.push('Vegan');
+                    else if (detail.master_data.is_vegetarian) tags.push('Vejetaryen');
+                    if (detail.master_data.is_celiac) tags.push('Glütensiz');
+                }
+                return {
+                    name: name,
+                    category: detail.category || this._categorizeDishName(name),
+                    icon: this._categorizeDishIcon(name),
+                    tags: tags,
+                    calories: detail.calories ? `${detail.calories} kcal` : null
+                };
+            });
+        };
+
         if (cityData.breakfast && Array.isArray(cityData.breakfast.items) && cityData.breakfast.items.length > 0) {
             const b = cityData.breakfast;
-            const items = b.items.map(name => ({
-                name: name,
-                category: this._categorizeDishName(name),
-                icon: this._categorizeDishIcon(name),
-                tags: []
-            }));
             breakfast = {
                 title: 'Sabah Kahvaltısı',
                 hours: '06:30 - 12:00',
                 calories: b.calories ? `${b.calories} kcal` : '650 - 850 kcal',
                 subsidy: '110 ₺',
-                items: items
+                items: processItems(b)
             };
         }
 
         if (cityData.dinner && Array.isArray(cityData.dinner.items) && cityData.dinner.items.length > 0) {
             const d = cityData.dinner;
-            const items = d.items.map(name => ({
-                name: name,
-                category: this._categorizeDishName(name),
-                icon: this._categorizeDishIcon(name),
-                tags: []
-            }));
             dinner = {
                 title: 'Akşam Yemeği',
                 hours: '16:00 - 22:30',
                 calories: d.calories ? `${d.calories} kcal` : '850 - 1100 kcal',
                 subsidy: '190 ₺',
-                items: items
+                items: processItems(d)
             };
             if (d.bot_commentary) {
                 try {
@@ -470,97 +465,19 @@ const Screens = {
                 calories: '650 - 850 kcal',
                 subsidy: '110 ₺',
                 items: [
-                    { name: 'Sucuklu Omlet / Haşlanmış Yumurta', category: 'Sıcak', icon: '🍳' },
-                    { name: 'Patates Kızartması / Karışık Kızartma', category: 'Sıcak', icon: '🍟' },
-                    { name: 'Taze Simit & Açma', category: 'Unlu Mamul', icon: '🥯' },
-                    { name: 'Beyaz Peynir / Kaşar Peynir', category: 'Şarküteri', icon: '🧀' },
-                    { name: 'Siyah ve Yeşil Zeytin', category: 'Kahvaltılık', icon: '🫒' },
-                    { name: 'Süzme Bal / Çilek Reçeli', category: 'Tatlı', icon: '🍯' },
-                    { name: 'Sıcak Çay / Süt', category: 'İçecek', icon: '☕' },
-                    { name: 'Çeyrek Ekmek & 500 ml Su', category: 'Temel', icon: '🍞' }
+                    { name: 'Sucuklu Omlet / Haşlanmış Yumurta', category: 'Sıcak', icon: '🍳', tags: [] },
+                    { name: 'Patates Kızartması / Karışık Kızartma', category: 'Sıcak', icon: '🍟', tags: [] },
+                    { name: 'Taze Simit & Açma', category: 'Unlu Mamul', icon: '🥯', tags: [] },
+                    { name: 'Beyaz Peynir / Kaşar Peynir', category: 'Şarküteri', icon: '🧀', tags: [] },
+                    { name: 'Siyah ve Yeşil Zeytin', category: 'Kahvaltılık', icon: '🫒', tags: [] },
+                    { name: 'Süzme Bal / Çilek Reçeli', category: 'Tatlı', icon: '🍯', tags: [] },
+                    { name: 'Sıcak Çay / Süt', category: 'İçecek', icon: '☕', tags: [] },
+                    { name: 'Çeyrek Ekmek & 500 ml Su', category: 'Temel', icon: '🍞', tags: [] }
                 ]
             };
         }
 
         if (!dinner) return null;
-        return { breakfast, dinner, botCommentary };
-    },
-
-    _parseKepceResponse(jsonList, dateStr) {
-        let breakfast = null;
-        let dinner = null;
-        let botCommentary = null;
-
-        for (const entry of jsonList) {
-            if (entry.bot_commentary) {
-                try {
-                    const parsedComment = typeof entry.bot_commentary === 'string' ? JSON.parse(entry.bot_commentary) : entry.bot_commentary;
-                    if (parsedComment && parsedComment.yorum) {
-                        botCommentary = parsedComment.yorum;
-                    }
-                } catch(e) {}
-            }
-
-            const items = (entry.items || []).map(it => {
-                let cat = it.category || 'Diğer';
-                let icon = this._categorizeDishIcon(it.name || it.raw_name || '');
-                const tags = [];
-                if (it.master_data) {
-                    if (it.master_data.is_vegan) tags.push('Vegan');
-                    else if (it.master_data.is_vegetarian) tags.push('Vejetaryen');
-                    if (it.master_data.is_celiac) tags.push('Glütensiz');
-                }
-                return {
-                    name: it.name || it.raw_name,
-                    category: cat,
-                    icon: icon,
-                    isAlternative: it.is_alternative || false,
-                    tags: tags
-                };
-            });
-
-            const calorieStr = (entry.calorie_range_min && entry.calorie_range_max)
-                ? `${entry.calorie_range_min} - ${entry.calorie_range_max} kcal`
-                : (entry.total_calories ? `${entry.total_calories} kcal` : '750 - 950 kcal');
-
-            if (entry.meal_type === 'breakfast') {
-                breakfast = {
-                    title: 'Sabah Kahvaltısı',
-                    hours: '06:30 - 12:00',
-                    calories: calorieStr,
-                    subsidy: '110 ₺',
-                    items: items
-                };
-            } else if (entry.meal_type === 'dinner') {
-                dinner = {
-                    title: 'Akşam Yemeği',
-                    hours: '16:00 - 22:30',
-                    calories: calorieStr,
-                    subsidy: '190 ₺',
-                    items: items
-                };
-            }
-        }
-
-        if (!breakfast) {
-            breakfast = {
-                title: 'Sabah Kahvaltısı',
-                hours: '06:30 - 12:00',
-                calories: '650 - 850 kcal',
-                subsidy: '110 ₺',
-                items: [
-                    { name: 'Sucuklu Omlet / Haşlanmış Yumurta', category: 'Sıcak', icon: '🍳' },
-                    { name: 'Patates Kızartması / Karışık Kızartma', category: 'Sıcak', icon: '🍟' },
-                    { name: 'Taze Simit & Açma', category: 'Unlu Mamul', icon: '🥯' },
-                    { name: 'Beyaz Peynir / Kaşar Peynir', category: 'Şarküteri', icon: '🧀' },
-                    { name: 'Siyah ve Yeşil Zeytin', category: 'Kahvaltılık', icon: '🫒' },
-                    { name: 'Süzme Bal / Çilek Reçeli', category: 'Tatlı', icon: '🍯' },
-                    { name: 'Sıcak Çay / Süt', category: 'İçecek', icon: '☕' },
-                    { name: 'Çeyrek Ekmek & 500 ml Su', category: 'Temel', icon: '🍞' }
-                ]
-            };
-        }
-
         return { breakfast, dinner, botCommentary };
     },
 

@@ -2366,3 +2366,190 @@ textarea {
     word-break: normal;
     overflow-wrap: anywhere;
 }
+
+/* =====================================================
+   PWA — "Telefonuna Yükle" kartı
+   ===================================================== */
+
+.install-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    margin-bottom: var(--space-md);
+    border-radius: var(--radius-lg);
+    background:
+        linear-gradient(135deg, rgba(249, 115, 22, 0.14), rgba(249, 115, 22, 0.04)),
+        var(--bg-card);
+    border: 1px solid rgba(249, 115, 22, 0.28);
+    box-shadow: 0 4px 18px rgba(249, 115, 22, 0.08);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    animation: installCardIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.install-card[hidden] {
+    display: none;
+}
+
+@keyframes installCardIn {
+    from { opacity: 0; transform: translate3d(0, 8px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.install-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.install-card-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    line-height: 1;
+    border-radius: var(--radius-md);
+    background: rgba(249, 115, 22, 0.16);
+    border: 1px solid rgba(249, 115, 22, 0.22);
+}
+
+.install-card-text {
+    min-width: 0;
+    flex: 1;
+    /* Kapatma butonunun altına girmesin */
+    padding-right: var(--space-lg);
+}
+
+.install-card-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.25;
+    margin-bottom: 2px;
+    overflow-wrap: anywhere;
+}
+
+.install-card-desc {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+}
+
+.install-card-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 44px;
+    padding: 11px 18px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--gradient-main);
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-base);
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.28);
+    touch-action: manipulation;
+}
+
+.install-card-btn:active {
+    transform: scale(0.98);
+}
+
+.install-card-btn[hidden] {
+    display: none;
+}
+
+/* iOS adımları */
+.install-steps {
+    margin: 0;
+    padding-left: 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
+.install-steps[hidden] {
+    display: none;
+}
+
+.install-steps li::marker {
+    color: var(--accent-orange);
+    font-weight: 700;
+}
+
+.install-steps strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.install-card-close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    font-size: 1.3rem;
+    line-height: 1;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    touch-action: manipulation;
+}
+
+/* Görsel küçük kalsın, dokunma alanı 44px olsun */
+.install-card-close::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+}
+
+.install-card-close:active {
+    color: var(--text-primary);
+    background: var(--bg-card-hover);
+}
+
+@media (min-width: 420px) {
+    .install-card {
+        padding: var(--space-lg);
+        gap: var(--space-lg);
+    }
+
+    .install-card-title {
+        font-size: 1.05rem;
+    }
+
+    .install-card-desc {
+        font-size: 0.85rem;
+    }
+}
+
+/* iOS paylas simgesi metinle ayni hizada dursun */
+.install-share-icon {
+    display: inline-block;
+    vertical-align: -2px;
+    color: var(--accent-orange);
+}

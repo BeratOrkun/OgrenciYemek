@@ -9,10 +9,14 @@ const App = {
         city: 'oy_city',
         university: 'oy_university',
         kykDorm: 'oy_kyk_dorm',
-        onboardingDone: 'oy_onboarding_done'
+        onboardingDone: 'oy_onboarding_done',
+        installDismissed: 'oy_install_dismissed'
     },
 
     currentScreen: null,
+
+    // PWA kurulum istemi (Chrome/Edge/Android tarafindan saglanir)
+    deferredInstallPrompt: null,
 
     // -------------------------------------------------------
     // Init
@@ -20,6 +24,9 @@ const App = {
     init() {
         // Register PWA service worker
         this.registerSW();
+
+        // "Telefonuna yükle" kartını hazırla
+        this.initInstallPrompt();
 
         // Check if onboarding is done
         const onboardingDone = localStorage.getItem(this.KEYS.onboardingDone);
@@ -40,6 +47,101 @@ const App = {
                 // SW registration failed (probably file:// protocol), ignore
             });
         }
+    },
+
+    // -------------------------------------------------------
+    // PWA — "Telefonuna Yükle" kartı
+    // -------------------------------------------------------
+    isStandalone() {
+        return window.matchMedia('(display-mode: standalone)').matches
+            || window.navigator.standalone === true;
+    },
+
+    isIOS() {
+        const ua = navigator.userAgent;
+        // iPadOS 13+ kendini Mac gibi tanıtıyor; dokunma desteğiyle ayırt ediliyor
+        return /iPad|iPhone|iPod/.test(ua)
+            || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    },
+
+    initInstallPrompt() {
+        // Chrome/Edge: kurulabilir olduğunda bu olay tetiklenir
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            this.deferredInstallPrompt = e;
+            this.refreshInstallCard();
+        });
+
+        // Kurulum tamamlanınca kartı kaldır
+        window.addEventListener('appinstalled', () => {
+            this.deferredInstallPrompt = null;
+            localStorage.setItem(this.KEYS.installDismissed, 'installed');
+            this.refreshInstallCard();
+        });
+
+        this.refreshInstallCard();
+    },
+
+    refreshInstallCard() {
+        const card = document.getElementById('install-card');
+        if (!card) return;
+
+        const dismissed = localStorage.getItem(this.KEYS.installDismissed);
+        // Zaten uygulama olarak açıldıysa veya kullanıcı kapattıysa gösterme
+        if (this.isStandalone() || dismissed) {
+            card.hidden = true;
+            return;
+        }
+
+        const btn = document.getElementById('install-card-btn');
+        const steps = document.getElementById('install-steps');
+        const desc = document.getElementById('install-card-desc');
+
+        if (this.deferredInstallPrompt) {
+            // Tek dokunuşla kurulum yapılabiliyor
+            card.hidden = false;
+            if (btn) btn.hidden = false;
+            if (steps) steps.hidden = true;
+        } else if (this.isIOS()) {
+            // iOS Safari beforeinstallprompt desteklemiyor — elle adımlar
+            card.hidden = false;
+            if (btn) btn.hidden = true;
+            if (steps) steps.hidden = false;
+            if (desc) {
+                desc.textContent = "ÖğrenciYemek'i ana ekranına ekle, uygulama gibi tek dokunuşla aç.";
+            }
+        } else {
+            // Kurulum bu tarayıcıda desteklenmiyor ya da zaten kurulu
+            card.hidden = true;
+        }
+    },
+
+    async triggerInstall() {
+        if (!this.deferredInstallPrompt) {
+            this.refreshInstallCard();
+            return;
+        }
+
+        const promptEvent = this.deferredInstallPrompt;
+        // Tek kullanımlık: olay tekrar kullanılamaz
+        this.deferredInstallPrompt = null;
+
+        try {
+            promptEvent.prompt();
+            const { outcome } = await promptEvent.userChoice;
+            if (outcome === 'accepted') {
+                localStorage.setItem(this.KEYS.installDismissed, 'installed');
+            }
+        } catch {
+            /* istem gösterilemedi — kart olduğu gibi kalsın */
+        }
+
+        this.refreshInstallCard();
+    },
+
+    dismissInstall() {
+        localStorage.setItem(this.KEYS.installDismissed, '1');
+        this.refreshInstallCard();
     },
 
     // -------------------------------------------------------

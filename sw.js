@@ -1,5 +1,5 @@
 // ÖğrenciYemek Service Worker
-const CACHE_NAME = 'ogrenciyemek-v1';
+const CACHE_NAME = 'ogrenciyemek-v2';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
@@ -7,7 +7,12 @@ const ASSETS_TO_CACHE = [
     '/js/app.js',
     '/js/data.js',
     '/js/screens.js',
-    '/manifest.json'
+    '/manifest.json',
+    '/icons/icon-192.png',
+    '/icons/icon-512.png',
+    '/icons/maskable-192.png',
+    '/icons/maskable-512.png',
+    '/icons/apple-touch-icon.png'
 ];
 
 // Install — cache core assets

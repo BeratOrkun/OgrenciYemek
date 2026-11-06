@@ -2,7 +2,7 @@
 // ÖğrenciYemek — Ekran Render Fonksiyonları
 // =====================================================
 
-const Screens = {
+var Screens = window.Screens = {
     // -------------------------------------------------------
     // Üniversite Yemekleri Ekranı
     // -------------------------------------------------------
@@ -1071,7 +1071,7 @@ const Screens = {
 // =====================================================
 // Gençlik Sofrası API Helper (DataTables & Proxies)
 // =====================================================
-const GenclikAPI = {
+var GenclikAPI = window.GenclikAPI = {
     MENU_URL: 'https://forms.ankara.bel.tr/genclik-sofrasi-menu',
     COLUMN_COUNT: 7,
 
@@ -1385,7 +1385,7 @@ const GenclikAPI = {
 // gönderdiği için doğrudan fetch edilebiliyor; başarısız
 // olursa GenclikAPI'nin proxy zinciri devreye giriyor.
 // =====================================================
-const GenclikSofralariAPI = {
+var GenclikSofralariAPI = window.GenclikSofralariAPI = {
     PAGE_URL: 'https://sosyalhizmetler.ankara.bel.tr/hizmetler/genclik-sofralari',
     ORIGIN: 'https://sosyalhizmetler.ankara.bel.tr',
     CACHE_KEY: 'oy_gs_menu_cache',
@@ -1558,3 +1558,7 @@ const GenclikSofralariAPI = {
         throw new Error('Gençlik Sofraları menüsü okunamadı.');
     }
 };
+
+window.Screens = Screens;
+window.GenclikAPI = GenclikAPI;
+window.GenclikSofralariAPI = GenclikSofralariAPI;

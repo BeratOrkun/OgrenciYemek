@@ -3,7 +3,7 @@
 // Yonlendirme, localStorage, PWA
 // =====================================================
 
-const App = {
+var App = window.App = {
     // LocalStorage keys
     KEYS: {
         city: 'oy_city',
@@ -18,6 +18,23 @@ const App = {
 
     // PWA kurulum istemi (Chrome/Edge/Android tarafindan saglanir)
     deferredInstallPrompt: null,
+
+    // Safe history helpers (Instagram, webview ve kısıtlı ortamlarda SecurityError fırlatmasını önler)
+    _safeHistoryReplace(state, title = '', url = null) {
+        try {
+            history.replaceState(state, title, url);
+        } catch {
+            /* sandbox / kısıtlı webview — yoksay */
+        }
+    },
+
+    _safeHistoryPush(state, title = '', url = null) {
+        try {
+            history.pushState(state, title, url);
+        } catch {
+            /* sandbox / kısıtlı webview — yoksay */
+        }
+    },
 
     // -------------------------------------------------------
     // Init
@@ -36,7 +53,7 @@ const App = {
 
         // Geçmişin tabanı: buradan geri basmak uygulamayı kapatır
         this._historyDepth = 0;
-        history.replaceState({ oyScreen: 'home', oyDepth: 0 }, '');
+        this._safeHistoryReplace({ oyScreen: 'home', oyDepth: 0 }, '');
 
         // Karşılama ekranı yok; doğrudan ana ekran açılır
         this.showScreen('home');
@@ -210,9 +227,6 @@ const App = {
             this.closeUniPicker(true);
         }
 
-        // Hide all screens
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-
         const previous = this.currentScreen;
         this.currentScreen = screenId;
 
@@ -222,48 +236,68 @@ const App = {
             const isSub = screenId !== 'home';
             if (isSub && previous !== screenId) {
                 this._historyDepth += 1;
-                history.pushState({ oyScreen: screenId, oyDepth: this._historyDepth }, '');
+                this._safeHistoryPush({ oyScreen: screenId, oyDepth: this._historyDepth }, '');
             } else if (screenId === 'home' && this._historyDepth > 0) {
-                // Uygulama içi "←": kaç girdi eklediysek hepsini geri al,
-                // böylece derinlik ne olursa olsun ana ekrana dönülür.
-                history.go(-this._historyDepth);
-                return;
+                // Ana ekrana donuste derinligi sifirla ve adresi guncelle (async popstate beklemeden aninda gec)
+                this._historyDepth = 0;
+                this._safeHistoryReplace({ oyScreen: 'home', oyDepth: 0 }, '');
             }
         }
 
-        switch (screenId) {
-            case 'home':
-                document.getElementById('home-screen').classList.add('active');
-                this.renderHome();
-                break;
+        // Hedef ekranı belirle
+        const targetId = (screenId === 'home') ? 'home-screen' : 'sub-screen';
+        const targetEl = document.getElementById(targetId);
 
-            case 'universities':
-                document.getElementById('sub-screen').classList.add('active');
-                Screens.renderUniversityScreen(document.getElementById('sub-screen'));
-                break;
+        // Diger ekranlari gizle, hedef ekrani hemen ac (ASLA 0 ekran durumu olusmaz, bos zemin engellenir)
+        document.querySelectorAll('.screen').forEach(s => {
+            if (s !== targetEl) s.classList.remove('active');
+        });
+        if (targetEl) targetEl.classList.add('active');
 
-            case 'kyk':
-                document.getElementById('sub-screen').classList.add('active');
-                Screens.renderKYKScreen(document.getElementById('sub-screen'));
-                break;
+        try {
+            switch (screenId) {
+                case 'home':
+                    this.renderHome();
+                    break;
 
-            case 'genclik':
-                document.getElementById('sub-screen').classList.add('active');
-                Screens.renderGenclikSofrasiScreen(document.getElementById('sub-screen'));
-                break;
+                case 'universities':
+                    Screens.renderUniversityScreen(targetEl);
+                    break;
 
-            case 'millet':
-                document.getElementById('sub-screen').classList.add('active');
-                Screens.renderMilletKutuphanesiScreen(document.getElementById('sub-screen'));
-                break;
+                case 'kyk':
+                    Screens.renderKYKScreen(targetEl);
+                    break;
+
+                case 'genclik':
+                    Screens.renderGenclikSofrasiScreen(targetEl);
+                    break;
+
+                case 'millet':
+                    Screens.renderMilletKutuphanesiScreen(targetEl);
+                    break;
+
+                default:
+                    this.renderHome();
+            }
+        } catch (err) {
+            console.error('Ekran yükleme hatası:', err);
+            // Savunma: alt ekran render hatası alsa bile kullanıcıyı boş arka planda bırakma
+            const home = document.getElementById('home-screen');
+            if (home) {
+                document.querySelectorAll('.screen').forEach(s => {
+                    if (s !== home) s.classList.remove('active');
+                });
+                home.classList.add('active');
+                try { this.renderHome(); } catch {}
+            }
         }
+
         // Always lock body scroll - screens manage their own internal scrolling
         document.body.classList.add('no-scroll');
 
         // Scroll sub-screen container to top when navigating
-        if (screenId !== 'home') {
-            const subScreen = document.getElementById('sub-screen');
-            if (subScreen) subScreen.scrollTop = 0;
+        if (screenId !== 'home' && targetEl) {
+            targetEl.scrollTop = 0;
         }
     },
 
@@ -347,7 +381,7 @@ const App = {
         this.uniPickerOpen = true;
         // Geri tuşu önce modalı kapatsın, uygulamadan çıkmasın.
         // Derinlik artmaz: modal bir ekran değil.
-        history.pushState({ oyModal: 'uni-picker', oyDepth: this._historyDepth }, '');
+        this._safeHistoryPush({ oyModal: 'uni-picker', oyDepth: this._historyDepth }, '');
     },
 
     // silent: geçmişe dokunmadan kapat (popstate veya ekran değişimi)
@@ -360,7 +394,11 @@ const App = {
 
         if (!silent) {
             // Modal için eklenen geçmiş girdisini geri al
-            history.back();
+            try {
+                history.back();
+            } catch {
+                /* yoksay */
+            }
         }
     },
 
@@ -404,11 +442,29 @@ const App = {
 };
 
 // -------------------------------------------------------
-// Boot
+// Global Export (inline onclick güvenliği)
 // -------------------------------------------------------
-document.addEventListener('DOMContentLoaded', () => {
-    App.init();
-});
+window.App = App;
+
+// -------------------------------------------------------
+// Boot (DOMContentLoaded yarış durumunu önler)
+// -------------------------------------------------------
+function bootApp() {
+    try {
+        App.init();
+    } catch (err) {
+        console.error('App.init başlatılamadı:', err);
+        const home = document.getElementById('home-screen');
+        if (home) home.classList.add('active');
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootApp);
+} else {
+    // DOM hazır (SW önbellek veya kısıtlı webview senaryosu)
+    bootApp();
+}
 
 // Close modal on overlay click
 document.addEventListener('click', (e) => {

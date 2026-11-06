@@ -42,6 +42,16 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="css/style.css">
+
+    <!-- Acil durum kurtarma: Beklenmedik bir JS hatasinda dahi ana ekranin asla bos zeminde kalmamasini garanti eder -->
+    <script>
+        window.addEventListener('error', function() {
+            var home = document.getElementById('home-screen');
+            if (home && !document.querySelector('.screen.active')) {
+                home.classList.add('active');
+            }
+        });
+    </script>
 </head>
 <body>
 

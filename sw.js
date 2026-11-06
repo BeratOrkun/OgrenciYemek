@@ -1,5 +1,5 @@
 // ÖğrenciYemek Service Worker
-const CACHE_NAME = 'ogrenciyemek-v11';
+const CACHE_NAME = 'ogrenciyemek-v12';
 
 // Göreceli yollar: SW'nin bulunduğu dizine göre çözümlenir, böylece
 // hem alan adı kökünde hem de /OgrenciYemek/ alt dizininde çalışır.
@@ -104,24 +104,33 @@ self.addEventListener('fetch', (event) => {
     }
 
     event.respondWith((async () => {
-        const cached = await onbellektenBul(request);
+        try {
+            const cached = await onbellektenBul(request);
 
-        if (cached) {
-            // Anında önbellekten ver, güncellemeyi arkada yap
-            event.waitUntil(arkaPlandaTazele(request));
-            return cached;
+            if (cached) {
+                // Anında önbellekten ver, güncellemeyi arkada yap
+                event.waitUntil(arkaPlandaTazele(request));
+                return cached;
+            }
+
+            // Önbellekte yoksa ağa git
+            const network = await arkaPlandaTazele(request);
+            if (network) return network;
+        } catch {
+            /* önbellek/ağ hatası — navigasyon kurtarmasına düş */
         }
-
-        // Önbellekte yoksa ağa git
-        const network = await arkaPlandaTazele(request);
-        if (network) return network;
 
         // Ağ da yoksa: gezinme isteklerinde uygulama kabuğunu döndür,
         // böylece kullanıcı boş ekran yerine uygulamayı görür.
         if (request.mode === 'navigate') {
-            const shell = (await caches.match('./index.html'))
-                || (await caches.match('./'));
-            if (shell) return shell;
+            try {
+                const shell = (await caches.match('./index.html'))
+                    || (await caches.match('./'))
+                    || (await caches.match('index.html'));
+                if (shell) return shell;
+            } catch {
+                /* yoksay */
+            }
         }
 
         return Response.error();

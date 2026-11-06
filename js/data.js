@@ -3,7 +3,7 @@
 // Ankara üniversiteleri, KYK yurtları, Gençlik Sofrası
 // =====================================================
 
-const APP_DATA = {
+var APP_DATA = window.APP_DATA = {
     cities: ['Ankara'],
 
     // Ankara Üniversiteleri (10 Kurum: 9 Devlet, 1 Vakıf)

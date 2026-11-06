@@ -11,7 +11,7 @@
 // bellekte tutar, böylece uygulama her koşulda çalışır.
 // =====================================================
 
-const Store = {
+var Store = window.Store = {
     _memory: {},
     _usable: null,
 
@@ -67,3 +67,5 @@ const Store = {
         }
     }
 };
+
+window.Store = Store;

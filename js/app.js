@@ -1,6 +1,6 @@
 // =====================================================
 // ÖğrenciYemek — Ana Uygulama Mantığı
-// Onboarding, Routing, localStorage, PWA
+// Yonlendirme, localStorage, PWA
 // =====================================================
 
 const App = {
@@ -8,8 +8,7 @@ const App = {
     KEYS: {
         city: 'oy_city',
         university: 'oy_university',
-        kykDorm: 'oy_kyk_dorm',
-        onboardingDone: 'oy_onboarding_done'
+        kykDorm: 'oy_kyk_dorm'
     },
 
     currentScreen: null,
@@ -30,17 +29,50 @@ const App = {
         // "Telefonuna yükle" kartını hazırla
         this.initInstallPrompt();
 
+        // Şehir sabit: Ankara
+        if (!localStorage.getItem(this.KEYS.city)) {
+            localStorage.setItem(this.KEYS.city, 'Ankara');
+        }
+
         // Geçmişin tabanı: buradan geri basmak uygulamayı kapatır
         this._historyDepth = 0;
         history.replaceState({ oyScreen: 'home', oyDepth: 0 }, '');
 
-        // Check if onboarding is done
-        const onboardingDone = localStorage.getItem(this.KEYS.onboardingDone);
+        // Karşılama ekranı yok; doğrudan ana ekran açılır
+        this.showScreen('home');
 
-        if (onboardingDone) {
-            this.showScreen('home');
+        // Menüleri arka planda hazırla (ilk açılışta da)
+        this.prefetchMenus();
+    },
+
+    // -------------------------------------------------------
+    // Menüleri arka planda önden çek
+    // Ana ekran boyanır boyanmaz KYK ve Gençlik Sofrası verisi
+    // sessizce indirilip cihaza yazılır; kullanıcı o ekranlara
+    // girdiğinde menü anında hazır olur.
+    // -------------------------------------------------------
+    prefetchMenus() {
+        const run = () => {
+            const city = localStorage.getItem(this.KEYS.city) || 'Ankara';
+            const today = new Date();
+            const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+            // KYK — başarılı olursa hem belleğe hem localStorage'a yazılır
+            try {
+                Screens._fetchKYKLive(dateStr, city).catch(() => {});
+            } catch { /* yoksay */ }
+
+            // Gençlik Sofrası — loadMenu kendi önbelleğine yazar
+            try {
+                GenclikSofralariAPI.loadMenu().catch(() => {});
+            } catch { /* yoksay */ }
+        };
+
+        // İlk boyamayı geciktirmemek için boşta çalıştır
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(run, { timeout: 2500 });
         } else {
-            this.showScreen('onboarding');
+            setTimeout(run, 1200);
         }
     },
 
@@ -187,7 +219,7 @@ const App = {
         // Alt ekrana girerken geçmişe bir giriş ekle ki cihazın geri
         // tuşu uygulamadan çıkmak yerine ana ekrana dönsün.
         if (!fromHistory) {
-            const isSub = screenId !== 'home' && screenId !== 'onboarding';
+            const isSub = screenId !== 'home';
             if (isSub && previous !== screenId) {
                 this._historyDepth += 1;
                 history.pushState({ oyScreen: screenId, oyDepth: this._historyDepth }, '');
@@ -200,11 +232,6 @@ const App = {
         }
 
         switch (screenId) {
-            case 'onboarding':
-                document.getElementById('onboarding-screen').classList.add('active');
-                this.initOnboarding();
-                break;
-
             case 'home':
                 document.getElementById('home-screen').classList.add('active');
                 this.renderHome();
@@ -234,56 +261,24 @@ const App = {
         document.body.classList.add('no-scroll');
 
         // Scroll sub-screen container to top when navigating
-        if (screenId !== 'home' && screenId !== 'onboarding') {
+        if (screenId !== 'home') {
             const subScreen = document.getElementById('sub-screen');
             if (subScreen) subScreen.scrollTop = 0;
         }
     },
 
     // -------------------------------------------------------
-    // Onboarding
-    // -------------------------------------------------------
-    initOnboarding() {
-        // Varsayılan şehri doğrudan Ankara yapıyoruz
-        localStorage.setItem(this.KEYS.city, 'Ankara');
-        this._populateUniversityList();
-    },
-
-    _populateUniversityList() {
-        const selectEl = document.getElementById('onboarding-uni-select');
-        if (!selectEl) return;
-
-        const universities = APP_DATA.universities;
-        // Mevcut optionları koruyarak (ilk baştaki disabled olanı) diğerlerini ekleyelim
-        const optionsHTML = universities.map(uni => `
-            <option value="${uni.name.replace(/'/g, "\\'")}">
-                ${uni.icon} ${uni.name}
-            </option>
-        `).join('');
-        
-        selectEl.innerHTML = `<option value="" disabled selected>Üniversite seçin...</option>` + optionsHTML;
-    },
-
-    selectUniversity(uniName) {
-        localStorage.setItem(this.KEYS.university, uniName);
-        this.completeOnboarding();
-    },
-
-    completeOnboarding() {
-        localStorage.setItem(this.KEYS.onboardingDone, 'true');
-        this.showScreen('home');
-    },
-
-    // -------------------------------------------------------
     // Home Screen
     // -------------------------------------------------------
     renderHome() {
-        const uni = localStorage.getItem(this.KEYS.university) || 'Öğrenci';
+        const storedUni = localStorage.getItem(this.KEYS.university);
         const city = localStorage.getItem(this.KEYS.city) || 'Ankara';
 
-        // Find short name
-        const uniData = APP_DATA.universities.find(u => u.name === uni);
-        const shortName = uniData ? uniData.shortName : uni;
+        // Henüz seçim yapılmamış olabilir — uygulama yine de çalışır
+        const uniData = storedUni
+            ? APP_DATA.universities.find(u => u.name === storedUni)
+            : null;
+        const shortName = uniData ? uniData.shortName : (storedUni || 'Öğrenci');
 
         const greetingEl = document.getElementById('home-greeting');
         const titleEl = document.getElementById('home-title');
@@ -298,7 +293,17 @@ const App = {
         }
 
         if (titleEl) {
-            titleEl.innerHTML = `<span>${shortName}</span> öğrencisi, bugün ne yiyelim?`;
+            // Seçim yoksa "Öğrenci öğrencisi" gibi tuhaf bir metin çıkmasın
+            titleEl.textContent = '';
+            if (storedUni) {
+                const accent = document.createElement('span');
+                accent.textContent = shortName;
+                titleEl.append(accent, ' öğrencisi, bugün ne yiyelim?');
+            } else {
+                const accent = document.createElement('span');
+                accent.textContent = 'Bugün';
+                titleEl.append(accent, ' ne yiyelim?');
+            }
         }
 
         // Update quick info
@@ -309,9 +314,16 @@ const App = {
             quickInfoEl.innerHTML = `<strong>${today.toLocaleDateString('tr-TR', options)}</strong> ${city}`;
         }
 
-        // Selamlamanın yanındaki üniversite butonu
-        const chipLabel = document.getElementById('uni-chip-label');
-        if (chipLabel) chipLabel.textContent = shortName;
+        // Üstteki üniversite seçim butonu
+        const bar = document.getElementById('uni-select-bar');
+        const valueEl = document.getElementById('uni-select-value');
+        if (valueEl) {
+            valueEl.textContent = storedUni ? (uniData ? uniData.name : storedUni) : 'Üniversiteni seç';
+        }
+        if (bar) {
+            // Seçim yapılmadıysa butonu vurgula
+            bar.classList.toggle('empty', !storedUni);
+        }
     },
 
     // -------------------------------------------------------
@@ -386,7 +398,6 @@ const App = {
 
     pickUniversity(uniName) {
         localStorage.setItem(this.KEYS.university, uniName);
-        localStorage.setItem(this.KEYS.onboardingDone, 'true');
         this.closeUniPicker();
         this.renderHome();
     }

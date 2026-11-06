@@ -86,11 +86,17 @@ body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     /* Koyu gradyan zemin: ustte sicak lacivert, altta neredeyse siyah.
        fixed sabitlenir ki kaydirirken bant kaymasi olmasin. */
-    background: linear-gradient(168deg,
-        #15102b 0%,
-        #0e0b1d 32%,
-        #090812 62%,
-        #0b0710 100%);
+    /* Katmanli zemin: ustte sicak mor-lacivert, altta derin siyah.
+       fixed sabitlenir ki kaydirirken bant kaymasi olmasin. */
+    background:
+        radial-gradient(120% 70% at 50% -10%, rgba(249, 115, 22, 0.13) 0%, transparent 60%),
+        radial-gradient(90% 55% at 100% 8%, rgba(168, 85, 247, 0.10) 0%, transparent 62%),
+        linear-gradient(170deg,
+            #1a1333 0%,
+            #140f28 22%,
+            #0d0a1c 48%,
+            #090711 74%,
+            #07060e 100%);
     background-attachment: fixed;
     background-color: var(--bg-primary);
     color: var(--text-primary);
@@ -114,9 +120,8 @@ body::before {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(ellipse at 15% 12%, rgba(249, 115, 22, 0.10) 0%, transparent 46%),
-                radial-gradient(ellipse at 85% 28%, rgba(168, 85, 247, 0.07) 0%, transparent 48%),
-                radial-gradient(ellipse at 50% 92%, rgba(59, 130, 246, 0.05) 0%, transparent 52%);
+    background: radial-gradient(ellipse at 12% 42%, rgba(249, 115, 22, 0.055) 0%, transparent 42%),
+                radial-gradient(ellipse at 88% 62%, rgba(59, 130, 246, 0.045) 0%, transparent 44%);
     pointer-events: none;
     z-index: 0;
 }
@@ -174,123 +179,6 @@ img {
     }
 }
 
-/* === ONBOARDING === */
-#onboarding-screen {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: var(--space-xl);
-    overflow-y: auto;
-}
-
-#onboarding-screen.active {
-    display: flex;
-}
-
-.onboarding-logo {
-    font-size: 4rem;
-    margin-bottom: var(--space-md);
-    animation: logoFloat 3s ease-in-out infinite;
-}
-
-@keyframes logoFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-}
-
-.onboarding-title {
-    font-size: 2rem;
-    font-weight: 800;
-    background: var(--gradient-main);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: var(--space-sm);
-}
-
-.onboarding-subtitle {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    margin-bottom: var(--space-2xl);
-    max-width: 300px;
-}
-
-.onboarding-step {
-    display: none;
-    width: 100%;
-    max-width: 360px;
-    animation: stepSlide 0.3s ease-out;
-}
-
-.onboarding-step.active {
-    display: block;
-}
-
-@keyframes stepSlide {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.step-label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--accent-orange);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: var(--space-md);
-}
-
-.select-wrapper {
-    position: relative;
-    margin-bottom: var(--space-lg);
-}
-
-.select-wrapper select {
-    width: 100%;
-    padding: 14px 18px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    background: var(--bg-glass);
-    color: var(--text-primary);
-    font-family: inherit;
-    font-size: 1rem;
-    appearance: none;
-    cursor: pointer;
-    transition: var(--transition-base);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-.select-wrapper select:focus {
-    outline: none;
-    border-color: var(--accent-orange);
-    box-shadow: 0 0 0 3px var(--accent-orange-glow);
-}
-
-.select-wrapper::after {
-    content: '▾';
-    position: absolute;
-    right: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-secondary);
-    pointer-events: none;
-    font-size: 1.1rem;
-}
-
-.select-wrapper select option {
-    background: #1a1a2e;
-    color: var(--text-primary);
-    padding: 10px;
-}
-
 /* Search input in select panels */
 .search-input-wrapper {
     position: relative;
@@ -331,7 +219,7 @@ img {
     pointer-events: none;
 }
 
-/* Scrollable list for onboarding */
+/* Kaydirilabilir liste */
 .select-list {
     max-height: 300px;
     overflow-y: auto;
@@ -491,15 +379,6 @@ img {
     padding-top: var(--space-sm);
 }
 
-/* Selamlama + üniversite seçim butonu aynı hizada */
-.home-header-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-sm);
-    margin-bottom: 4px;
-}
-
 .home-greeting {
     font-size: 1rem;
     color: var(--text-secondary);
@@ -508,52 +387,6 @@ img {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-/* Üniversite değiştirme butonu */
-.uni-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-    max-width: 55%;
-    padding: 7px 12px;
-    border-radius: var(--radius-full);
-    background: var(--bg-glass);
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    font-family: inherit;
-    font-size: 0.8rem;
-    font-weight: 600;
-    line-height: 1;
-    cursor: pointer;
-    transition: var(--transition-base);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-}
-
-.uni-chip:active {
-    transform: scale(0.96);
-    border-color: var(--accent-orange);
-}
-
-.uni-chip-icon {
-    font-size: 0.9rem;
-    line-height: 1;
-}
-
-.uni-chip-label {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: var(--text-primary);
-}
-
-.uni-chip-caret {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    line-height: 1;
 }
 
 .home-title {
@@ -2133,22 +1966,6 @@ body {
     min-height: 44px;
 }
 
-/* Chip görsel olarak küçük kalsın ama dokunma alanı 44px olsun */
-.uni-chip {
-    min-height: 36px;
-    position: relative;
-}
-
-.uni-chip::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 44px;
-}
-
 .menu-card,
 .uni-card,
 .uni-picker-item {
@@ -2264,10 +2081,6 @@ textarea {
     flex-shrink: 0;
 }
 
-.onboarding-title {
-    font-size: 1.7rem;
-}
-
 @media (min-width: 420px) {
     .menu-card-inner {
         padding: var(--space-lg);
@@ -2288,9 +2101,6 @@ textarea {
         font-size: 0.85rem;
     }
 
-    .onboarding-title {
-        font-size: 2rem;
-    }
 }
 
 /* --- 10. KYK öğün sekmeleri: dar ekranda tek satırda kalsın --- */
@@ -2502,9 +2312,6 @@ textarea {
     font-weight: 600;
 }
 
-
-
-
 @media (min-width: 420px) {
     .install-card {
         padding: var(--space-lg);
@@ -2528,3 +2335,224 @@ textarea {
 }
 
 
+/* =====================================================
+   Üniversite seçim barı — ana ekranın en üstü
+   ===================================================== */
+
+.uni-select-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 56px;
+    padding: 10px 14px;
+    margin-bottom: var(--space-lg);
+    border-radius: var(--radius-lg);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: var(--transition-base);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.22);
+    touch-action: manipulation;
+}
+
+.uni-select-bar:active {
+    transform: scale(0.99);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+}
+
+/* Henüz seçim yapılmadıysa dikkat çek */
+.uni-select-bar.empty {
+    border-color: rgba(249, 115, 22, 0.42);
+    background:
+        linear-gradient(135deg, rgba(249, 115, 22, 0.16), rgba(249, 115, 22, 0.05));
+    box-shadow: 0 2px 16px rgba(249, 115, 22, 0.14);
+}
+
+.uni-select-bar-icon {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    line-height: 1;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.uni-select-bar.empty .uni-select-bar-icon {
+    background: rgba(249, 115, 22, 0.16);
+    border-color: rgba(249, 115, 22, 0.24);
+}
+
+.uni-select-bar-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    flex: 1;
+}
+
+.uni-select-bar-label {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.uni-select-bar.empty .uni-select-bar-label {
+    color: var(--accent-orange);
+}
+
+.uni-select-bar-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--text-primary);
+    /* Uzun üniversite adları barı taşırmasın */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.uni-select-bar-caret {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: var(--transition-fast);
+}
+
+.uni-select-bar.empty .uni-select-bar-caret {
+    color: var(--accent-orange);
+}
+
+@media (min-width: 420px) {
+    .uni-select-bar {
+        min-height: 60px;
+        padding: 12px 16px;
+    }
+
+    .uni-select-bar-value {
+        font-size: 0.95rem;
+    }
+}
+
+/* =====================================================
+   Ana ekran rafinasyonu
+   ===================================================== */
+
+/* Başlık bloğu biraz daha nefes alsın */
+.home-header {
+    margin-bottom: var(--space-lg);
+    padding-top: 2px;
+}
+
+.home-greeting {
+    margin-bottom: 2px;
+    letter-spacing: 0.1px;
+}
+
+.home-title {
+    letter-spacing: -0.4px;
+}
+
+/* Tarih kartı: menü kartlarıyla aynı dilde, daha yumuşak */
+.quick-info {
+    gap: 14px;
+    padding: 13px 16px;
+    border-radius: var(--radius-lg);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025));
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+
+.quick-info-icon {
+    flex-shrink: 0;
+    font-size: 1.15rem;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.quick-info-text {
+    min-width: 0;
+}
+
+.quick-info-text strong {
+    font-size: 0.95rem;
+    letter-spacing: -0.1px;
+}
+
+/* Menü kartları: daha belirgin derinlik, yumuşak kenar */
+.menu-card {
+    border: 1px solid var(--border-color);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.22);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+
+.menu-card:active {
+    transform: scale(0.99);
+}
+
+/* Renk vurgusu: solda ince bir şerit */
+.menu-card::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    opacity: 0.75;
+    pointer-events: none;
+}
+
+.menu-card[data-accent="orange"]::after { background: var(--accent-orange); }
+.menu-card[data-accent="green"]::after  { background: var(--accent-green); }
+.menu-card[data-accent="blue"]::after   { background: var(--accent-blue); }
+.menu-card[data-accent="purple"]::after { background: var(--accent-purple); }
+
+/* İkon kutusu: vurgu rengiyle hafif boyansın */
+.menu-card[data-accent="orange"] .menu-card-icon { background: rgba(249, 115, 22, 0.12); border-color: rgba(249, 115, 22, 0.18); }
+.menu-card[data-accent="green"]  .menu-card-icon { background: rgba(34, 197, 94, 0.12);  border-color: rgba(34, 197, 94, 0.18); }
+.menu-card[data-accent="blue"]   .menu-card-icon { background: rgba(59, 130, 246, 0.12); border-color: rgba(59, 130, 246, 0.18); }
+.menu-card[data-accent="purple"] .menu-card-icon { background: rgba(168, 85, 247, 0.12); border-color: rgba(168, 85, 247, 0.18); }
+
+.menu-card-title {
+    letter-spacing: -0.2px;
+}
+
+.menu-card-arrow {
+    opacity: 0.55;
+}
+
+/* Alt bilgi */
+.home-footer {
+    margin-top: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}

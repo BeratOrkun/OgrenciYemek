@@ -886,21 +886,50 @@ const Screens = {
         const menuContainer = container.querySelector('#genclik-menu-content');
         if (!menuContainer) return;
 
-        // 1) Birincil kaynak: resmi Gençlik Sofraları sayfası (günün + haftanın menüsü)
+        const applyHours = (hours) => {
+            if (!hours) return;
+            const hoursEl = container.querySelector('#genclik-hours');
+            if (hoursEl) hoursEl.textContent = `🕕 ${hours}`;
+        };
+
+        // 1) Cihazda kayıt varsa ANINDA göster — ağ beklenmez.
+        //    (Açılışta arka planda önden çekildiği için genelde burası dolu.)
+        let shownFromCache = false;
+        const cached = GenclikSofralariAPI.readCache();
+        if (cached && cached.data) {
+            const ok = this._renderGenclikPageMenu(menuContainer, {
+                ...cached.data,
+                stale: false,
+                fromCache: true
+            });
+            if (ok) {
+                applyHours(cached.data.hours);
+                shownFromCache = true;
+            }
+        }
+
+        // 2) Arka planda taze veriyi dene; gelirse sessizce üzerine yaz
         try {
             const pageData = await GenclikSofralariAPI.loadMenu();
             if (pageData && this._renderGenclikPageMenu(menuContainer, pageData)) {
-                if (pageData.hours) {
-                    const hoursEl = container.querySelector('#genclik-hours');
-                    if (hoursEl) hoursEl.textContent = `🕕 ${pageData.hours}`;
-                }
+                applyHours(pageData.hours);
                 return;
             }
         } catch {
-            /* ikincil kaynağa geç */
+            /* ağ hatası */
         }
 
-        // 2) İkincil kaynak: eski menü formu (DataTables tablosu)
+        // 3) Taze veri yoksa ve ekranda kayıtlı menü duruyorsa ona dokunma
+        if (shownFromCache) {
+            this._renderGenclikPageMenu(menuContainer, {
+                ...cached.data,
+                stale: true,
+                cachedAt: cached.savedAt
+            });
+            return;
+        }
+
+        // 4) Hiçbir şey yoksa eski menü formunu dene
         await this._fetchGenclikMenuLegacy(menuContainer);
     },
 

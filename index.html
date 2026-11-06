@@ -45,44 +45,30 @@
 <div id="app">
 
     <!-- ===================================================
-         ONBOARDING SCREEN
-         =================================================== -->
-    <section id="onboarding-screen" class="screen">
-        <div class="onboarding-logo">🍽️</div>
-        <h1 class="onboarding-title">ÖğrenciYemek</h1>
-        <p class="onboarding-subtitle">Ücretsiz ve uygun fiyatlı yemek imkanlarını keşfet!</p>
-
-        <!-- University Selection -->
-        <div id="onboarding-step" class="onboarding-step active">
-            <p style="color: var(--text-secondary); margin-bottom: var(--space-lg); font-size: 0.95rem;">
-                Üniversiteni seç
-            </p>
-
-            <div class="select-wrapper">
-                <select id="onboarding-uni-select" onchange="if(this.value) App.selectUniversity(this.value)">
-                    <option value="" disabled selected>Üniversite seçin...</option>
-                    <!-- Dynamically populated -->
-                </select>
-            </div>
-        </div>
-    </section>
-
-    <!-- ===================================================
          HOME SCREEN
          =================================================== -->
     <section id="home-screen" class="screen">
         <!-- Scrollable Content -->
         <div class="home-scroll">
+            <!-- Üniversite seçimi — ekranın en üstü -->
+            <button type="button" class="uni-select-bar" id="uni-select-bar"
+                    onclick="App.openUniPicker()" aria-label="Üniversiteni seç veya değiştir">
+                <span class="uni-select-bar-icon" aria-hidden="true">🎓</span>
+                <span class="uni-select-bar-text">
+                    <span class="uni-select-bar-label">Üniversiten</span>
+                    <span class="uni-select-bar-value" id="uni-select-value">Üniversiteni seç</span>
+                </span>
+                <span class="uni-select-bar-caret" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                         stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 9l6 6 6-6" />
+                    </svg>
+                </span>
+            </button>
+
             <!-- Header -->
             <div class="home-header">
-                <div class="home-header-row">
-                    <p class="home-greeting" id="home-greeting">Merhaba 👋</p>
-                    <button class="uni-chip" id="uni-chip" onclick="App.openUniPicker()" aria-label="Üniversiteni değiştir">
-                        <span class="uni-chip-icon" aria-hidden="true">🎓</span>
-                        <span class="uni-chip-label" id="uni-chip-label">Seç</span>
-                        <span class="uni-chip-caret" aria-hidden="true">▾</span>
-                    </button>
-                </div>
+                <p class="home-greeting" id="home-greeting">Merhaba 👋</p>
                 <h1 class="home-title" id="home-title">
                     <span>Öğrenci</span>, bugün ne yiyelim?
                 </h1>

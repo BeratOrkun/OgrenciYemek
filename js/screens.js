@@ -287,39 +287,101 @@ const Screens = {
         const statusPill = container.querySelector('#kyk-status-pill');
         const statusText = container.querySelector('#kyk-status-text');
 
-        // Check offline backup first to display immediately if available
-        const mmDd = dateStr.slice(5); // e.g. "11-05"
-        const backupData = APP_DATA.kykMenuBackup && APP_DATA.kykMenuBackup[mmDd];
-        let menuToShow = backupData ? JSON.parse(JSON.stringify(backupData)) : null;
-
-        if (menuToShow && contentEl) {
-            this._renderKYKMenuContent(contentEl, menuToShow, this.currentKYKMealType);
+        const citySlug = this._slugifyCity(city);
+        const setStatus = (cls, text) => {
             if (statusPill && statusText) {
-                statusPill.className = 'kyk-status-pill synced';
-                statusText.textContent = 'Güncel Menü';
+                statusPill.className = `kyk-status-pill ${cls}`;
+                statusText.textContent = text;
+            }
+        };
+
+        // 1) Daha önce bu cihaza kaydedilmiş menü varsa anında göster.
+        //    İnternet yoksa kullanıcı en azından son çektiği hali görür.
+        const stored = this._readStoredKYKMenu(citySlug, dateStr);
+        let shownSomething = false;
+
+        if (stored && contentEl) {
+            this._renderKYKMenuContent(contentEl, stored.data, this.currentKYKMealType);
+            setStatus('synced', 'Kayıtlı Menü');
+            shownSomething = true;
+        } else {
+            // 2) Kayıt yoksa uygulamayla gelen yedek menüyü göster
+            const mmDd = dateStr.slice(5); // e.g. "11-05"
+            const backupData = APP_DATA.kykMenuBackup && APP_DATA.kykMenuBackup[mmDd];
+            if (backupData && contentEl) {
+                this._renderKYKMenuContent(contentEl, JSON.parse(JSON.stringify(backupData)), this.currentKYKMealType);
+                setStatus('synced', 'Güncel Menü');
+                shownSomething = true;
             }
         }
 
-        // Try live fetch in background
+        // 3) Arka planda canlı veriyi dene; gelirse üzerine yaz ve kaydet
         try {
             const liveData = await this._fetchKYKLive(dateStr, city);
             if (liveData && contentEl) {
                 this._renderKYKMenuContent(contentEl, liveData, this.currentKYKMealType);
-                if (statusPill && statusText) {
-                    statusPill.className = 'kyk-status-pill live';
-                    statusText.textContent = 'Canlı Menü';
-                }
+                setStatus('live', 'Canlı Menü');
+                return;
             }
         } catch (e) {
-            // Live fetch failed, ensure fallback is shown
-            if (!menuToShow && contentEl) {
-                const fallback = this._getGenericKYKMeal(dateStr);
-                this._renderKYKMenuContent(contentEl, fallback, this.currentKYKMealType);
-                if (statusPill && statusText) {
-                    statusPill.className = 'kyk-status-pill offline';
-                    statusText.textContent = 'Çevrimdışı Menü';
-                }
+            /* ağ hatası — aşağıdaki çevrimdışı durumuna düş */
+        }
+
+        // 4) Canlı veri alınamadı
+        if (stored) {
+            // Kaydın ne zaman alındığını göster
+            const when = new Date(stored.savedAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+            setStatus('offline', `Kayıtlı Menü · ${when}`);
+        } else if (shownSomething) {
+            setStatus('offline', 'Çevrimdışı Menü');
+        } else if (contentEl) {
+            this._renderKYKMenuContent(contentEl, this._getGenericKYKMeal(dateStr), this.currentKYKMealType);
+            setStatus('offline', 'Çevrimdışı Menü');
+        }
+    },
+
+    // -------------------------------------------------------
+    // KYK — cihazda kalıcı menü deposu
+    // Bir kez başarıyla çekilen menü localStorage'a yazılır; internet
+    // yokken aynı gün/şehir için bu kayıt gösterilir.
+    // -------------------------------------------------------
+    KYK_STORE_KEY: 'oy_kyk_store',
+    KYK_STORE_LIMIT: 30, // en yeni 30 gün/şehir kaydı tutulur
+
+    _readKYKStore() {
+        try {
+            const raw = localStorage.getItem(this.KYK_STORE_KEY);
+            if (!raw) return {};
+            const parsed = JSON.parse(raw);
+            return (parsed && typeof parsed === 'object') ? parsed : {};
+        } catch {
+            return {};
+        }
+    },
+
+    _readStoredKYKMenu(citySlug, dateStr) {
+        const store = this._readKYKStore();
+        const entry = store[`${citySlug}_${dateStr}`];
+        if (!entry || !entry.data) return null;
+        return entry;
+    },
+
+    _writeStoredKYKMenu(citySlug, dateStr, data) {
+        try {
+            const store = this._readKYKStore();
+            store[`${citySlug}_${dateStr}`] = { savedAt: Date.now(), data };
+
+            // Depo şişmesin: en eski kayıtları at
+            const keys = Object.keys(store);
+            if (keys.length > this.KYK_STORE_LIMIT) {
+                keys.sort((a, b) => (store[a].savedAt || 0) - (store[b].savedAt || 0))
+                    .slice(0, keys.length - this.KYK_STORE_LIMIT)
+                    .forEach(k => delete store[k]);
             }
+
+            localStorage.setItem(this.KYK_STORE_KEY, JSON.stringify(store));
+        } catch {
+            /* kota dolu veya özel mod — sessizce geç */
         }
     },
 
@@ -330,6 +392,13 @@ const Screens = {
         if (this.kykMenuMemoryCache[cacheKey]) {
             return this.kykMenuMemoryCache[cacheKey];
         }
+
+        // Başarılı çekimi hem belleğe hem cihaza yaz
+        const remember = (parsed) => {
+            this.kykMenuMemoryCache[cacheKey] = parsed;
+            this._writeStoredKYKMenu(citySlug, dateStr, parsed);
+            return parsed;
+        };
 
         // 1. Primary: Our Dedicated Public GitHub CDN (kyk-yemek-api - today's live menus)
         try {
@@ -343,10 +412,7 @@ const Screens = {
                 const todayJson = await res.json();
                 if (todayJson && todayJson.date === dateStr && todayJson.menus && todayJson.menus[citySlug]) {
                     const parsed = this._parseOurApiMenu(todayJson.menus[citySlug]);
-                    if (parsed) {
-                        this.kykMenuMemoryCache[cacheKey] = parsed;
-                        return parsed;
-                    }
+                    if (parsed) return remember(parsed);
                 }
             }
         } catch (e) {}
@@ -363,10 +429,7 @@ const Screens = {
                 const archiveJson = await res.json();
                 if (archiveJson && archiveJson.by_date && archiveJson.by_date[dateStr] && archiveJson.by_date[dateStr][citySlug]) {
                     const parsed = this._parseOurApiMenu(archiveJson.by_date[dateStr][citySlug]);
-                    if (parsed) {
-                        this.kykMenuMemoryCache[cacheKey] = parsed;
-                        return parsed;
-                    }
+                    if (parsed) return remember(parsed);
                 }
             }
         } catch (e) {}
@@ -384,10 +447,7 @@ const Screens = {
                 const mmDd = dateStr.slice(5);
                 if (rawMap && rawMap[mmDd]) {
                     const parsed = this._parseRawKykText(rawMap[mmDd], dateStr);
-                    if (parsed) {
-                        this.kykMenuMemoryCache[cacheKey] = parsed;
-                        return parsed;
-                    }
+                    if (parsed) return remember(parsed);
                 }
             }
         } catch (e) {}
@@ -1300,7 +1360,6 @@ const GenclikSofralariAPI = {
     PAGE_URL: 'https://sosyalhizmetler.ankara.bel.tr/hizmetler/genclik-sofralari',
     ORIGIN: 'https://sosyalhizmetler.ankara.bel.tr',
     CACHE_KEY: 'oy_gs_menu_cache',
-    CACHE_TTL: 6 * 60 * 60 * 1000, // 6 saat
 
     absoluteUrl(src) {
         if (!src) return null;
@@ -1424,7 +1483,9 @@ const GenclikSofralariAPI = {
             if (!raw) return null;
             const cached = JSON.parse(raw);
             if (!cached || !cached.savedAt || !cached.data) return null;
-            if (Date.now() - cached.savedAt > this.CACHE_TTL) return null;
+            // Yaş kontrolü YOK: internet yokken eldeki tek veri budur,
+            // eskimiş olsa bile boş ekran göstermekten iyidir. Kullanıcı
+            // kaydın tarihini arayüzdeki notta görüyor.
             return cached;
         } catch {
             return null;

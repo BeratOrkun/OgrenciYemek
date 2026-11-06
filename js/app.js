@@ -14,6 +14,9 @@ const App = {
 
     currentScreen: null,
 
+    // Uygulamanın geçmişe eklediği girdi sayısı (geri tuşu yönetimi)
+    _historyDepth: 0,
+
     // PWA kurulum istemi (Chrome/Edge/Android tarafindan saglanir)
     deferredInstallPrompt: null,
 
@@ -26,6 +29,10 @@ const App = {
 
         // "Telefonuna yükle" kartını hazırla
         this.initInstallPrompt();
+
+        // Geçmişin tabanı: buradan geri basmak uygulamayı kapatır
+        this._historyDepth = 0;
+        history.replaceState({ oyScreen: 'home', oyDepth: 0 }, '');
 
         // Check if onboarding is done
         const onboardingDone = localStorage.getItem(this.KEYS.onboardingDone);
@@ -163,11 +170,34 @@ const App = {
     // -------------------------------------------------------
     // Screen Navigation
     // -------------------------------------------------------
-    showScreen(screenId) {
+    // fromHistory: popstate'ten geliyorsa yeni geçmiş girdisi eklenmez,
+    // yoksa geri tuşu sonsuz döngüye girer.
+    showScreen(screenId, fromHistory = false) {
+        // Ekran değişiyorsa açık modalı kapat
+        if (screenId !== this.currentScreen) {
+            this.closeUniPicker(true);
+        }
+
         // Hide all screens
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
 
+        const previous = this.currentScreen;
         this.currentScreen = screenId;
+
+        // Alt ekrana girerken geçmişe bir giriş ekle ki cihazın geri
+        // tuşu uygulamadan çıkmak yerine ana ekrana dönsün.
+        if (!fromHistory) {
+            const isSub = screenId !== 'home' && screenId !== 'onboarding';
+            if (isSub && previous !== screenId) {
+                this._historyDepth += 1;
+                history.pushState({ oyScreen: screenId, oyDepth: this._historyDepth }, '');
+            } else if (screenId === 'home' && this._historyDepth > 0) {
+                // Uygulama içi "←": kaç girdi eklediysek hepsini geri al,
+                // böylece derinlik ne olursa olsun ana ekrana dönülür.
+                history.go(-this._historyDepth);
+                return;
+            }
+        }
 
         switch (screenId) {
             case 'onboarding':
@@ -287,9 +317,11 @@ const App = {
     // -------------------------------------------------------
     // Üniversite Seçici (selamlamanın sağındaki buton)
     // -------------------------------------------------------
+    uniPickerOpen: false,
+
     openUniPicker() {
         const modal = document.getElementById('uni-picker-modal');
-        if (!modal) return;
+        if (!modal || this.uniPickerOpen) return;
 
         this._renderUniPickerList();
 
@@ -300,11 +332,24 @@ const App = {
         }
 
         modal.classList.add('active');
+        this.uniPickerOpen = true;
+        // Geri tuşu önce modalı kapatsın, uygulamadan çıkmasın.
+        // Derinlik artmaz: modal bir ekran değil.
+        history.pushState({ oyModal: 'uni-picker', oyDepth: this._historyDepth }, '');
     },
 
-    closeUniPicker() {
+    // silent: geçmişe dokunmadan kapat (popstate veya ekran değişimi)
+    closeUniPicker(silent = false) {
         const modal = document.getElementById('uni-picker-modal');
-        if (modal) modal.classList.remove('active');
+        if (!modal || !this.uniPickerOpen) return;
+
+        modal.classList.remove('active');
+        this.uniPickerOpen = false;
+
+        if (!silent) {
+            // Modal için eklenen geçmiş girdisini geri al
+            history.back();
+        }
     },
 
     _renderUniPickerList(term = '') {
@@ -366,9 +411,19 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') App.closeUniPicker();
 });
 
-// Back button handler (browser)
-window.addEventListener('popstate', () => {
-    if (App.currentScreen !== 'home' && App.currentScreen !== 'onboarding') {
-        App.showScreen('home');
+// Cihaz/tarayıcı geri tuşu
+// Sıra: açık modal varsa önce o kapanır, sonra alt ekrandan ana ekrana
+// dönülür. Ana ekranda geri basmak uygulamayı kapatır (beklenen davranış).
+window.addEventListener('popstate', (e) => {
+    // Derinliği her zaman geçmiş girdisinden tazele
+    App._historyDepth = (e.state && e.state.oyDepth) || 0;
+
+    // Modal açıksa onu kapat ve burada dur
+    if (App.uniPickerOpen) {
+        App.closeUniPicker(true);
+        return;
     }
+
+    const target = e.state && e.state.oyScreen ? e.state.oyScreen : 'home';
+    App.showScreen(target, true);
 });

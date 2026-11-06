@@ -2,21 +2,39 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0a0a1a">
-    <meta name="description" content="Öğrenciler için ücretsiz ve uygun fiyatlı yemek imkanları. Üniversite yemekleri, KYK menüleri, Gençlik Sofrası ve daha fazlası.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#15102b">
+    <meta name="description" content="Ankara'daki öğrenciler için ücretsiz ve uygun fiyatlı yemek rehberi: üniversite yemekhane menüleri, günlük KYK menüsü, ABB Gençlik Sofrası ve Millet Kütüphanesi ikramları.">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <!-- Ana ekranda iki satira bolunebilsin diye bosluklu yazildi -->
     <meta name="apple-mobile-web-app-title" content="Öğrenci Yemek">
 
     <title>ÖğrenciYemek — Öğrenci Yemek Rehberi</title>
+    <link rel="canonical" href="https://ogrenciyemek.com/">
+
+    <!-- Sosyal paylasim -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ÖğrenciYemek">
+    <meta property="og:locale" content="tr_TR">
+    <meta property="og:url" content="https://ogrenciyemek.com/">
+    <meta property="og:title" content="ÖğrenciYemek — Öğrenci Yemek Rehberi">
+    <meta property="og:description" content="Üniversite yemekhane menüleri, günlük KYK menüsü, ABB Gençlik Sofrası ve Millet Kütüphanesi ikramları — tek uygulamada.">
+    <meta property="og:image" content="https://ogrenciyemek.com/icons/icon-512.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="ÖğrenciYemek — Öğrenci Yemek Rehberi">
+    <meta name="twitter:description" content="Üniversite, KYK ve Gençlik Sofrası menüleri tek uygulamada.">
+    <meta name="twitter:image" content="https://ogrenciyemek.com/icons/icon-512.png">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
 
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>" type="image/svg+xml">
+    <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
     <!-- Styles -->
@@ -80,13 +98,13 @@
 
             <!-- Telefona Yükle (PWA) -->
             <div class="install-card" id="install-card" hidden>
-                <button type="button" class="install-card-close" onclick="App.dismissInstall()" aria-label="Kapat">×</button>
                 <div class="install-card-top">
                     <span class="install-card-icon" aria-hidden="true">📲</span>
                     <div class="install-card-text">
                         <h3 class="install-card-title">Telefonuna yükle</h3>
                         <p class="install-card-desc" id="install-card-desc">
-                            ÖğrenciYemek'i uygulama gibi kullan — ana ekranından tek dokunuşla aç, menülere daha hızlı ulaş.
+                            ÖğrenciYemek'i uygulama gibi kullan — ana ekranından tek dokunuşla aç,
+                            internet yokken bile menülere bak. İndirme boyutu yalnızca <strong>~75 KB</strong>.
                         </p>
                     </div>
                 </div>

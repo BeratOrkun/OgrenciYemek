@@ -9,8 +9,7 @@ const App = {
         city: 'oy_city',
         university: 'oy_university',
         kykDorm: 'oy_kyk_dorm',
-        onboardingDone: 'oy_onboarding_done',
-        installDismissed: 'oy_install_dismissed'
+        onboardingDone: 'oy_onboarding_done'
     },
 
     currentScreen: null,
@@ -43,7 +42,9 @@ const App = {
     // -------------------------------------------------------
     registerSW() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(() => {
+            // Göreceli yol: hem alan adı kökünde hem de GitHub Pages
+            // proje alt dizininde (/OgrenciYemek/) doğru çözümlenir
+            navigator.serviceWorker.register('sw.js').catch(() => {
                 // SW registration failed (probably file:// protocol), ignore
             });
         }
@@ -64,31 +65,50 @@ const App = {
             || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     },
 
+    // Kurulu olup olmadığı localStorage'a YAZILMAZ. Kullanıcı uygulamayı
+    // silerse kart tekrar görünsün diye her açılışta canlı olarak tespit
+    // edilir: Chrome kuruluyken beforeinstallprompt'u hiç tetiklemez.
+    relatedAppInstalled: false,
+
     initInstallPrompt() {
-        // Chrome/Edge: kurulabilir olduğunda bu olay tetiklenir
+        // Chrome/Edge: yalnızca kurulu DEĞİLSE tetiklenir
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             this.deferredInstallPrompt = e;
+            this.relatedAppInstalled = false;
             this.refreshInstallCard();
         });
 
-        // Kurulum tamamlanınca kartı kaldır
+        // Kurulum tamamlandığı anda kartı kaldır
         window.addEventListener('appinstalled', () => {
             this.deferredInstallPrompt = null;
-            localStorage.setItem(this.KEYS.installDismissed, 'installed');
+            this.relatedAppInstalled = true;
             this.refreshInstallCard();
         });
 
+        // Destekleyen tarayıcılarda kurulu olup olmadığını doğrudan sor
+        this.checkInstalledApp();
+
         this.refreshInstallCard();
+    },
+
+    async checkInstalledApp() {
+        if (!navigator.getInstalledRelatedApps) return;
+        try {
+            const apps = await navigator.getInstalledRelatedApps();
+            this.relatedAppInstalled = apps.length > 0;
+            this.refreshInstallCard();
+        } catch {
+            /* desteklenmiyor veya izin yok — diğer sinyallere güven */
+        }
     },
 
     refreshInstallCard() {
         const card = document.getElementById('install-card');
         if (!card) return;
 
-        const dismissed = localStorage.getItem(this.KEYS.installDismissed);
-        // Zaten uygulama olarak açıldıysa veya kullanıcı kapattıysa gösterme
-        if (this.isStandalone() || dismissed) {
+        // Uygulama olarak açıldıysa ya da kurulu olduğu doğrulandıysa gizle
+        if (this.isStandalone() || this.relatedAppInstalled) {
             card.hidden = true;
             return;
         }
@@ -98,7 +118,7 @@ const App = {
         const desc = document.getElementById('install-card-desc');
 
         if (this.deferredInstallPrompt) {
-            // Tek dokunuşla kurulum yapılabiliyor
+            // Tek dokunuşla kurulabilir (ve kurulu değil)
             card.hidden = false;
             if (btn) btn.hidden = false;
             if (steps) steps.hidden = true;
@@ -108,10 +128,11 @@ const App = {
             if (btn) btn.hidden = true;
             if (steps) steps.hidden = false;
             if (desc) {
-                desc.textContent = "ÖğrenciYemek'i ana ekranına ekle, uygulama gibi tek dokunuşla aç.";
+                desc.innerHTML = "ÖğrenciYemek'i ana ekranına ekle, uygulama gibi tek dokunuşla aç. "
+                    + "İndirme boyutu yalnızca <strong>~75 KB</strong>.";
             }
         } else {
-            // Kurulum bu tarayıcıda desteklenmiyor ya da zaten kurulu
+            // Kurulum bu tarayıcıda desteklenmiyor
             card.hidden = true;
         }
     },
@@ -123,24 +144,19 @@ const App = {
         }
 
         const promptEvent = this.deferredInstallPrompt;
-        // Tek kullanımlık: olay tekrar kullanılamaz
+        // Tek kullanımlık: aynı olay tekrar kullanılamaz
         this.deferredInstallPrompt = null;
 
         try {
             promptEvent.prompt();
             const { outcome } = await promptEvent.userChoice;
             if (outcome === 'accepted') {
-                localStorage.setItem(this.KEYS.installDismissed, 'installed');
+                this.relatedAppInstalled = true;
             }
         } catch {
-            /* istem gösterilemedi — kart olduğu gibi kalsın */
+            /* istem gösterilemedi */
         }
 
-        this.refreshInstallCard();
-    },
-
-    dismissInstall() {
-        localStorage.setItem(this.KEYS.installDismissed, '1');
         this.refreshInstallCard();
     },
 

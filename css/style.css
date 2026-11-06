@@ -84,7 +84,15 @@ html {
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--bg-primary);
+    /* Koyu gradyan zemin: ustte sicak lacivert, altta neredeyse siyah.
+       fixed sabitlenir ki kaydirirken bant kaymasi olmasin. */
+    background: linear-gradient(168deg,
+        #15102b 0%,
+        #0e0b1d 32%,
+        #090812 62%,
+        #0b0710 100%);
+    background-attachment: fixed;
+    background-color: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.6;
     min-height: 100dvh;
@@ -106,9 +114,9 @@ body::before {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(ellipse at 20% 50%, rgba(249, 115, 22, 0.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(34, 197, 94, 0.04) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 100%, rgba(59, 130, 246, 0.03) 0%, transparent 50%);
+    background: radial-gradient(ellipse at 15% 12%, rgba(249, 115, 22, 0.10) 0%, transparent 46%),
+                radial-gradient(ellipse at 85% 28%, rgba(168, 85, 247, 0.07) 0%, transparent 48%),
+                radial-gradient(ellipse at 50% 92%, rgba(59, 130, 246, 0.05) 0%, transparent 52%);
     pointer-events: none;
     z-index: 0;
 }
@@ -2421,8 +2429,6 @@ textarea {
 .install-card-text {
     min-width: 0;
     flex: 1;
-    /* Kapatma butonunun altına girmesin */
-    padding-right: var(--space-lg);
 }
 
 .install-card-title {
@@ -2496,41 +2502,8 @@ textarea {
     font-weight: 600;
 }
 
-.install-card-close {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    background: none;
-    color: var(--text-muted);
-    font-size: 1.3rem;
-    line-height: 1;
-    border-radius: var(--radius-full);
-    cursor: pointer;
-    transition: var(--transition-fast);
-    touch-action: manipulation;
-}
 
-/* Görsel küçük kalsın, dokunma alanı 44px olsun */
-.install-card-close::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 44px;
-    height: 44px;
-    transform: translate(-50%, -50%);
-}
 
-.install-card-close:active {
-    color: var(--text-primary);
-    background: var(--bg-card-hover);
-}
 
 @media (min-width: 420px) {
     .install-card {
@@ -2552,4 +2525,11 @@ textarea {
     display: inline-block;
     vertical-align: -2px;
     color: var(--accent-orange);
+}
+
+
+/* Kurulum kartindaki boyut vurgusu */
+.install-card-desc strong {
+    color: var(--text-primary);
+    font-weight: 700;
 }

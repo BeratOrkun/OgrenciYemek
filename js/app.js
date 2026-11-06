@@ -135,8 +135,8 @@ const App = {
             if (btn) btn.hidden = true;
             if (steps) steps.hidden = false;
             if (desc) {
-                desc.innerHTML = "ÖğrenciYemek'i ana ekranına ekle, uygulama gibi tek dokunuşla aç. "
-                    + "İndirme boyutu yalnızca <strong>~75 KB</strong>.";
+                desc.textContent = "ÖğrenciYemek'i ana ekranına ekle, uygulama gibi tek dokunuşla aç. "
+                    + "İndirme boyutu yalnızca ~75 KB.";
             }
         } else {
             // Kurulum bu tarayıcıda desteklenmiyor

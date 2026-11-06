@@ -2528,8 +2528,3 @@ textarea {
 }
 
 
-/* Kurulum kartindaki boyut vurgusu */
-.install-card-desc strong {
-    color: var(--text-primary);
-    font-weight: 700;
-}

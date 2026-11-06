@@ -200,7 +200,7 @@ const Screens = {
             <div class="kyk-meal-tabs">
                 <button class="kyk-meal-tab ${activeMealType === 'all' ? 'active' : ''}" onclick="Screens.setKYKMealType('all')">Tüm Menü</button>
                 <button class="kyk-meal-tab ${activeMealType === 'breakfast' ? 'active' : ''}" onclick="Screens.setKYKMealType('breakfast')">🍳 Kahvaltı</button>
-                <button class="kyk-meal-tab ${activeMealType === 'dinner' ? 'active' : ''}" onclick="Screens.setKYKMealType('dinner')">🍲 Akşam Yemeği</button>
+                <button class="kyk-meal-tab ${activeMealType === 'dinner' ? 'active' : ''}" onclick="Screens.setKYKMealType('dinner')">🍲 Akşam</button>
             </div>
 
             <!-- Menü İçerik Alanı -->
@@ -307,7 +307,7 @@ const Screens = {
                 this._renderKYKMenuContent(contentEl, liveData, this.currentKYKMealType);
                 if (statusPill && statusText) {
                     statusPill.className = 'kyk-status-pill live';
-                    statusText.textContent = '🟢 Canlı Menü';
+                    statusText.textContent = 'Canlı Menü';
                 }
             }
         } catch (e) {
@@ -976,17 +976,6 @@ const Screens = {
                 <p class="mt-sm text-muted" style="font-size: 0.8rem;">Zemin Kat Restoran — Ücretsiz ikram hizmeti</p>
             </div>
         `;
-    },
-
-    // -------------------------------------------------------
-    // Çankaya Belediyesi Ekranı
-    // -------------------------------------------------------
-    renderCankayaScreen(container) {
-        const data = APP_DATA.cankayaBelediyesi;
-        // Open in new tab directly
-        window.open(data.menuUrl, '_blank', 'noopener,noreferrer');
-        // Stay on home but show a brief confirmation
-        App.showScreen('home');
     }
 };
 

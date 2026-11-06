@@ -2856,6 +2856,13 @@ const APP_DATA = {
         subtitle: 'Zemin Kat Restoran',
         services: [
             {
+                name: 'Sıcak İçecek İkramı',
+                schedule: 'Her gün — 7/24',
+                hours: '24 saat',
+                icon: '☕',
+                description: 'Çay, kahve, sıcak içecek ve su kesintisiz olarak ücretsiz sunulmaktadır.'
+            },
+            {
                 name: 'Çorba İkramı',
                 schedule: 'Hafta içi ve hafta sonu',
                 hours: '12:00 - 14:00 / 18:00 - 20:00',
@@ -2870,12 +2877,5 @@ const APP_DATA = {
                 description: 'Gece saatlerinde ücretsiz kek ikramı yapılmaktadır.'
             }
         ]
-    },
-
-    // Çankaya Belediyesi
-    cankayaBelediyesi: {
-        menuUrl: 'https://www.cankaya.bel.tr/sayfalar/menulerimiz',
-        title: 'Çankaya Belediyesi Yemek Menüleri',
-        description: 'Çankaya Belediyesi\'nin güncel yemek menülerine ulaşmak için aşağıdaki butona tıklayın.'
     }
 };

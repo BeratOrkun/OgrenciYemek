@@ -51,16 +51,18 @@
          HOME SCREEN
          =================================================== -->
     <section id="home-screen" class="screen">
-        <!-- Settings Button -->
-        <button class="settings-btn" onclick="App.openSettings()" aria-label="Ayarlar" id="settings-btn">
-            ⚙️
-        </button>
-
         <!-- Scrollable Content -->
         <div class="home-scroll">
             <!-- Header -->
             <div class="home-header">
-                <p class="home-greeting" id="home-greeting">Merhaba 👋</p>
+                <div class="home-header-row">
+                    <p class="home-greeting" id="home-greeting">Merhaba 👋</p>
+                    <button class="uni-chip" id="uni-chip" onclick="App.openUniPicker()" aria-label="Üniversiteni değiştir">
+                        <span class="uni-chip-icon" aria-hidden="true">🎓</span>
+                        <span class="uni-chip-label" id="uni-chip-label">Seç</span>
+                        <span class="uni-chip-caret" aria-hidden="true">▾</span>
+                    </button>
+                </div>
                 <h1 class="home-title" id="home-title">
                     <span>Öğrenci</span>, bugün ne yiyelim?
                 </h1>
@@ -109,7 +111,7 @@
                         <div class="menu-card-icon">🍲</div>
                         <div class="menu-card-content">
                             <h3 class="menu-card-title">Gençlik Sofrası</h3>
-                            <p class="menu-card-desc">ABB ücretsiz yemek hizmeti</p>
+                            <p class="menu-card-desc">ABB ücretsiz yemek hizmeti menüsü</p>
                         </div>
                         <span class="menu-card-arrow">›</span>
                     </div>
@@ -122,24 +124,12 @@
                         <div class="menu-card-icon">🏛️</div>
                         <div class="menu-card-content">
                             <h3 class="menu-card-title">Millet Kütüphanesi</h3>
-                            <p class="menu-card-desc">Ücretsiz çorba ve kek ikramı</p>
+                            <p class="menu-card-desc">Ücretsiz çorba, kahve, kek ikramı</p>
                         </div>
                         <span class="menu-card-arrow">›</span>
                     </div>
                 </div>
 
-                <!-- Çankaya Belediyesi -->
-                <div class="menu-card" data-accent="cyan" onclick="App.showScreen('cankaya')">
-                    <div class="menu-card-glow"></div>
-                    <div class="menu-card-inner">
-                        <div class="menu-card-icon">🏢</div>
-                        <div class="menu-card-content">
-                            <h3 class="menu-card-title">Çankaya Belediyesi</h3>
-                            <p class="menu-card-desc">Çankaya Belediyesi yemek menüleri</p>
-                        </div>
-                        <span class="menu-card-arrow">›</span>
-                    </div>
-                </div>
             </div>
 
             <!-- Footer -->
@@ -157,26 +147,24 @@
 </div>
 
 <!-- ===================================================
-     SETTINGS MODAL
+     ÜNİVERSİTE SEÇİCİ
      =================================================== -->
-<div id="settings-modal" class="modal-overlay" onclick="if(event.target===this)App.closeSettings()">
+<div id="uni-picker-modal" class="modal-overlay" onclick="if(event.target===this)App.closeUniPicker()">
     <div class="modal-content">
         <div class="modal-handle"></div>
-        <h3 class="modal-title">⚙️ Ayarlar</h3>
+        <h3 class="modal-title">🎓 Üniversiteni seç</h3>
 
-        <div class="modal-field">
-            <div class="modal-field-label">Şehir</div>
-            <div class="modal-field-value" id="settings-city">-</div>
+        <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="search" id="uni-picker-search" placeholder="Üniversite ara..." autocomplete="off">
         </div>
 
-        <div class="modal-field">
-            <div class="modal-field-label">Üniversite</div>
-            <div class="modal-field-value" id="settings-uni">-</div>
+        <div class="uni-picker-list" id="uni-picker-list">
+            <!-- Dinamik olarak dolduruluyor -->
         </div>
 
         <div class="modal-actions">
-            <button class="btn btn-secondary" style="flex:1;" onclick="App.closeSettings()">Kapat</button>
-            <button class="btn btn-primary" style="flex:1;" onclick="App.resetOnboarding()">🔄 Değiştir</button>
+            <button type="button" class="btn btn-secondary btn-full" onclick="App.closeUniPicker()">Kapat</button>
         </div>
     </div>
 </div>

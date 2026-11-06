@@ -81,10 +81,6 @@ const App = {
                 document.getElementById('sub-screen').classList.add('active');
                 Screens.renderMilletKutuphanesiScreen(document.getElementById('sub-screen'));
                 break;
-
-            case 'cankaya':
-                Screens.renderCankayaScreen(document.getElementById('sub-screen'));
-                break;
         }
         // Always lock body scroll - screens manage their own internal scrolling
         document.body.classList.add('no-scroll');
@@ -164,33 +160,72 @@ const App = {
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             quickInfoEl.innerHTML = `<strong>${today.toLocaleDateString('tr-TR', options)}</strong> ${city}`;
         }
+
+        // Selamlamanın yanındaki üniversite butonu
+        const chipLabel = document.getElementById('uni-chip-label');
+        if (chipLabel) chipLabel.textContent = shortName;
     },
 
     // -------------------------------------------------------
-    // Settings Modal
+    // Üniversite Seçici (selamlamanın sağındaki buton)
     // -------------------------------------------------------
-    openSettings() {
-        const modal = document.getElementById('settings-modal');
-        const cityEl = document.getElementById('settings-city');
-        const uniEl = document.getElementById('settings-uni');
+    openUniPicker() {
+        const modal = document.getElementById('uni-picker-modal');
+        if (!modal) return;
 
-        if (cityEl) cityEl.textContent = localStorage.getItem(this.KEYS.city) || '-';
-        if (uniEl) uniEl.textContent = localStorage.getItem(this.KEYS.university) || '-';
+        this._renderUniPickerList();
+
+        const search = document.getElementById('uni-picker-search');
+        if (search) {
+            search.value = '';
+            search.oninput = () => this._renderUniPickerList(search.value);
+        }
 
         modal.classList.add('active');
     },
 
-    closeSettings() {
-        document.getElementById('settings-modal').classList.remove('active');
+    closeUniPicker() {
+        const modal = document.getElementById('uni-picker-modal');
+        if (modal) modal.classList.remove('active');
     },
 
-    resetOnboarding() {
-        localStorage.removeItem(this.KEYS.onboardingDone);
-        localStorage.removeItem(this.KEYS.city);
-        localStorage.removeItem(this.KEYS.university);
-        localStorage.removeItem(this.KEYS.kykDorm);
-        this.closeSettings();
-        this.showScreen('onboarding');
+    _renderUniPickerList(term = '') {
+        const listEl = document.getElementById('uni-picker-list');
+        if (!listEl) return;
+
+        const current = localStorage.getItem(this.KEYS.university);
+        const q = term.toLocaleLowerCase('tr').trim();
+
+        const matches = APP_DATA.universities.filter(uni => {
+            if (!q) return true;
+            const haystack = `${uni.name} ${uni.shortName || ''}`.toLocaleLowerCase('tr');
+            return haystack.includes(q);
+        });
+
+        if (!matches.length) {
+            listEl.innerHTML = `<p class="uni-picker-empty">Eşleşen üniversite bulunamadı.</p>`;
+            return;
+        }
+
+        listEl.innerHTML = matches.map(uni => `
+            <button type="button"
+                    class="uni-picker-item${uni.name === current ? ' selected' : ''}"
+                    onclick="App.pickUniversity('${uni.name.replace(/'/g, "\\'")}')">
+                <span class="uni-picker-item-icon" aria-hidden="true">${uni.icon}</span>
+                <span class="uni-picker-item-text">
+                    <span class="uni-picker-item-name">${uni.name}</span>
+                    <span class="uni-picker-item-meta">${uni.type}</span>
+                </span>
+                ${uni.name === current ? '<span class="uni-picker-item-check" aria-hidden="true">✓</span>' : ''}
+            </button>
+        `).join('');
+    },
+
+    pickUniversity(uniName) {
+        localStorage.setItem(this.KEYS.university, uniName);
+        localStorage.setItem(this.KEYS.onboardingDone, 'true');
+        this.closeUniPicker();
+        this.renderHome();
     }
 };
 
@@ -204,8 +239,13 @@ document.addEventListener('DOMContentLoaded', () => {
 // Close modal on overlay click
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('modal-overlay')) {
-        App.closeSettings();
+        App.closeUniPicker();
     }
+});
+
+// Esc ile seçiciyi kapat
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') App.closeUniPicker();
 });
 
 // Back button handler (browser)

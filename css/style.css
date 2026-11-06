@@ -154,14 +154,15 @@ img {
     display: block;
 }
 
+/* Dikey giriş: yatay kaydırmaya (taşmaya) yol açmaz */
 @keyframes screenSlideIn {
     from {
         opacity: 0;
-        transform: translateX(20px);
+        transform: translate3d(0, 10px, 0);
     }
     to {
         opacity: 1;
-        transform: translateX(0);
+        transform: translate3d(0, 0, 0);
     }
 }
 
@@ -482,11 +483,69 @@ img {
     padding-top: var(--space-sm);
 }
 
+/* Selamlama + üniversite seçim butonu aynı hizada */
+.home-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    margin-bottom: 4px;
+}
+
 .home-greeting {
     font-size: 1rem;
     color: var(--text-secondary);
-    margin-bottom: 4px;
     font-weight: 500;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Üniversite değiştirme butonu */
+.uni-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    max-width: 55%;
+    padding: 7px 12px;
+    border-radius: var(--radius-full);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    transition: var(--transition-base);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+
+.uni-chip:active {
+    transform: scale(0.96);
+    border-color: var(--accent-orange);
+}
+
+.uni-chip-icon {
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+.uni-chip-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-primary);
+}
+
+.uni-chip-caret {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    line-height: 1;
 }
 
 .home-title {
@@ -1591,25 +1650,9 @@ img {
     }
 }
 
-@media (max-width: 360px) {
-    .screen {
-        padding: var(--space-md);
-    }
-
-    .menu-card-icon {
-        width: 80px;
-        height: 80px;
-        font-size: 2.4rem;
-    }
-
-    .menu-card-title {
-        font-size: 1.2rem;
-    }
-
-    .onboarding-title {
-        font-size: 1.6rem;
-    }
-}
+/* Not: küçük ekrana özel büyütme kuralları kaldırıldı.
+   Ölçekleme artık mobile-first katmanında (taban = telefon,
+   min-width sorgularıyla büyüyor). */
 
 /* Sub-screens need to scroll vertically within their viewport */
 #sub-screen.active {
@@ -1911,4 +1954,415 @@ img {
         align-items: baseline;
         gap: 6px;
     }
+}
+
+/* =====================================================
+   Üniversite Seçici (modal liste)
+   ===================================================== */
+
+.uni-picker-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 46vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 calc(var(--space-sm) * -1);
+    padding: 2px var(--space-sm);
+    overscroll-behavior: contain;
+}
+
+.uni-picker-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 52px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.uni-picker-item:active {
+    transform: scale(0.985);
+    background: var(--bg-card-hover);
+}
+
+.uni-picker-item.selected {
+    border-color: var(--accent-orange);
+    background: rgba(249, 115, 22, 0.1);
+}
+
+.uni-picker-item-icon {
+    font-size: 1.15rem;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.uni-picker-item-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    flex: 1;
+}
+
+.uni-picker-item-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.25;
+    /* Uzun isimler taşmasın, 2 satırda kesilsin */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.uni-picker-item-meta {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.uni-picker-item-check {
+    flex-shrink: 0;
+    color: var(--accent-orange);
+    font-weight: 800;
+}
+
+.uni-picker-empty {
+    padding: var(--space-lg) var(--space-md);
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* =====================================================
+   Mobile-first düzeltmeler
+   Taban stiller telefon içindir; büyük ekranlar
+   min-width sorgularıyla zenginleştirilir.
+   ===================================================== */
+
+/* --- 1. Yatay taşmayı kökten engelle --- */
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Grid/flex çocuklarının min-content'e kilitlenip
+   kapsayıcıyı şişirmesini engeller (üniversite listesi hatası). */
+.uni-list {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.uni-card,
+.uni-card-info,
+.uni-card-meta,
+.location-card,
+.service-card {
+    min-width: 0;
+}
+
+.uni-card-meta {
+    flex-wrap: wrap;
+    row-gap: 4px;
+}
+
+.uni-card-note {
+    overflow-wrap: anywhere;
+}
+
+/* Uzun kelimeler/URL'ler kartları taşırmasın */
+.menu-card-title,
+.menu-card-desc,
+.location-card-name,
+.location-card-address,
+.service-card-name,
+.info-hero-title,
+.info-hero-subtitle,
+.sub-header-title {
+    overflow-wrap: anywhere;
+}
+
+/* --- 2. Taban (mobil) yerleşim ölçüleri --- */
+.screen {
+    padding: var(--space-md);
+    padding-top: max(var(--space-md), env(safe-area-inset-top, 0px));
+    padding-bottom: max(var(--space-md), env(safe-area-inset-bottom, 0px));
+}
+
+.home-scroll {
+    padding: var(--space-lg) var(--space-md);
+    padding-top: max(var(--space-lg), env(safe-area-inset-top, 0px));
+    padding-bottom: max(var(--space-xl), env(safe-area-inset-bottom, 0px));
+}
+
+.home-title {
+    font-size: 1.55rem;
+}
+
+.uni-card {
+    padding: var(--space-md);
+}
+
+/* --- 3. Dokunma hedefleri (min. 44px) --- */
+.filter-tab {
+    min-height: 44px;
+    padding: 10px 16px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.back-btn,
+.gs-menu-retry {
+    min-height: 44px;
+}
+
+/* Chip görsel olarak küçük kalsın ama dokunma alanı 44px olsun */
+.uni-chip {
+    min-height: 36px;
+    position: relative;
+}
+
+.uni-chip::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 44px;
+}
+
+.menu-card,
+.uni-card,
+.uni-picker-item {
+    touch-action: manipulation;
+}
+
+/* --- 4. iOS'ta input odaklanınca sayfanın zoomlanmasını engelle --- */
+input,
+select,
+textarea {
+    font-size: 16px;
+}
+
+.search-input-wrapper input {
+    font-size: 16px;
+}
+
+/* --- 5. Dokunmatik cihazlarda hover efektleri takılı kalmasın --- */
+@media (hover: none) {
+    .uni-card:hover,
+    .menu-card:hover,
+    .location-card:hover {
+        transform: none;
+        background: var(--bg-card);
+        border-color: var(--border-color);
+    }
+
+    .uni-card:hover .uni-card-arrow,
+    .menu-card:hover .menu-card-arrow {
+        transform: none;
+        color: var(--text-muted);
+    }
+
+    .menu-card:hover .menu-card-glow {
+        opacity: 0;
+    }
+}
+
+/* Dokunmada geri bildirim */
+.uni-card:active {
+    transform: scale(0.99);
+    background: var(--bg-card-hover);
+}
+
+/* --- 6. Modal: klavye açılınca içerik sıkışmasın --- */
+.modal-content {
+    max-height: min(85dvh, 760px);
+    padding: var(--space-lg) var(--space-lg) max(var(--space-lg), env(safe-area-inset-bottom, 0px));
+    overscroll-behavior: contain;
+}
+
+/* --- 7. Hareket azaltma tercihi --- */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* --- 8. Daha geniş ekranlar için zenginleştirme --- */
+@media (min-width: 420px) {
+    .screen {
+        padding: var(--space-lg);
+        padding-top: max(var(--space-lg), env(safe-area-inset-top, 0px));
+    }
+
+    .home-scroll {
+        padding: var(--space-xl) var(--space-lg);
+    }
+
+    .home-title {
+        font-size: 1.8rem;
+    }
+
+    .uni-card {
+        padding: var(--space-md) var(--space-lg);
+    }
+}
+
+/* --- 9. Ana menü kartları: taban ölçüler telefon içindir --- */
+.menu-card-inner {
+    padding: var(--space-md);
+    gap: var(--space-md);
+}
+
+.menu-card-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+}
+
+.menu-card-content {
+    min-width: 0;
+}
+
+.menu-card-title {
+    font-size: 1rem;
+    line-height: 1.25;
+    margin-bottom: 2px;
+}
+
+.menu-card-desc {
+    font-size: 0.8rem;
+    line-height: 1.35;
+}
+
+.menu-card-arrow {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.onboarding-title {
+    font-size: 1.7rem;
+}
+
+@media (min-width: 420px) {
+    .menu-card-inner {
+        padding: var(--space-lg);
+        gap: var(--space-lg);
+    }
+
+    .menu-card-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 1.8rem;
+    }
+
+    .menu-card-title {
+        font-size: 1.15rem;
+    }
+
+    .menu-card-desc {
+        font-size: 0.85rem;
+    }
+
+    .onboarding-title {
+        font-size: 2rem;
+    }
+}
+
+/* --- 10. KYK öğün sekmeleri: dar ekranda tek satırda kalsın --- */
+.kyk-meal-tabs {
+    gap: 6px;
+}
+
+.kyk-meal-tab {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 6px;
+    font-size: 0.78rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+@media (min-width: 420px) {
+    .kyk-meal-tabs {
+        gap: 8px;
+    }
+
+    .kyk-meal-tab {
+        padding: 10px 8px;
+        font-size: 0.85rem;
+    }
+}
+
+/* --- 11. KYK tarih/yenileme kontrolleri: dokunma hedefi 44px --- */
+.kyk-date-arrow-btn,
+.kyk-refresh-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.kyk-quick-btn {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* Görsel ölçü korunur, dokunma alanı büyür */
+.kyk-quick-btn::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 44px;
+}
+
+/* --- 12. KYK öğün başlığı ve yemek adları (dar ekran) --- */
+.kyk-meal-header {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.kyk-meal-title-group {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+/* Kalori rozeti sıkışıp iki satıra bölünmesin */
+.kyk-calorie-badge {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* "A+B+C" gibi uzun birleşik adlar taşmasın;
+   break-word yerine standart davranış kullanılıyor */
+.kyk-dish-name {
+    word-break: normal;
+    overflow-wrap: anywhere;
 }

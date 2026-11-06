@@ -100,7 +100,10 @@ var App = window.App = {
         if ('serviceWorker' in navigator) {
             // Göreceli yol: hem alan adı kökünde hem de GitHub Pages
             // proje alt dizininde (/OgrenciYemek/) doğru çözümlenir
-            navigator.serviceWorker.register('sw.js').catch(() => {
+            navigator.serviceWorker.register('sw.js').then((reg) => {
+                // Her açılışta güncellemeyi hemen kontrol et
+                reg.update().catch(() => {});
+            }).catch(() => {
                 // SW registration failed (probably file:// protocol), ignore
             });
         }
@@ -420,18 +423,24 @@ var App = window.App = {
             return;
         }
 
-        listEl.innerHTML = matches.map(uni => `
+        listEl.innerHTML = matches.map(uni => {
+            const isSelected = uni.name === current;
+            const badgeClass = uni.type === 'Devlet' ? 'devlet' : 'vakif';
+            return `
             <button type="button"
-                    class="uni-picker-item${uni.name === current ? ' selected' : ''}"
+                    class="uni-picker-item${isSelected ? ' selected' : ''}"
                     onclick="App.pickUniversity('${uni.name.replace(/'/g, "\\'")}')">
                 <span class="uni-picker-item-icon" aria-hidden="true">${uni.icon}</span>
                 <span class="uni-picker-item-text">
                     <span class="uni-picker-item-name">${uni.name}</span>
-                    <span class="uni-picker-item-meta">${uni.type}</span>
+                    <span class="uni-picker-item-meta">
+                        <span class="uni-picker-badge ${badgeClass}">${uni.type}</span>
+                    </span>
                 </span>
-                ${uni.name === current ? '<span class="uni-picker-item-check" aria-hidden="true">✓</span>' : ''}
+                ${isSelected ? '<span class="uni-picker-item-check" aria-label="Seçili">✓</span>' : '<span class="uni-picker-item-radio" aria-hidden="true"></span>'}
             </button>
-        `).join('');
+        `;
+        }).join('');
     },
 
     pickUniversity(uniName) {

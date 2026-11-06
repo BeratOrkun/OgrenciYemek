@@ -1,5 +1,5 @@
 // ÖğrenciYemek Service Worker
-const CACHE_NAME = 'ogrenciyemek-v12';
+const CACHE_NAME = 'ogrenciyemek-v13';
 
 // Göreceli yollar: SW'nin bulunduğu dizine göre çözümlenir, böylece
 // hem alan adı kökünde hem de /OgrenciYemek/ alt dizininde çalışır.
@@ -7,10 +7,15 @@ const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './css/style.css',
+    './css/style.css?v=13',
     './js/storage.js',
+    './js/storage.js?v=13',
     './js/app.js',
+    './js/app.js?v=13',
     './js/data.js',
+    './js/data.js?v=13',
     './js/screens.js',
+    './js/screens.js?v=13',
     './manifest.json',
     './icons/icon-192.png',
     './icons/icon-512.png',

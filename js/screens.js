@@ -544,6 +544,14 @@ const Screens = {
         if (lower.includes('dolma') || lower.includes('sarma') || lower.includes('mücver') || lower.includes('patlıcan') || lower.includes('karnabahar') || lower.includes('kabak')) return '🍆';
         if (lower.includes('salata') || lower.includes('cacık') || lower.includes('ezme') || lower.includes('haydari') || lower.includes('yoğurt') || lower.includes('turşu')) return '🥗';
         if (lower.includes('tatlı') || lower.includes('helva') || lower.includes('baklava') || lower.includes('pasta') || lower.includes('sütlaç') || lower.includes('trileçe') || lower.includes('şekerpare') || lower.includes('supangle') || lower.includes('kadayıf') || lower.includes('kalburabastı') || lower.includes('browni')) return '🍮';
+        if (!lower.includes('suyu')) {
+            if (lower.includes('muz')) return '🍌';
+            if (lower.includes('elma')) return '🍎';
+            if (lower.includes('portakal') || lower.includes('mandalina')) return '🍊';
+            if (lower.includes('üzüm')) return '🍇';
+            if (lower.includes('karpuz')) return '🍉';
+            if (lower.includes('armut') || lower.includes('kayısı') || lower.includes('şeftali') || lower.includes('kavun')) return '🍐';
+        }
         if (lower.includes('su') || lower.includes('ayran') || lower.includes('meyve suyu')) return '💧';
         if (lower.includes('ekmek')) return '🍞';
         if (lower.includes('omlet') || lower.includes('yumurta') || lower.includes('menemen')) return '🍳';
@@ -681,17 +689,17 @@ const Screens = {
                 <span class="info-hero-icon">🍲</span>
                 <h3 class="info-hero-title">ABB Gençlik Sofrası</h3>
                 <p class="info-hero-subtitle">${data.description}</p>
-                <div class="time-badge">🕕 ${data.hours}</div>
+                <div class="time-badge" id="genclik-hours">🕕 ${data.hours}</div>
             </div>
 
             <div class="section-title">Günün Menüsü</div>
-            <div id="genclik-menu-content" class="kyk-menu-placeholder mb-lg">
-                <span class="kyk-menu-placeholder-icon">⏳</span>
+            <div id="genclik-menu-content" class="gs-menu-loading mb-lg">
+                <span class="gs-menu-loading-icon">⏳</span>
                 <p>Menü yükleniyor...</p>
             </div>
 
-            <a href="${data.menuUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-full mb-lg">
-                📋 Tüm Menüyü Görüntüle
+            <a href="${data.pageUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-full mb-lg">
+                📋 Gençlik Sofraları Sayfasını Aç
             </a>
 
             <div class="section-title">Hizmet Noktaları</div>
@@ -715,8 +723,128 @@ const Screens = {
         this._fetchGenclikMenu(container);
     },
 
+    _esc(value) {
+        return String(value ?? '').replace(/[&<>"']/g, (c) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[c]);
+    },
+
+    _renderGenclikDishRow(dish) {
+        return `
+            <div class="gs-dish-item">
+                <span class="gs-dish-icon">${this._categorizeDishIcon(dish)}</span>
+                <span class="gs-dish-name">${this._esc(dish)}</span>
+            </div>
+        `;
+    },
+
+    _renderGenclikSourceNote(data) {
+        if (data.stale) {
+            const when = data.cachedAt
+                ? new Date(data.cachedAt).toLocaleString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })
+                : null;
+            return `
+                <div class="gs-source-note warn">
+                    <span>📴</span>
+                    <span>Siteye ulaşılamadı, kayıtlı menü gösteriliyor${when ? ` (${this._esc(when)})` : ''}.</span>
+                </div>
+            `;
+        }
+        return `
+            <div class="gs-source-note">
+                <span>${data.viaProxy ? '⚠️' : '🟢'}</span>
+                <span>Kaynak: ${this._esc(data.source || 'Sosyal Hizmetler sayfası')}</span>
+            </div>
+        `;
+    },
+
+    // Birincil: ABB Sosyal Hizmetler Gençlik Sofraları sayfası
+    _renderGenclikPageMenu(menuContainer, data) {
+        let html = '';
+
+        if (data.today && data.today.items.length) {
+            html += `
+                <div class="gs-board">
+                    <div class="gs-board-head">
+                        <h3 class="gs-board-title">Bugünün Menüsü</h3>
+                        ${data.today.dateText ? `<span class="gs-board-date">${this._esc(data.today.dateText)}</span>` : ''}
+                    </div>
+                    <div class="gs-dish-list">
+                        ${data.today.items.map(d => this._renderGenclikDishRow(d)).join('')}
+                    </div>
+                    <div class="gs-board-foot">Afiyet olsun!</div>
+                </div>
+            `;
+        }
+
+        if (data.week && data.week.days.length) {
+            html += `
+                <div class="gs-week">
+                    <div class="gs-week-head">
+                        <h3 class="gs-week-title">Bu Haftanın Menüsü</h3>
+                        ${data.week.range ? `<span class="gs-week-range">${this._esc(data.week.range)}</span>` : ''}
+                    </div>
+                    ${data.week.days.map(day => `
+                        <div class="gs-week-row${day.isToday ? ' today' : ''}">
+                            <div class="gs-week-day">
+                                <span class="gs-week-day-name">${this._esc(day.gun || '-')}</span>
+                                ${day.tarih ? `<span class="gs-week-day-date">${this._esc(day.tarih)}</span>` : ''}
+                            </div>
+                            <div class="gs-week-dishes">
+                                ${day.dishes.map(d => `<span class="gs-week-dish">${this._esc(d)}</span>`).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Metin yoksa görsel yedeği
+        if (!html && data.image) {
+            html += `
+                <div class="gs-board">
+                    <div class="gs-board-head">
+                        <h3 class="gs-board-title">Menü Görseli</h3>
+                    </div>
+                    <a href="${this._esc(data.image.src)}" target="_blank" rel="noopener noreferrer" class="gs-menu-image-link">
+                        <img src="${this._esc(data.image.src)}" alt="${this._esc(data.image.alt || 'Gençlik Sofraları menüsü')}" class="gs-menu-image" loading="lazy">
+                    </a>
+                    <div class="gs-board-foot">Büyütmek için görsele dokun</div>
+                </div>
+            `;
+        }
+
+        if (!html) return false;
+
+        html += this._renderGenclikSourceNote(data);
+        menuContainer.className = 'gs-menu-wrap mb-lg';
+        menuContainer.innerHTML = html;
+        return true;
+    },
+
     async _fetchGenclikMenu(container) {
         const menuContainer = container.querySelector('#genclik-menu-content');
+        if (!menuContainer) return;
+
+        // 1) Birincil kaynak: resmi Gençlik Sofraları sayfası (günün + haftanın menüsü)
+        try {
+            const pageData = await GenclikSofralariAPI.loadMenu();
+            if (pageData && this._renderGenclikPageMenu(menuContainer, pageData)) {
+                if (pageData.hours) {
+                    const hoursEl = container.querySelector('#genclik-hours');
+                    if (hoursEl) hoursEl.textContent = `🕕 ${pageData.hours}`;
+                }
+                return;
+            }
+        } catch {
+            /* ikincil kaynağa geç */
+        }
+
+        // 2) İkincil kaynak: eski menü formu (DataTables tablosu)
+        await this._fetchGenclikMenuLegacy(menuContainer);
+    },
+
+    async _fetchGenclikMenuLegacy(menuContainer) {
         try {
             const data = await GenclikAPI.loadMenuData();
 
@@ -746,42 +874,68 @@ const Screens = {
 
                     tableHTML += `
                         <tr style="border-bottom: 1px solid var(--border-color);">
-                            <td style="padding: 10px 8px; font-weight: 600; color: var(--text-primary); white-space: nowrap;">${tarih}</td>
-                            <td style="padding: 10px 8px; color: var(--text-secondary);">${yemek1}</td>
-                            <td style="padding: 10px 8px; color: var(--text-secondary);">${yemek2}</td>
-                            <td style="padding: 10px 8px; color: var(--text-secondary);">${yemek3}</td>
-                            <td style="padding: 10px 8px; color: var(--text-secondary);">${yemek4}</td>
+                            <td style="padding: 10px 8px; font-weight: 600; color: var(--text-primary); white-space: nowrap;">${this._esc(tarih)}</td>
+                            <td style="padding: 10px 8px; color: var(--text-secondary);">${this._esc(yemek1)}</td>
+                            <td style="padding: 10px 8px; color: var(--text-secondary);">${this._esc(yemek2)}</td>
+                            <td style="padding: 10px 8px; color: var(--text-secondary);">${this._esc(yemek3)}</td>
+                            <td style="padding: 10px 8px; color: var(--text-secondary);">${this._esc(yemek4)}</td>
                         </tr>
                     `;
                 });
 
                 tableHTML += '</tbody></table></div>';
-                
+
                 if (data.viaProxy) {
                     tableHTML += `
-                        <div class="mt-sm text-muted" style="font-size: 0.75rem; display: flex; align-items: center; gap: 4px; padding: 0 10px 10px 10px;">
-                            <span style="color: var(--accent-yellow);">⚠️</span> Veriler ${data.source} ile yüklendi.
+                        <div class="gs-source-note">
+                            <span>⚠️</span>
+                            <span>Veriler ${this._esc(data.source)} ile yüklendi.</span>
                         </div>
                     `;
                 }
 
+                menuContainer.className = 'gs-menu-wrap mb-lg';
                 menuContainer.innerHTML = tableHTML;
-                menuContainer.style.padding = '0';
-                menuContainer.style.overflow = 'hidden';
             } else {
                 throw new Error('No data');
             }
-        } catch (err) {
-            // Fallback: show a message with link
-            menuContainer.innerHTML = `
-                <span class="kyk-menu-placeholder-icon">📋</span>
-                <p>Menü verisine şu an ulaşılamıyor.</p>
-                <p class="mt-sm" style="font-size: 0.8rem; color: var(--text-muted);">
-                    Güncel menü için aşağıdaki butonu kullanın.
-                </p>
-                <p class="mt-sm" style="font-size: 0.7rem; color: var(--accent-red);">${err.message}</p>
-            `;
+        } catch {
+            // Son çare: kullanıcıyı resmi Gençlik Sofraları sayfasına yönlendir
+            this._renderGenclikMenuFallback(menuContainer);
         }
+    },
+
+    _renderGenclikMenuFallback(menuContainer) {
+        const pageUrl = APP_DATA.genclikSofrasi.pageUrl;
+        menuContainer.className = 'gs-menu-fallback mb-lg';
+        menuContainer.innerHTML = `
+            <span class="gs-menu-fallback-icon">📋</span>
+            <p class="gs-menu-fallback-title">Menü şu an yüklenemedi</p>
+            <p class="gs-menu-fallback-desc">
+                Güncel günün ve haftanın menüsünü ABB Sosyal Hizmetler sayfasından görebilirsin.
+            </p>
+            <a href="${pageUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-full">
+                🔗 Gençlik Sofraları Sayfasına Git
+            </a>
+            <button type="button" class="gs-menu-retry" onclick="Screens.retryGenclikMenu(this)">
+                🔄 Tekrar Dene
+            </button>
+        `;
+    },
+
+    retryGenclikMenu(btn) {
+        const screen = btn.closest('#sub-screen') || document.getElementById('sub-screen');
+        const menuContainer = screen?.querySelector('#genclik-menu-content');
+        if (!menuContainer) return;
+        menuContainer.className = 'gs-menu-loading mb-lg';
+        menuContainer.innerHTML = `
+            <span class="gs-menu-loading-icon">⏳</span>
+            <p>Menü yükleniyor...</p>
+        `;
+        try {
+            localStorage.removeItem(GenclikSofralariAPI.CACHE_KEY);
+        } catch {}
+        this._fetchGenclikMenu(screen);
     },
 
     // -------------------------------------------------------
@@ -1144,5 +1298,184 @@ const GenclikAPI = {
         } catch {}
 
         throw new Error('Menü verisi alınamadı. Kaynak siteye erişilemiyor veya format değişmiş olabilir.');
+    }
+};
+
+// =====================================================
+// Gençlik Sofraları — ABB Sosyal Hizmetler sayfa kazıyıcı
+// Birincil kaynak. Sayfa `access-control-allow-origin: *`
+// gönderdiği için doğrudan fetch edilebiliyor; başarısız
+// olursa GenclikAPI'nin proxy zinciri devreye giriyor.
+// =====================================================
+const GenclikSofralariAPI = {
+    PAGE_URL: 'https://sosyalhizmetler.ankara.bel.tr/hizmetler/genclik-sofralari',
+    ORIGIN: 'https://sosyalhizmetler.ankara.bel.tr',
+    CACHE_KEY: 'oy_gs_menu_cache',
+    CACHE_TTL: 6 * 60 * 60 * 1000, // 6 saat
+
+    absoluteUrl(src) {
+        if (!src) return null;
+        if (/^https?:\/\//i.test(src)) return src;
+        return this.ORIGIN + (src.startsWith('/') ? src : `/${src}`);
+    },
+
+    clean(text) {
+        return (text || '').replace(/\s+/g, ' ').trim();
+    },
+
+    // "EZOGELİN ÇORBA · ETLİ NOHUT" -> ["EZOGELİN ÇORBA", "ETLİ NOHUT"]
+    splitDishes(text) {
+        return this.clean(text)
+            .split(/\s*[·•|]\s*|\s{2,}/)
+            .map(s => this.clean(s))
+            .filter(s => s && !GenclikAPI.isEmptyDish(s));
+    },
+
+    parseToday(doc) {
+        let items = [...doc.querySelectorAll('.gs-tahta-liste li')]
+            .map(li => this.clean(li.textContent))
+            .filter(s => s && !GenclikAPI.isEmptyDish(s));
+
+        const timeEl = doc.querySelector('.gs-tahta-tarih time');
+        let dateISO = timeEl?.getAttribute('datetime') || null;
+        let dateText = this.clean(timeEl?.textContent) || this.clean(doc.querySelector('.gs-tahta-tarih')?.textContent);
+
+        // Sınıf adları değişirse: "BUGÜNÜN MENÜSÜ" başlığından listeyi bul
+        if (!items.length) {
+            const heading = [...doc.querySelectorAll('h2, h3, h4, h5, strong')]
+                .find(el => /bugün(ün)?\s*men[üu]/i.test(el.textContent || ''));
+            const scope = heading?.closest('div, section');
+            const list = scope?.querySelector('ul, ol');
+            if (list) {
+                items = [...list.querySelectorAll('li')]
+                    .map(li => this.clean(li.textContent))
+                    .filter(s => s && !GenclikAPI.isEmptyDish(s));
+            }
+            if (!dateText && scope) {
+                const t = scope.querySelector('time');
+                dateISO = dateISO || t?.getAttribute('datetime') || null;
+                dateText = this.clean(t?.textContent);
+            }
+        }
+
+        if (!items.length) return null;
+        return { items, dateISO, dateText: dateText || null };
+    },
+
+    parseWeek(doc) {
+        const section = doc.querySelector('.hz-gs-hafta');
+        if (!section) return null;
+
+        const days = [...section.querySelectorAll('ol > li, ul > li')].map(li => {
+            const dayEl = li.querySelector('.hz-gs-gun');
+            const smallEl = dayEl?.querySelector('small');
+            // Gün adı <small> içindeki tarihten ayrılıyor
+            let gun = '';
+            if (dayEl) {
+                const clone = dayEl.cloneNode(true);
+                clone.querySelectorAll('small').forEach(s => s.remove());
+                gun = this.clean(clone.textContent);
+            }
+            const dishText = li.querySelector('.hz-gs-yemekler')?.textContent;
+            return {
+                gun: gun || null,
+                tarih: this.clean(smallEl?.textContent) || null,
+                dishes: this.splitDishes(dishText),
+                isToday: li.classList.contains('hz-gs-bugun')
+            };
+        }).filter(d => d.dishes.length);
+
+        if (!days.length) return null;
+        return {
+            days,
+            range: this.clean(section.querySelector('.hz-gs-hafta-not')?.textContent) || null
+        };
+    },
+
+    // Menü metin olarak okunamazsa, menü bölümündeki görseli yedek olarak kullan
+    parseMenuImage(doc) {
+        const scope = doc.querySelector('#menu') || doc.body;
+        if (!scope) return null;
+        const imgs = [...scope.querySelectorAll('img')]
+            .map(img => ({
+                src: this.absoluteUrl(img.getAttribute('src')),
+                alt: this.clean(img.getAttribute('alt'))
+            }))
+            .filter(i => i.src);
+        if (!imgs.length) return null;
+        const hinted = imgs.find(i => /men[üu]|tahta|sofra/i.test(`${i.src} ${i.alt}`));
+        return hinted || imgs[0];
+    },
+
+    parseHours(doc) {
+        const candidates = [...doc.querySelectorAll('.hz-galeri-sayi, .time-badge, p, span')]
+            .map(el => this.clean(el.textContent))
+            .filter(t => t && t.length < 80);
+        return candidates.find(t => /\d{1,2}[.:]\d{2}\s*[–\-—]\s*\d{1,2}[.:]\d{2}/.test(t)) || null;
+    },
+
+    parsePage(html) {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const today = this.parseToday(doc);
+        const week = this.parseWeek(doc);
+        const hours = this.parseHours(doc);
+
+        if (!today && !week) {
+            const image = this.parseMenuImage(doc);
+            if (image) return { today: null, week: null, hours, image };
+            return null;
+        }
+
+        return { today, week, hours, image: null };
+    },
+
+    readCache() {
+        try {
+            const raw = localStorage.getItem(this.CACHE_KEY);
+            if (!raw) return null;
+            const cached = JSON.parse(raw);
+            if (!cached || !cached.savedAt || !cached.data) return null;
+            if (Date.now() - cached.savedAt > this.CACHE_TTL) return null;
+            return cached;
+        } catch {
+            return null;
+        }
+    },
+
+    writeCache(data) {
+        try {
+            localStorage.setItem(this.CACHE_KEY, JSON.stringify({ savedAt: Date.now(), data }));
+        } catch {
+            /* kota dolu veya özel mod — sessizce geç */
+        }
+    },
+
+    async loadMenu() {
+        try {
+            const { response, viaProxy } = await GenclikAPI.fetchMenuResource(this.PAGE_URL, {
+                headers: { Accept: 'text/html' }
+            });
+            const html = await response.text();
+            const parsed = this.parsePage(html);
+            if (parsed) {
+                const result = {
+                    ...parsed,
+                    source: viaProxy ? 'Sosyal Hizmetler sayfası (CORS proxy)' : 'Sosyal Hizmetler sayfası',
+                    viaProxy,
+                    stale: false
+                };
+                this.writeCache(result);
+                return result;
+            }
+        } catch {
+            /* ağ/parse hatası — önbelleğe düş */
+        }
+
+        const cached = this.readCache();
+        if (cached) {
+            return { ...cached.data, stale: true, cachedAt: cached.savedAt };
+        }
+
+        throw new Error('Gençlik Sofraları menüsü okunamadı.');
     }
 };

@@ -1616,3 +1616,299 @@ img {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 }
+
+/* =====================================================
+   Gençlik Sofraları — Menü Bileşenleri
+   Kaynak: sosyalhizmetler.ankara.bel.tr (canlı kazıma)
+   ===================================================== */
+
+.gs-menu-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+/* --- Yükleniyor durumu --- */
+.gs-menu-loading {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl) var(--space-lg);
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.gs-menu-loading-icon {
+    display: block;
+    font-size: 1.8rem;
+    margin-bottom: var(--space-sm);
+    animation: gs-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes gs-pulse {
+    0%, 100% { opacity: 0.45; transform: scale(0.94); }
+    50%      { opacity: 1;    transform: scale(1.06); }
+}
+
+/* --- Bugünün menüsü (yazı tahtası kartı) --- */
+.gs-board {
+    position: relative;
+    background:
+        radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.05), transparent 55%),
+        linear-gradient(145deg, #14321f 0%, #0d2416 60%, #0a1b11 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-md), inset 0 0 36px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+}
+
+.gs-board::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 6px solid rgba(120, 72, 32, 0.28);
+    pointer-events: none;
+}
+
+.gs-board-head {
+    text-align: center;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.18);
+}
+
+.gs-board-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #f8fafc;
+}
+
+.gs-board-date {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.78rem;
+    color: rgba(226, 232, 240, 0.72);
+}
+
+.gs-dish-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.gs-dish-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.gs-dish-icon {
+    font-size: 1.15rem;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.gs-dish-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    letter-spacing: 0.2px;
+}
+
+.gs-board-foot {
+    margin-top: var(--space-md);
+    text-align: center;
+    font-size: 0.8rem;
+    font-style: italic;
+    color: rgba(226, 232, 240, 0.6);
+}
+
+/* --- Menü görseli yedeği --- */
+.gs-menu-image-link {
+    display: block;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.gs-menu-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+}
+
+/* --- Haftalık menü --- */
+.gs-week {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.gs-week-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.gs-week-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.gs-week-range {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.gs-week-row {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: var(--space-md);
+    padding: 10px 10px 10px 12px;
+    border-radius: var(--radius-md);
+    border-left: 3px solid transparent;
+}
+
+.gs-week-row + .gs-week-row {
+    margin-top: 4px;
+}
+
+.gs-week-row.today {
+    background: rgba(249, 115, 22, 0.08);
+    border-left-color: var(--accent-orange);
+}
+
+.gs-week-day {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.gs-week-day-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.gs-week-row.today .gs-week-day-name {
+    color: var(--accent-orange);
+}
+
+.gs-week-day-date {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.gs-week-dishes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-content: flex-start;
+}
+
+.gs-week-dish {
+    font-size: 0.74rem;
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--text-secondary);
+}
+
+.gs-week-row.today .gs-week-dish {
+    background: rgba(249, 115, 22, 0.12);
+    border-color: rgba(249, 115, 22, 0.22);
+    color: #fdba74;
+}
+
+/* --- Kaynak notu --- */
+.gs-source-note {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.73rem;
+    color: var(--text-muted);
+    padding: 0 2px;
+}
+
+.gs-source-note.warn {
+    color: var(--accent-yellow);
+}
+
+/* --- Menü yüklenemediğinde yönlendirme kartı --- */
+.gs-menu-fallback {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl) var(--space-lg);
+    text-align: center;
+}
+
+.gs-menu-fallback-icon {
+    display: block;
+    font-size: 2rem;
+    margin-bottom: var(--space-sm);
+}
+
+.gs-menu-fallback-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.gs-menu-fallback-desc {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-lg);
+    line-height: 1.5;
+}
+
+.gs-menu-retry {
+    margin-top: var(--space-sm);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition-fast);
+}
+
+.gs-menu-retry:hover {
+    color: var(--text-secondary);
+    background: var(--bg-card-hover);
+}
+
+@media (max-width: 400px) {
+    .gs-week-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .gs-week-day {
+        flex-direction: row;
+        align-items: baseline;
+        gap: 6px;
+    }
+}

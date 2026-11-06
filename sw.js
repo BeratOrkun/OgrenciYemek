@@ -35,6 +35,16 @@ self.addEventListener('activate', (event) => {
 
 // Fetch — network first, fallback to cache
 self.addEventListener('fetch', (event) => {
+    const url = new URL(event.request.url);
+
+    // Sadece kendi dosyalarımızı (same-origin GET) yönet.
+    // Menü API'leri ve kazınan sayfalar doğrudan ağa gitsin: aksi halde
+    // çevrimdışıyken eski menü "güncel" gibi gösterilir ve POST
+    // isteklerinde cache.put hata verir.
+    if (event.request.method !== 'GET' || url.origin !== self.location.origin) {
+        return;
+    }
+
     event.respondWith(
         fetch(event.request)
             .then((response) => {

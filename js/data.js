@@ -2819,8 +2819,12 @@ const APP_DATA = {
 
     // Gençlik Sofrası Hizmet Noktaları
     genclikSofrasi: {
+        // Birincil kaynak: ABB Sosyal Hizmetler resmi Gençlik Sofraları sayfası
+        // (günün menüsü + haftalık menü burada yayınlanıyor)
+        pageUrl: 'https://sosyalhizmetler.ankara.bel.tr/hizmetler/genclik-sofralari',
+        // İkincil kaynak: eski menü formu (DataTables)
         menuUrl: 'https://forms.ankara.bel.tr/genclik-sofrasi-menu',
-        hours: '18:00 - 20:00 (Hafta içi)',
+        hours: '17:00 - 20:00 (Hafta içi)',
         description: 'Ankara Büyükşehir Belediyesi tarafından üniversite öğrencilerine ücretsiz sıcak yemek hizmeti.',
         locations: [
             {

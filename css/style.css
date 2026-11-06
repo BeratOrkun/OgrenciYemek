@@ -214,8 +214,11 @@ img {
     left: 14px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-muted);
-    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* muted cok sonuk kaliyordu, koyu zeminde okunmuyordu */
+    color: var(--text-secondary);
     pointer-events: none;
 }
 
@@ -2554,5 +2557,136 @@ textarea {
     padding-bottom: var(--space-sm);
     text-align: center;
     font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* =====================================================
+   Form kontrolleri — yerel (varsayilan) gorunumu kapat
+   iOS/Safari bu reset olmadan butonlari ve arama alanini
+   beyaz yerel bilesen olarak ciziyordu.
+   ===================================================== */
+
+button,
+input,
+textarea,
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border-radius: 0;           /* iOS'un zorladigi yuvarlatmayi sifirla */
+    font-family: inherit;
+}
+
+/* Yukaridaki sifirlama bilesenlerin kendi yariciplarini ezmesin */
+.btn,
+.uni-select-bar,
+.uni-picker-item,
+.filter-tab,
+.back-btn,
+.install-card-btn,
+.gs-menu-retry,
+.kyk-meal-tab,
+.kyk-quick-btn,
+.kyk-date-arrow-btn,
+.kyk-refresh-btn,
+.search-input-wrapper input {
+    border-radius: var(--radius-md);
+}
+
+.btn,
+.filter-tab,
+.kyk-quick-btn,
+.back-btn,
+.kyk-date-arrow-btn,
+.kyk-refresh-btn {
+    border-radius: var(--radius-full);
+}
+
+.uni-select-bar,
+.uni-picker-item,
+.install-card-btn {
+    border-radius: var(--radius-lg);
+}
+
+.install-card-btn,
+.gs-menu-retry {
+    border-radius: var(--radius-md);
+}
+
+/* type=search'un yerel temizleme/sus ogeleri (iOS'ta beyaz daire-X) */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+    appearance: none;
+    -webkit-appearance: none;
+    display: none;
+}
+
+/* iOS'ta inputlarin ic golgesi */
+input,
+textarea {
+    background-clip: padding-box;
+}
+
+/* Chrome otomatik doldurma beyaz/mavi zemini ezmesin */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text-primary);
+    -webkit-box-shadow: 0 0 0 1000px #15102b inset;
+    caret-color: var(--text-primary);
+    transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Yerel gorunum kapatildigi icin gorunur odak halkasini biz veriyoruz */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+[onclick]:focus-visible {
+    outline: 2px solid var(--accent-orange);
+    outline-offset: 2px;
+}
+
+/* Kurulum kartinda gercek uygulama ikonu (emoji degil) */
+img.install-card-icon {
+    display: block;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Alt bilgi: logo amblemi + marka */
+.home-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: var(--space-lg);
+    padding-bottom: var(--space-sm);
+}
+
+.home-footer-logo {
+    flex-shrink: 0;
+    border-radius: 9px;
+    opacity: 0.85;
+}
+
+.home-footer-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+    text-align: left;
+}
+
+.home-footer-text strong {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.home-footer-text span {
+    font-size: 0.72rem;
     color: var(--text-muted);
 }

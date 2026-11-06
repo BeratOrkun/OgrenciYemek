@@ -26,18 +26,18 @@ const Screens = {
 
         container.innerHTML = `
             <div class="sub-header">
-                <button class="back-btn" onclick="App.showScreen('home')" aria-label="Geri">←</button>
+                <button type="button" class="back-btn" onclick="App.showScreen('home')" aria-label="Geri">←</button>
                 <h2 class="sub-header-title">🎓 Üniversite Yemekleri</h2>
             </div>
 
             <div class="uni-filter-tabs" id="uni-filter-tabs">
-                <button class="filter-tab active" data-filter="all">Tümü (${universities.length})</button>
-                <button class="filter-tab" data-filter="devlet">Devlet (${devletCount})</button>
-                <button class="filter-tab" data-filter="vakif">Vakıf (${vakifCount})</button>
+                <button type="button" class="filter-tab active" data-filter="all">Tümü (${universities.length})</button>
+                <button type="button" class="filter-tab" data-filter="devlet">Devlet (${devletCount})</button>
+                <button type="button" class="filter-tab" data-filter="vakif">Vakıf (${vakifCount})</button>
             </div>
 
             <div class="search-input-wrapper mb-md">
-                <span class="search-icon">🔍</span>
+                <span class="search-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg></span>
                 <input type="text" id="uni-search" placeholder="Üniversite ara..." autocomplete="off">
             </div>
 
@@ -170,7 +170,7 @@ const Screens = {
 
         container.innerHTML = `
             <div class="sub-header">
-                <button class="back-btn" onclick="App.showScreen('home')" aria-label="Geri">←</button>
+                <button type="button" class="back-btn" onclick="App.showScreen('home')" aria-label="Geri">←</button>
                 <h2 class="sub-header-title">🏠 KYK Yemek Menüsü</h2>
             </div>
 
@@ -184,23 +184,23 @@ const Screens = {
             <!-- Tarih Navigasyonu -->
             <div class="kyk-date-nav">
                 <div class="kyk-date-controls">
-                    <button class="kyk-date-arrow-btn" onclick="Screens.stepKYKDate(-1)" aria-label="Önceki Gün">‹</button>
+                    <button type="button" class="kyk-date-arrow-btn" onclick="Screens.stepKYKDate(-1)" aria-label="Önceki Gün">‹</button>
                     <div class="kyk-date-display">
                         <span class="kyk-date-text">${formattedDate}</span>
                     </div>
-                    <button class="kyk-date-arrow-btn" onclick="Screens.stepKYKDate(1)" aria-label="Sonraki Gün">›</button>
+                    <button type="button" class="kyk-date-arrow-btn" onclick="Screens.stepKYKDate(1)" aria-label="Sonraki Gün">›</button>
                 </div>
                 <div class="kyk-quick-dates">
-                    <button class="kyk-quick-btn ${isToday ? 'active' : ''}" onclick="Screens.setKYKDate('${defaultDate}')">Bugün</button>
-                    <button class="kyk-quick-btn ${isTomorrow ? 'active' : ''}" onclick="Screens.setKYKDate('${tomorrowStr}')">Yarın</button>
+                    <button type="button" class="kyk-quick-btn ${isToday ? 'active' : ''}" onclick="Screens.setKYKDate('${defaultDate}')">Bugün</button>
+                    <button type="button" class="kyk-quick-btn ${isTomorrow ? 'active' : ''}" onclick="Screens.setKYKDate('${tomorrowStr}')">Yarın</button>
                 </div>
             </div>
 
             <!-- Öğün Seçim Sekmeleri -->
             <div class="kyk-meal-tabs">
-                <button class="kyk-meal-tab ${activeMealType === 'all' ? 'active' : ''}" onclick="Screens.setKYKMealType('all')">Tüm Menü</button>
-                <button class="kyk-meal-tab ${activeMealType === 'breakfast' ? 'active' : ''}" onclick="Screens.setKYKMealType('breakfast')">🍳 Kahvaltı</button>
-                <button class="kyk-meal-tab ${activeMealType === 'dinner' ? 'active' : ''}" onclick="Screens.setKYKMealType('dinner')">🍲 Akşam</button>
+                <button type="button" class="kyk-meal-tab ${activeMealType === 'all' ? 'active' : ''}" onclick="Screens.setKYKMealType('all')">Tüm Menü</button>
+                <button type="button" class="kyk-meal-tab ${activeMealType === 'breakfast' ? 'active' : ''}" onclick="Screens.setKYKMealType('breakfast')">🍳 Kahvaltı</button>
+                <button type="button" class="kyk-meal-tab ${activeMealType === 'dinner' ? 'active' : ''}" onclick="Screens.setKYKMealType('dinner')">🍲 Akşam</button>
             </div>
 
             <!-- Menü İçerik Alanı -->
@@ -221,7 +221,7 @@ const Screens = {
                 </div>
                 <div class="kyk-subsidy-footer">
                     <span>* Parmak izi ile yemekhanelerde kullanılır.</span>
-                    <button class="kyk-refresh-btn" onclick="Screens.refreshKYKMenu()" title="Menüyü Yenile">🔄 Yenile</button>
+                    <button type="button" class="kyk-refresh-btn" onclick="Screens.refreshKYKMenu()" title="Menüyü Yenile">🔄 Yenile</button>
                 </div>
             </div>
         `;
@@ -741,7 +741,7 @@ const Screens = {
 
         container.innerHTML = `
             <div class="sub-header">
-                <button class="back-btn" onclick="App.showScreen('home')" aria-label="Geri">←</button>
+                <button type="button" class="back-btn" onclick="App.showScreen('home')" aria-label="Geri">←</button>
                 <h2 class="sub-header-title">🍲 Gençlik Sofrası</h2>
             </div>
 
@@ -1035,7 +1035,7 @@ const Screens = {
 
         container.innerHTML = `
             <div class="sub-header">
-                <button class="back-btn" onclick="App.showScreen('home')" aria-label="Geri">←</button>
+                <button type="button" class="back-btn" onclick="App.showScreen('home')" aria-label="Geri">←</button>
                 <h2 class="sub-header-title">🏛️ Millet Kütüphanesi</h2>
             </div>
 

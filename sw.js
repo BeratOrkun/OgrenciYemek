@@ -1,5 +1,6 @@
 // ÖğrenciYemek Service Worker
-const CACHE_NAME = 'ogrenciyemek-v8';
+const CACHE_NAME = 'ogrenciyemek-v11';
+
 // Göreceli yollar: SW'nin bulunduğu dizine göre çözümlenir, böylece
 // hem alan adı kökünde hem de /OgrenciYemek/ alt dizininde çalışır.
 const ASSETS_TO_CACHE = [
@@ -21,70 +22,108 @@ const ASSETS_TO_CACHE = [
     './icons/favicon-32.png'
 ];
 
-// Install — cache core assets
+// -----------------------------------------------------------
+// Install — tüm kabuk dosyaları önbelleğe GİRDİKTEN SONRA devral.
+// skipWaiting() daha önce waitUntil dışındaydı; yeni SW önbelleği
+// dolmadan aktifleşip activate'te eski önbelleği siliyordu. O aralıkta
+// ağ takılırsa dosyalar hiçbir yerden gelemiyor ve sayfa boş açılıyordu.
+// -----------------------------------------------------------
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(ASSETS_TO_CACHE);
-        })
+        caches.open(CACHE_NAME)
+            .then((cache) => cache.addAll(ASSETS_TO_CACHE))
+            .then(() => self.skipWaiting())
     );
-    self.skipWaiting();
 });
 
-// Activate — clean old caches
+// -----------------------------------------------------------
+// Activate — eski önbellekler temizlendikten sonra sayfaları devral
+// -----------------------------------------------------------
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then((keys) => {
-            return Promise.all(
+        caches.keys()
+            .then((keys) => Promise.all(
                 keys.filter((key) => key !== CACHE_NAME)
                     .map((key) => caches.delete(key))
-            );
-        })
+            ))
+            .then(() => self.clients.claim())
     );
-    self.clients.claim();
 });
 
-// Fetch — network first, fallback to cache
-self.addEventListener('fetch', (event) => {
-    const url = new URL(event.request.url);
+// Yalnızca sağlam, kendi kaynağımızdan gelen yanıtlar saklanır.
+// (404/500 önbelleğe girerse uygulama kalıcı olarak bozulurdu.)
+function cachelenebilir(response) {
+    return response
+        && response.ok
+        && (response.type === 'basic' || response.type === 'default');
+}
 
-    // Sadece kendi dosyalarımızı (same-origin GET) yönet.
+// Arka planda tazele: yanıtı beklemeyiz, bir sonraki açılış güncel olur.
+function arkaPlandaTazele(request) {
+    return fetch(request)
+        .then((response) => {
+            if (cachelenebilir(response)) {
+                const kopya = response.clone();
+                caches.open(CACHE_NAME)
+                    .then((cache) => cache.put(request, kopya))
+                    .catch(() => { /* kota/izin — yoksay */ });
+            }
+            return response;
+        })
+        .catch(() => null);
+}
+
+// Önbellekte ara: birebir, sonra sorgu parametresini yok sayarak.
+// Kurulu uygulama "/?mod=app" ile açıldığı için ignoreSearch şart.
+async function onbellektenBul(request) {
+    return (await caches.match(request))
+        || (await caches.match(request, { ignoreSearch: true }));
+}
+
+// -----------------------------------------------------------
+// Fetch — kabuk için ÖNBELLEK ÖNCE, arka planda tazeleme.
+// Eski davranış "önce ağ" idi: her dosya ağı bekliyordu ve zayıf
+// bağlantıda JS istekleri düşüp sayfa boş kalıyordu. Artık kabuk
+// her zaman anında önbellekten geliyor, güncelleme arkada oluyor.
+// -----------------------------------------------------------
+self.addEventListener('fetch', (event) => {
+    const request = event.request;
+
+    // Sadece kendi dosyalarımız (same-origin GET).
     // Menü API'leri ve kazınan sayfalar doğrudan ağa gitsin: aksi halde
     // çevrimdışıyken eski menü "güncel" gibi gösterilir ve POST
     // isteklerinde cache.put hata verir.
-    if (event.request.method !== 'GET' || url.origin !== self.location.origin) {
+    let url;
+    try {
+        url = new URL(request.url);
+    } catch {
+        return;
+    }
+    if (request.method !== 'GET' || url.origin !== self.location.origin) {
         return;
     }
 
-    event.respondWith(
-        fetch(event.request)
-            .then((response) => {
-                const responseClone = response.clone();
-                caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(event.request, responseClone);
-                });
-                return response;
-            })
-            .catch(async () => {
-                // Birebir eşleşme
-                const exact = await caches.match(event.request);
-                if (exact) return exact;
+    event.respondWith((async () => {
+        const cached = await onbellektenBul(request);
 
-                // Sorgu parametresini yok sayarak dene.
-                // Kurulu uygulama "/?mod=app" adresiyle açılıyor; bu
-                // olmadan çevrimdışı açılışta önbellekteki "/" ile
-                // eşleşmez ve uygulama boş ekran verir.
-                const ignoringQuery = await caches.match(event.request, { ignoreSearch: true });
-                if (ignoringQuery) return ignoringQuery;
+        if (cached) {
+            // Anında önbellekten ver, güncellemeyi arkada yap
+            event.waitUntil(arkaPlandaTazele(request));
+            return cached;
+        }
 
-                // Son çare: her gezinme isteği için ana sayfayı döndür
-                if (event.request.mode === 'navigate') {
-                    const shell = await caches.match('./index.html')
-                        || await caches.match('./');
-                    if (shell) return shell;
-                }
+        // Önbellekte yoksa ağa git
+        const network = await arkaPlandaTazele(request);
+        if (network) return network;
 
-                return Response.error();
-            })
-    );
+        // Ağ da yoksa: gezinme isteklerinde uygulama kabuğunu döndür,
+        // böylece kullanıcı boş ekran yerine uygulamayı görür.
+        if (request.mode === 'navigate') {
+            const shell = (await caches.match('./index.html'))
+                || (await caches.match('./'));
+            if (shell) return shell;
+        }
+
+        return Response.error();
+    })());
 });

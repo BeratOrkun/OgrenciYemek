@@ -1,5 +1,5 @@
 // ÖğrenciYemek Service Worker
-const CACHE_NAME = 'ogrenciyemek-v3';
+const CACHE_NAME = 'ogrenciyemek-v4';
 // Göreceli yollar: SW'nin bulunduğu dizine göre çözümlenir, böylece
 // hem alan adı kökünde hem de /OgrenciYemek/ alt dizininde çalışır.
 const ASSETS_TO_CACHE = [
@@ -61,8 +61,26 @@ self.addEventListener('fetch', (event) => {
                 });
                 return response;
             })
-            .catch(() => {
-                return caches.match(event.request);
+            .catch(async () => {
+                // Birebir eşleşme
+                const exact = await caches.match(event.request);
+                if (exact) return exact;
+
+                // Sorgu parametresini yok sayarak dene.
+                // Kurulu uygulama "/?mod=app" adresiyle açılıyor; bu
+                // olmadan çevrimdışı açılışta önbellekteki "/" ile
+                // eşleşmez ve uygulama boş ekran verir.
+                const ignoringQuery = await caches.match(event.request, { ignoreSearch: true });
+                if (ignoringQuery) return ignoringQuery;
+
+                // Son çare: her gezinme isteği için ana sayfayı döndür
+                if (event.request.mode === 'navigate') {
+                    const shell = await caches.match('./index.html')
+                        || await caches.match('./');
+                    if (shell) return shell;
+                }
+
+                return Response.error();
             })
     );
 });

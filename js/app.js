@@ -168,7 +168,7 @@ const App = {
             if (steps) steps.hidden = false;
             if (desc) {
                 desc.textContent = "ÖğrenciYemek'i ana ekranına ekle, uygulama gibi tek dokunuşla aç. "
-                    + "İndirme boyutu yalnızca ~75 KB.";
+                    + "İndirme boyutu yalnızca ~100 KB.";
             }
         } else {
             // Kurulum bu tarayıcıda desteklenmiyor

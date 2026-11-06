@@ -1,5 +1,5 @@
 // ÖğrenciYemek Service Worker
-const CACHE_NAME = 'ogrenciyemek-v5';
+const CACHE_NAME = 'ogrenciyemek-v6';
 // Göreceli yollar: SW'nin bulunduğu dizine göre çözümlenir, böylece
 // hem alan adı kökünde hem de /OgrenciYemek/ alt dizininde çalışır.
 const ASSETS_TO_CACHE = [
@@ -14,7 +14,10 @@ const ASSETS_TO_CACHE = [
     './icons/icon-512.png',
     './icons/maskable-192.png',
     './icons/maskable-512.png',
-    './icons/apple-touch-icon.png'
+    './icons/apple-touch-icon.png',
+    './icons/favicon.ico',
+    './icons/favicon-16.png',
+    './icons/favicon-32.png'
 ];
 
 // Install — cache core assets

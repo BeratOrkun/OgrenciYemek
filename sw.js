@@ -1,5 +1,5 @@
 // ÖğrenciYemek Service Worker
-const CACHE_NAME = 'ogrenciyemek-v13';
+const CACHE_NAME = 'ogrenciyemek-v14';
 
 // Göreceli yollar: SW'nin bulunduğu dizine göre çözümlenir, böylece
 // hem alan adı kökünde hem de /OgrenciYemek/ alt dizininde çalışır.
@@ -7,24 +7,33 @@ const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './css/style.css',
-    './css/style.css?v=13',
+    './css/style.css?v=14',
     './js/storage.js',
-    './js/storage.js?v=13',
+    './js/storage.js?v=14',
     './js/app.js',
-    './js/app.js?v=13',
+    './js/app.js?v=14',
     './js/data.js',
-    './js/data.js?v=13',
+    './js/data.js?v=14',
     './js/screens.js',
-    './js/screens.js?v=13',
+    './js/screens.js?v=14',
     './manifest.json',
+    './manifest.json?v=14',
     './icons/icon-192.png',
+    './icons/icon-192.png?v=14',
     './icons/icon-512.png',
+    './icons/icon-512.png?v=14',
     './icons/maskable-192.png',
+    './icons/maskable-192.png?v=14',
     './icons/maskable-512.png',
+    './icons/maskable-512.png?v=14',
     './icons/apple-touch-icon.png',
+    './icons/apple-touch-icon.png?v=14',
     './icons/favicon.ico',
+    './icons/favicon.ico?v=14',
     './icons/favicon-16.png',
-    './icons/favicon-32.png'
+    './icons/favicon-16.png?v=14',
+    './icons/favicon-32.png',
+    './icons/favicon-32.png?v=14'
 ];
 
 // -----------------------------------------------------------

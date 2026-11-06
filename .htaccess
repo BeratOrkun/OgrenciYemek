@@ -46,9 +46,9 @@
         Header set Cache-Control "public, max-age=0, must-revalidate"
     </Files>
 
-    # Manifest — kısa ömür
+    # Manifest — her zaman taze
     <Files "manifest.json">
-        Header set Cache-Control "public, max-age=3600"
+        Header set Cache-Control "public, max-age=0, must-revalidate"
     </Files>
 
     # HTML — her zaman taze

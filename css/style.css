@@ -2690,3 +2690,102 @@ img.install-card-icon {
     font-size: 0.72rem;
     color: var(--text-muted);
 }
+
+/* =====================================================
+   Instagram takip karti — menu kartlariyla ayni dilde
+   ===================================================== */
+
+.social-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    margin-bottom: var(--space-md);
+    border-radius: var(--radius-lg);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+    cursor: pointer;
+    transition: var(--transition-base);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    touch-action: manipulation;
+}
+
+.social-card:active {
+    transform: scale(0.99);
+}
+
+/* Soldaki renk seridi — menu kartlarindaki ile ayni dil */
+.social-card::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: linear-gradient(180deg, #fa7e1e, #d62976, #962fbf);
+    opacity: 0.85;
+    pointer-events: none;
+}
+
+.social-card-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    color: #fff;
+    /* Instagram marka gecisi */
+    background: radial-gradient(circle at 28% 108%,
+        #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.social-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.social-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+}
+
+.social-card-handle {
+    font-size: 0.8rem;
+    line-height: 1.35;
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+}
+
+.social-card-arrow {
+    flex-shrink: 0;
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    opacity: 0.55;
+}
+
+@media (min-width: 420px) {
+    .social-card {
+        padding: var(--space-lg);
+        gap: var(--space-lg);
+    }
+
+    .social-card-icon {
+        width: 56px;
+        height: 56px;
+    }
+}

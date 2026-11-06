@@ -30,8 +30,8 @@ const App = {
         this.initInstallPrompt();
 
         // Şehir sabit: Ankara
-        if (!localStorage.getItem(this.KEYS.city)) {
-            localStorage.setItem(this.KEYS.city, 'Ankara');
+        if (!Store.get(this.KEYS.city)) {
+            Store.set(this.KEYS.city, 'Ankara');
         }
 
         // Geçmişin tabanı: buradan geri basmak uygulamayı kapatır
@@ -53,7 +53,7 @@ const App = {
     // -------------------------------------------------------
     prefetchMenus() {
         const run = () => {
-            const city = localStorage.getItem(this.KEYS.city) || 'Ankara';
+            const city = Store.get(this.KEYS.city) || 'Ankara';
             const today = new Date();
             const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
@@ -271,8 +271,8 @@ const App = {
     // Home Screen
     // -------------------------------------------------------
     renderHome() {
-        const storedUni = localStorage.getItem(this.KEYS.university);
-        const city = localStorage.getItem(this.KEYS.city) || 'Ankara';
+        const storedUni = Store.get(this.KEYS.university);
+        const city = Store.get(this.KEYS.city) || 'Ankara';
 
         // Henüz seçim yapılmamış olabilir — uygulama yine de çalışır
         const uniData = storedUni
@@ -368,7 +368,7 @@ const App = {
         const listEl = document.getElementById('uni-picker-list');
         if (!listEl) return;
 
-        const current = localStorage.getItem(this.KEYS.university);
+        const current = Store.get(this.KEYS.university);
         const q = term.toLocaleLowerCase('tr').trim();
 
         const matches = APP_DATA.universities.filter(uni => {
@@ -397,7 +397,7 @@ const App = {
     },
 
     pickUniversity(uniName) {
-        localStorage.setItem(this.KEYS.university, uniName);
+        Store.set(this.KEYS.university, uniName);
         this.closeUniPicker();
         this.renderHome();
     }

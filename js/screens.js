@@ -7,7 +7,7 @@ const Screens = {
     // Üniversite Yemekleri Ekranı
     // -------------------------------------------------------
     renderUniversityScreen(container) {
-        const userUni = localStorage.getItem('oy_university');
+        const userUni = Store.get('oy_university');
         const universities = APP_DATA.universities;
         const devletCount = universities.filter(u => u.type === 'Devlet').length;
         const vakifCount = universities.filter(u => u.type === 'Vakıf').length;
@@ -155,7 +155,7 @@ const Screens = {
 
         const activeDate = this.currentKYKDate;
         const activeMealType = this.currentKYKMealType;
-        const city = localStorage.getItem('oy_city') || 'Ankara';
+        const city = Store.get('oy_city') || 'Ankara';
         const formattedDate = this._formatTurkishDate(activeDate);
         const isToday = activeDate === defaultDate;
 
@@ -255,7 +255,7 @@ const Screens = {
 
     refreshKYKMenu() {
         if (this.currentKYKDate) {
-            const city = localStorage.getItem('oy_city') || 'Ankara';
+            const city = Store.get('oy_city') || 'Ankara';
             const citySlug = this._slugifyCity(city);
             delete this.kykMenuMemoryCache[`oy_kyk_live_${citySlug}_${this.currentKYKDate}`];
         }
@@ -350,7 +350,7 @@ const Screens = {
 
     _readKYKStore() {
         try {
-            const raw = localStorage.getItem(this.KYK_STORE_KEY);
+            const raw = Store.get(this.KYK_STORE_KEY);
             if (!raw) return {};
             const parsed = JSON.parse(raw);
             return (parsed && typeof parsed === 'object') ? parsed : {};
@@ -379,7 +379,7 @@ const Screens = {
                     .forEach(k => delete store[k]);
             }
 
-            localStorage.setItem(this.KYK_STORE_KEY, JSON.stringify(store));
+            Store.set(this.KYK_STORE_KEY, JSON.stringify(store));
         } catch {
             /* kota dolu veya özel mod — sessizce geç */
         }
@@ -1022,7 +1022,7 @@ const Screens = {
             <p>Menü yükleniyor...</p>
         `;
         try {
-            localStorage.removeItem(GenclikSofralariAPI.CACHE_KEY);
+            Store.remove(GenclikSofralariAPI.CACHE_KEY);
         } catch {}
         this._fetchGenclikMenu(screen);
     },
@@ -1508,7 +1508,7 @@ const GenclikSofralariAPI = {
 
     readCache() {
         try {
-            const raw = localStorage.getItem(this.CACHE_KEY);
+            const raw = Store.get(this.CACHE_KEY);
             if (!raw) return null;
             const cached = JSON.parse(raw);
             if (!cached || !cached.savedAt || !cached.data) return null;
@@ -1523,7 +1523,7 @@ const GenclikSofralariAPI = {
 
     writeCache(data) {
         try {
-            localStorage.setItem(this.CACHE_KEY, JSON.stringify({ savedAt: Date.now(), data }));
+            Store.set(this.CACHE_KEY, JSON.stringify({ savedAt: Date.now(), data }));
         } catch {
             /* kota dolu veya özel mod — sessizce geç */
         }

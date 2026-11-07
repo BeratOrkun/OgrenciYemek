@@ -1,5 +1,5 @@
 // ÖğrenciYemek Service Worker
-const CACHE_NAME = 'ogrenciyemek-v18';
+const CACHE_NAME = 'ogrenciyemek-v19';
 
 // Göreceli yollar: SW'nin bulunduğu dizine göre çözümlenir, böylece
 // hem alan adı kökünde hem de /OgrenciYemek/ alt dizininde çalışır.
@@ -49,7 +49,13 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then((cache) => cache.addAll(ASSETS_TO_CACHE))
+            // cache: 'reload' SART: aksi halde addAll tarayicinin HTTP
+            // onbelleginden okur ve max-age=3600 ile duran BAYAT govdeleri
+            // on bellege yazar. Yeni surum yayinda olsa bile kullanici
+            // eskisini calistirmaya devam eder.
+            .then((cache) => cache.addAll(
+                ASSETS_TO_CACHE.map((u) => new Request(u, { cache: 'reload' }))
+            ))
             .then(() => self.skipWaiting())
     );
 });
@@ -94,8 +100,18 @@ function arkaPlandaTazele(request) {
 // Önbellekte ara: birebir, sonra sorgu parametresini yok sayarak.
 // Kurulu uygulama "/?mod=app" ile açıldığı için ignoreSearch şart.
 async function onbellektenBul(request) {
-    return (await caches.match(request))
-        || (await caches.match(request, { ignoreSearch: true }));
+    const birebir = await caches.match(request);
+    if (birebir) return birebir;
+
+    // ignoreSearch YALNIZCA gezinme istekleri icin.
+    // Varliklarda kullanilirsa "app.js?v=18" istegi on bellekteki
+    // surumsuz "app.js" govdesiyle eslesir; yeni surum yayinda olsa
+    // bile kullaniciya ESKI dosya gider ve ?v= atlatmasi tamamen
+    // islevsiz kalir.
+    if (request.mode === 'navigate') {
+        return await caches.match(request, { ignoreSearch: true });
+    }
+    return undefined;
 }
 
 // -----------------------------------------------------------

@@ -1,5 +1,5 @@
 // ÖğrenciYemek Service Worker
-const CACHE_NAME = 'ogrenciyemek-v24';
+const CACHE_NAME = 'ogrenciyemek-v25';
 
 // Göreceli yollar: SW'nin bulunduğu dizine göre çözümlenir, böylece
 // hem alan adı kökünde hem de /OgrenciYemek/ alt dizininde çalışır.
@@ -7,16 +7,17 @@ const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './css/style.css',
-    './css/style.css?v=15',
+    './css/style.css?v=25',
     './js/storage.js',
-    './js/storage.js?v=15',
+    './js/storage.js?v=25',
     './js/analytics.js',
+    './js/analytics.js?v=25',
     './js/app.js',
-    './js/app.js?v=15',
+    './js/app.js?v=25',
     './js/data.js',
-    './js/data.js?v=15',
+    './js/data.js?v=25',
     './js/screens.js',
-    './js/screens.js?v=15',
+    './js/screens.js?v=25',
     './manifest.json',
     './manifest.json?v=15',
     './icons/icon-192.png',
@@ -138,25 +139,26 @@ self.addEventListener('fetch', (event) => {
     }
 
     event.respondWith((async () => {
-        try {
-            const cached = await onbellektenBul(request);
-
-            if (cached) {
-                // Anında önbellekten ver, güncellemeyi arkada yap
-                event.waitUntil(arkaPlandaTazele(request));
-                return cached;
+        // 1) Gezinme (HTML) istekleri: ÖNCE AĞ (2.5 sn zaman aşımlı), yoksa önbellek.
+        // Böylece yeni sürüm yayınlandığında kullanıcı ilk yenilemede anında güncel
+        // index.html ve güncel ?v= script'lerini alır; çevrimdışıysa da önbellekten açılır.
+        if (request.mode === 'navigate') {
+            try {
+                const agYaniti = await Promise.race([
+                    fetch(new Request(request, { cache: 'no-cache' })),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2500))
+                ]);
+                if (cachelenebilir(agYaniti)) {
+                    const kopya = agYaniti.clone();
+                    caches.open(CACHE_NAME)
+                        .then((cache) => cache.put('./index.html', kopya))
+                        .catch(() => {});
+                    return agYaniti;
+                }
+            } catch {
+                /* çevrimdışı veya ağ yavaş — önbelleğe düş */
             }
 
-            // Önbellekte yoksa ağa git
-            const network = await arkaPlandaTazele(request);
-            if (network) return network;
-        } catch {
-            /* önbellek/ağ hatası — navigasyon kurtarmasına düş */
-        }
-
-        // Ağ da yoksa: gezinme isteklerinde uygulama kabuğunu döndür,
-        // böylece kullanıcı boş ekran yerine uygulamayı görür.
-        if (request.mode === 'navigate') {
             try {
                 const shell = (await caches.match('./index.html'))
                     || (await caches.match('./'))
@@ -165,6 +167,21 @@ self.addEventListener('fetch', (event) => {
             } catch {
                 /* yoksay */
             }
+        }
+
+        // 2) Diğer varlıklar (CSS, JS, ikonlar): ÖNCE ÖNBELLEK, arkada tazele
+        try {
+            const cached = await onbellektenBul(request);
+
+            if (cached) {
+                event.waitUntil(arkaPlandaTazele(request));
+                return cached;
+            }
+
+            const network = await arkaPlandaTazele(request);
+            if (network) return network;
+        } catch {
+            /* yoksay */
         }
 
         return Response.error();

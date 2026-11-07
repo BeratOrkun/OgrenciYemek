@@ -43,7 +43,11 @@
             while (kuyrukUmami.length) {
                 try {
                     var oge = kuyrukUmami.shift();
-                    if (oge.veri) {
+                    if (oge.tip === 'sayfa') {
+                        window.umami.track(function (props) {
+                            return Object.assign({}, props, { url: oge.yol, title: oge.baslik });
+                        });
+                    } else if (oge.veri) {
                         window.umami.track(oge.ad, oge.veri);
                     } else {
                         window.umami.track(oge.ad);
@@ -59,14 +63,24 @@
         }
     }
 
-    // Her iki sayaca aynı anda, birbirini etkilemeden gönderir
+    // Her iki sayaca aynı anda özel olay (Event) gönderir
     function olay(ad, baslik, ekVeri) {
         // GoatCounter'a gönder
         kuyrukGC.push({ path: ad, title: baslik, event: true });
         bosaltGC();
 
         // Umami'ye gönder
-        kuyrukUmami.push({ ad: ad, veri: ekVeri || { baslik: baslik } });
+        kuyrukUmami.push({ tip: 'olay', ad: ad, veri: ekVeri || { baslik: baslik } });
+        bosaltUmami();
+    }
+
+    // Her iki sayaca sanal sayfa görüntülemesi (Pageview) gönderir
+    // Böylece hem GoatCounter ana listesinde hem Umami "Pages" kutusunda görünür
+    function sayfaGoruntuleme(yol, baslik) {
+        kuyrukGC.push({ path: yol, title: baslik, event: false });
+        bosaltGC();
+
+        kuyrukUmami.push({ tip: 'sayfa', yol: yol, baslik: baslik });
         bosaltUmami();
     }
 
@@ -135,16 +149,20 @@
 
     // Ana menü sayfalarına (Üniversite, KYK, Gençlik, Millet) girildiğinde
     var SAYFA_HARITASI = {
-        universities: { yol: 'sayfa/universite-yemekleri', baslik: 'Sayfa: Üniversite Yemekleri', ad: 'Üniversite Yemekleri' },
-        kyk:          { yol: 'sayfa/kyk-yemekleri',        baslik: 'Sayfa: KYK Yemekleri',        ad: 'KYK Yemekleri' },
-        genclik:      { yol: 'sayfa/genclik-sofrasi',      baslik: 'Sayfa: Gençlik Sofrası',      ad: 'Gençlik Sofrası' },
-        millet:       { yol: 'sayfa/millet-kutuphanesi',   baslik: 'Sayfa: Millet Kütüphanesi',   ad: 'Millet Kütüphanesi' }
+        universities: { sayfaYolu: '/universite-yemekleri', olayYolu: 'sayfa/universite-yemekleri', baslik: 'Üniversite Yemekleri' },
+        kyk:          { sayfaYolu: '/kyk-yemekleri',        olayYolu: 'sayfa/kyk-yemekleri',        baslik: 'KYK Yemekleri' },
+        genclik:      { sayfaYolu: '/genclik-sofrasi',      olayYolu: 'sayfa/genclik-sofrasi',      baslik: 'Gençlik Sofrası' },
+        millet:       { sayfaYolu: '/millet-kutuphanesi',   olayYolu: 'sayfa/millet-kutuphanesi',   baslik: 'Millet Kütüphanesi' }
     };
 
     function sayfaAcildi(ekranKodu) {
         var bilgi = SAYFA_HARITASI[ekranKodu];
         if (!bilgi) return;
-        olay(bilgi.yol, bilgi.baslik, { sayfa: bilgi.ad });
+        // 1) Her iki sayaca gerçek Sayfa Görüntülemesi (Pageview) olarak gönder (/kyk-yemekleri vb.)
+        sayfaGoruntuleme(bilgi.sayfaYolu, bilgi.baslik);
+        // 2) Umami'de Events sekmesinde de görünmesi için ayrıca olay olarak gönder
+        kuyrukUmami.push({ tip: 'olay', ad: bilgi.olayYolu, veri: { sayfa: bilgi.baslik } });
+        bosaltUmami();
     }
 
     // Instagram takip kartına tıklandığında

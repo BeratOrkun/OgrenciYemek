@@ -444,7 +444,18 @@ var App = window.App = {
     },
 
     pickUniversity(uniName) {
+        const previous = Store.get(this.KEYS.university);
         Store.set(this.KEYS.university, uniName);
+
+        // GoatCounter: yalnızca gerçek seçim/değişiklikte say (aynısına tekrar basınca değil)
+        if (previous !== uniName) {
+            try {
+                if (window.OYAnalytics) window.OYAnalytics.universiteSecildi(uniName);
+            } catch {
+                /* sayaç asla uygulamayı bozmamalı */
+            }
+        }
+
         this.closeUniPicker();
         this.renderHome();
     }

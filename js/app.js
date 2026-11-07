@@ -233,6 +233,15 @@ var App = window.App = {
         const previous = this.currentScreen;
         this.currentScreen = screenId;
 
+        // GoatCounter + Umami: alt menü sayfalarına (Üni, KYK, Gençlik, Millet) girişi say
+        if (screenId !== 'home' && screenId !== previous) {
+            try {
+                if (window.OYAnalytics) window.OYAnalytics.sayfaAcildi(screenId);
+            } catch {
+                /* sayaç asla uygulamayı bozmamalı */
+            }
+        }
+
         // Alt ekrana girerken geçmişe bir giriş ekle ki cihazın geri
         // tuşu uygulamadan çıkmak yerine ana ekrana dönsün.
         if (!fromHistory) {

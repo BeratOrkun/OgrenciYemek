@@ -122,6 +122,12 @@ var Screens = window.Screens = {
     },
 
     openUniMenu(url, name) {
+        try {
+            if (window.OYAnalytics) window.OYAnalytics.universiteMenuTiklandi(name);
+        } catch {
+            /* sayaç asla uygulamayı bozmamalı */
+        }
+
         if (url && url !== '#') {
             window.open(url, '_blank', 'noopener,noreferrer');
         } else {

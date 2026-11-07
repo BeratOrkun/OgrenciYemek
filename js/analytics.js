@@ -127,6 +127,31 @@
         olay('uni-secim/' + kisaAd(ad), 'Üniversite seçildi: ' + ad, { universite: ad });
     }
 
+    // Üniversite Yemekleri ekranında bir üniversitenin menü kartına tıklandığında
+    function universiteMenuTiklandi(ad) {
+        if (!ad) return;
+        olay('uni-menu/' + kisaAd(ad), 'Üniversite menüsü tıklandı: ' + ad, { universite: ad });
+    }
+
+    // Ana menü sayfalarına (Üniversite, KYK, Gençlik, Millet) girildiğinde
+    var SAYFA_HARITASI = {
+        universities: { yol: 'sayfa/universite-yemekleri', baslik: 'Sayfa: Üniversite Yemekleri', ad: 'Üniversite Yemekleri' },
+        kyk:          { yol: 'sayfa/kyk-yemekleri',        baslik: 'Sayfa: KYK Yemekleri',        ad: 'KYK Yemekleri' },
+        genclik:      { yol: 'sayfa/genclik-sofrasi',      baslik: 'Sayfa: Gençlik Sofrası',      ad: 'Gençlik Sofrası' },
+        millet:       { yol: 'sayfa/millet-kutuphanesi',   baslik: 'Sayfa: Millet Kütüphanesi',   ad: 'Millet Kütüphanesi' }
+    };
+
+    function sayfaAcildi(ekranKodu) {
+        var bilgi = SAYFA_HARITASI[ekranKodu];
+        if (!bilgi) return;
+        olay(bilgi.yol, bilgi.baslik, { sayfa: bilgi.ad });
+    }
+
+    // Instagram takip kartına tıklandığında
+    function instagramTiklandi() {
+        olay('instagram-tiklama', 'Instagram takip kartına tıklandı', { hesap: '@ogrenciyemek.com_' });
+    }
+
     // Seçili üniversitesiyle siteyi kullanan kişi — cihaz başına günde bir kez.
     // Sayaç eklenmeden önce seçim yapmış kullanıcılar da böylece görünür.
     function gunlukAktifUniversite() {
@@ -141,7 +166,10 @@
     }
 
     window.OYAnalytics = {
-        universiteSecildi: universiteSecildi
+        universiteSecildi: universiteSecildi,
+        universiteMenuTiklandi: universiteMenuTiklandi,
+        sayfaAcildi: sayfaAcildi,
+        instagramTiklandi: instagramTiklandi
     };
 
     function baslat() {

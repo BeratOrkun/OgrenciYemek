@@ -21,7 +21,6 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 header('Expires: 0');
 header('Content-Type: image/gif');
-header('Content-Length: 43');
 
 // Yanıt her durumda 1x1 şeffaf GIF — <img> ile de çağrılabilsin
 $gif = base64_decode('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
@@ -30,6 +29,7 @@ $olay = isset($_GET['e']) && is_string($_GET['e']) ? $_GET['e'] : '';
 $tekil = isset($_GET['u']) && $_GET['u'] === '1';
 
 if (!in_array($olay, GECERLI_OLAYLAR, true)) {
+    header('Content-Length: ' . strlen($gif));
     echo $gif;
     exit;
 }
@@ -43,6 +43,7 @@ $dosya = $dizin . '/stats.json';
 $fp = @fopen($dosya, 'c+');
 if ($fp === false) {
     // Yazamıyorsak sessizce çık — sayaç asla siteyi bozmamalı
+    header('Content-Length: ' . strlen($gif));
     echo $gif;
     exit;
 }
@@ -77,4 +78,5 @@ if (flock($fp, LOCK_EX)) {
 }
 fclose($fp);
 
+header('Content-Length: ' . strlen($gif));
 echo $gif;

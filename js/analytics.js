@@ -1,44 +1,73 @@
 // =====================================================
-// ÖğrenciYemek — GoatCounter olay takibi
+// ÖğrenciYemek — GoatCounter + Umami Çift Yönlü Olay Takibi
 //
-// Sayfa görüntülemeleri index.html'deki GoatCounter script'i
-// tarafından otomatik sayılır. Bu dosya yalnızca iki özel olayı
-// ekler: uygulama kurulumu ve kurulu uygulamadan açılış.
+// Sayfa görüntülemeleri index.html'deki GoatCounter ve Umami
+// script'leri tarafından birbirinden bağımsız otomatik sayılır.
 //
-// GoatCounter çerez kullanmaz, ziyaretçide hiçbir şey saklamaz.
-// Script async yüklendiği için olaylar hazır olana kadar
-// kuyrukta bekletilir.
+// Bu dosya özel olayları (kurulum, uygulamadan açılış, seçilen
+// ve aktif üniversite) iki ayrı kuyrukla hem GoatCounter'a hem
+// Umami'ye gönderir. İki sayaç birbirinden tamamen izoledir;
+// biri yavaşlasa veya engellense bile diğeri çalışmaya devam eder.
 // =====================================================
 
 (function () {
     'use strict';
 
-    var kuyruk = [];
-    var deneme = 0;
+    var kuyrukGC = [];
+    var kuyrukUmami = [];
+    var denemeGC = 0;
+    var denemeUmami = 0;
     var BEKLEME_ADIMI = 250;   // ms
     var EN_FAZLA_DENEME = 40;  // ~10 saniye
 
-    function bosalt() {
+    // 1) GoatCounter Kuyruğu (Bağımsız)
+    function bosaltGC() {
         if (window.goatcounter && typeof window.goatcounter.count === 'function') {
-            while (kuyruk.length) {
+            while (kuyrukGC.length) {
                 try {
-                    window.goatcounter.count(kuyruk.shift());
+                    window.goatcounter.count(kuyrukGC.shift());
                 } catch (e) {
                     /* sayaç asla uygulamayı bozmamalı */
                 }
             }
             return;
         }
-        // Script engellenmişse veya yüklenemediyse sessizce vazgeç
-        if (deneme++ < EN_FAZLA_DENEME) {
-            setTimeout(bosalt, BEKLEME_ADIMI);
+        if (denemeGC++ < EN_FAZLA_DENEME) {
+            setTimeout(bosaltGC, BEKLEME_ADIMI);
         }
     }
 
-    function olay(ad, baslik) {
-        // path olay adı olarak kullanılır; başında "/" olamaz
-        kuyruk.push({ path: ad, title: baslik, event: true });
-        bosalt();
+    // 2) Umami Kuyruğu (Bağımsız)
+    function bosaltUmami() {
+        if (window.umami && typeof window.umami.track === 'function') {
+            while (kuyrukUmami.length) {
+                try {
+                    var oge = kuyrukUmami.shift();
+                    if (oge.veri) {
+                        window.umami.track(oge.ad, oge.veri);
+                    } else {
+                        window.umami.track(oge.ad);
+                    }
+                } catch (e) {
+                    /* sayaç asla uygulamayı bozmamalı */
+                }
+            }
+            return;
+        }
+        if (denemeUmami++ < EN_FAZLA_DENEME) {
+            setTimeout(bosaltUmami, BEKLEME_ADIMI);
+        }
+    }
+
+    // Her iki sayaca aynı anda, birbirini etkilemeden gönderir
+    function olay(ad, baslik, ekVeri) {
+        // GoatCounter'a gönder
+        kuyrukGC.push({ path: ad, title: baslik, event: true });
+        bosaltGC();
+
+        // Umami'ye gönder
+        kuyrukUmami.push({ ad: ad, veri: ekVeri || { baslik: baslik } });
+        bosaltUmami();
     }
 
     function uygulamadanMiAcildi() {
@@ -95,7 +124,7 @@
     // Kullanıcı üniversitesini seçtiğinde / değiştirdiğinde
     function universiteSecildi(ad) {
         if (!ad) return;
-        olay('uni-secim/' + kisaAd(ad), 'Üniversite seçildi: ' + ad);
+        olay('uni-secim/' + kisaAd(ad), 'Üniversite seçildi: ' + ad, { universite: ad });
     }
 
     // Seçili üniversitesiyle siteyi kullanan kişi — cihaz başına günde bir kez.
@@ -107,7 +136,7 @@
         var isaret = bugun() + '|' + kisaAd(ad);
         if (depodanOku(GUNLUK_ANAHTAR) === isaret) return;
 
-        olay('uni-aktif/' + kisaAd(ad), 'Aktif kullanıcı: ' + ad);
+        olay('uni-aktif/' + kisaAd(ad), 'Aktif kullanıcı: ' + ad, { universite: ad });
         depoyaYaz(GUNLUK_ANAHTAR, isaret);
     }
 

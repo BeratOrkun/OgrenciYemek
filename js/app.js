@@ -233,8 +233,9 @@ var App = window.App = {
         const previous = this.currentScreen;
         this.currentScreen = screenId;
 
-        // GoatCounter + Umami: alt menü sayfalarına (Üni, KYK, Gençlik, Millet) girişi say
-        if (screenId !== 'home' && screenId !== previous) {
+        // GoatCounter + Umami: alt menü sayfalarına (Üni, KYK, Gençlik, Millet) girişi say,
+        // ana ekrana dönüşte ise yalnızca aktif sayfa bağlamını '/' olarak güncelle
+        if (screenId !== previous && !(previous === null && screenId === 'home')) {
             try {
                 if (window.OYAnalytics) window.OYAnalytics.sayfaAcildi(screenId);
             } catch {

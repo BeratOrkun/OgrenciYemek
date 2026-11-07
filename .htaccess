@@ -56,8 +56,12 @@
         Header set Cache-Control "public, max-age=0, must-revalidate"
     </FilesMatch>
 
-    # CSS/JS — sürümsüz dosya adları olduğu için kısa ömür + revalidate
-    <FilesMatch "\.(css|js)$">
+    # CSS/JS — kısa ömür + revalidate.
+    # sw.js HARİÇ: bu kalıp onu da yakalıyordu ve Apache FilesMatch'i
+    # Files'tan sonra işlediği için yukarıdaki max-age=0 kuralını
+    # eziyordu. Sonuç: service worker güncellemeleri 1 saate kadar
+    # gecikiyor, kullanıcılar eski sürümde kalıyordu.
+    <FilesMatch "^(?!sw\.js$).+\.(css|js)$">
         Header set Cache-Control "public, max-age=3600, must-revalidate"
     </FilesMatch>
 

@@ -30,6 +30,8 @@
     var zamanlayiciGC = null;
     var zamanlayiciUmami = null;
     var acilisHazir = false;
+    var gcGorunurlukBekliyor = false;  // GoatCounter gorunurluk kuyrugu aktif mi
+    var gcGorunurlukDeneme = 0;        // sonsuz donguye karsi ust sinir
 
     var BEKLEME_ADIMI = 250;   // ms (script yüklenme kontrol aralığı)
     var ACILIS_GECIKMESI = 450; // ms (ilk '/' sayfa kaydının önce gitmesini garantiler)
@@ -68,8 +70,28 @@
         }
 
         if (window.goatcounter && typeof window.goatcounter.count === 'function') {
-            // Sayfa ön-yükleme (prerender) aşamasındaysa filtre düşüreceği için bekle
-            if (typeof window.goatcounter.filter === 'function' && window.goatcounter.filter() === 'visibilityState') {
+            // Sayfa görünür değilse (arka plan sekmesi / PWA ön-yüklemesi)
+            // GoatCounter saymaz. ESKİDEN burada sadece return ediliyordu:
+            // kuyruktaki olaylar bir daha hiç denenmiyor ve sessizce
+            // kayboluyordu. Umami'de aynı kontrol olmadığı için olaylar
+            // orada görünüp GoatCounter'da görünmüyordu. Artık sayfa
+            // görünür olunca tekrar deneniyor.
+            if (typeof window.goatcounter.filter === 'function'
+                && window.goatcounter.filter() === 'visibilityState') {
+                if (!gcGorunurlukBekliyor) {
+                    gcGorunurlukBekliyor = true;
+                    document.addEventListener('visibilitychange', function tekrarDene() {
+                        if (document.visibilityState === 'visible') {
+                            document.removeEventListener('visibilitychange', tekrarDene);
+                            gcGorunurlukBekliyor = false;
+                            bosaltGC();
+                        }
+                    });
+                }
+                // Yedek: görünürlük olayı hiç gelmezse zamanlayıcıyla dene
+                if (gcGorunurlukDeneme++ < 60) {
+                    zamanlayiciGC = setTimeout(bosaltGC, 1000);
+                }
                 return;
             }
             while (kuyrukGC.length) {

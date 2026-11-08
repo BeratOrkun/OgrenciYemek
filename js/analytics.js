@@ -302,7 +302,9 @@
         baslatildi = true;
 
         if (uygulamadanMiAcildi()) {
-            olay('uygulamadan-acilis', 'Kurulu uygulamadan açıldı');
+            olay('uygulamadan-acilis', 'Kurulu uygulamadan açıldı', { ortam: 'Uygulama (PWA)' });
+        } else {
+            olay('webden-acilis', 'Web tarayıcıdan açıldı', { ortam: 'Web Tarayıcı' });
         }
 
         gunlukAktifUniversite();

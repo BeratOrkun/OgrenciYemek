@@ -68,4 +68,10 @@ var Store = window.Store = {
     }
 };
 
+// Bu depo bu yüklemeden ÖNCE hiç kullanılmış mıydı?
+// app.js her açılışta 'oy_city' yazdığı için, o çalışmadan önce burada
+// (ilk yüklenen dosyada) ölçülür. analytics.js bununla iPhone'daki yeni
+// kurulumu (ana ekran uygulamasının deposu boş başlar) eski kurulumdan ayırır.
+Store.ilkAcilis = Store.available() && Store.get('oy_city') === null;
+
 window.Store = Store;

@@ -169,8 +169,17 @@
         }
     }
 
+    // Umami olay adını 50 karakterde keser; GoatCounter kesmez. Uzun adlı
+    // üniversitelerde iki panelde farklı ad oluşmasın diye ikisine de aynı
+    // (kırpılmış) ad gönderilir.
+    var EN_UZUN_OLAY_ADI = 50;
+    function olayAdiKirp(ad) {
+        return String(ad).slice(0, EN_UZUN_OLAY_ADI);
+    }
+
     // Her iki sayaca birebir aynı anda Özel Olay (Event) gönderir
     function olay(ad, baslik, ekVeri) {
+        ad = olayAdiKirp(ad);
         kuyrukGC.push({
             yol: ad,
             baslik: baslik,
@@ -243,7 +252,7 @@
         if (!ad || typeof ad !== 'string') return;
 
         var tarih = bugun();
-        var olayAdi = 'uni-aktif/' + kisaAd(ad);
+        var olayAdi = olayAdiKirp('uni-aktif/' + kisaAd(ad));
         var olayBasligi = 'Aktif kullanıcı: ' + ad;
 
         if (depodanOku(GUNLUK_GC_ANAHTAR) !== tarih) {
@@ -308,6 +317,166 @@
         olay('instagram-tiklama', 'Instagram takip kartına tıklandı', { hesap: '@ogrenciyemek.com_' });
     }
 
+    // =====================================================
+    // KURULUM SAYIMI
+    //
+    //   kurulum                → her yeni kurulum (tüm platformların toplamı)
+    //   kurulum/ios            → aynı kurulumun platform kırılımı
+    //   kurulum/android
+    //   kurulum/masaustu
+    //   kurulum-eski/<platform>→ bu sayım eklenmeden ÖNCE kurulmuş cihaz;
+    //                            güncellemeden sonraki ilk açılışta 1 kez.
+    //                            Yeni kurulum DEĞİLDİR, 'kurulum'a katılmaz.
+    //
+    // İki sinyal kullanılır:
+    //  a) appinstalled — Chrome/Edge (Android + masaüstü) kurulum anında verir.
+    //  b) Uygulama penceresinden ilk açılış — iOS appinstalled göndermediği
+    //     için iPhone'da tek yol budur; Android'de (a) kaçarsa yedektir.
+    //
+    // Cihaz başına tek sayım 'oy_kurulum' anahtarıyla sağlanır:
+    //   "bekliyor|yeni|ios|ilk-acilis" → karar verildi, henüz gönderilmedi
+    //   "1731400000000"                → gönderildi (zaman damgası)
+    // =====================================================
+    var KURULUM_ANAHTAR = 'oy_kurulum';
+    var SURUM_ANAHTAR = 'oy_kurulum_takip'; // bu sayımı içeren sürüm bu depoda ilk ne zaman çalıştı
+
+    var PLATFORM_ETIKET = { ios: 'iPhone/iPad', android: 'Android', masaustu: 'Masaüstü' };
+
+    function platform() {
+        try {
+            var ua = navigator.userAgent || '';
+            if (/iPad|iPhone|iPod/.test(ua)
+                || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+                return 'ios';
+            }
+            if (/Android/i.test(ua)) return 'android';
+        } catch (e) { /* yoksay */ }
+        return 'masaustu';
+    }
+
+    // Kurulu uygulamanın deposu tarayıcınınkinden AYRI mı?
+    // Safari ailesinde (iOS'taki tüm tarayıcılar + macOS Safari) ayrıdır;
+    // Chrome/Edge/Firefox'ta uygulama tarayıcıyla aynı depoyu kullanır.
+    function depoAyriMi() {
+        if (platform() === 'ios') return true;
+        try {
+            var ua = navigator.userAgent || '';
+            return /Safari/.test(ua) && !/Chrome|Chromium|Edg|OPR|Android/.test(ua);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    // Yalnızca gerçek uygulama penceresi. (?mod=app burada bilerek sayılmaz:
+    // o adres paylaşılıp tarayıcıda açılabilir, kurulum kanıtı değildir.)
+    function uygulamaPenceresi() {
+        try {
+            return (window.matchMedia
+                    && window.matchMedia('(display-mode: standalone)').matches)
+                || window.navigator.standalone === true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function depoKalici() {
+        try {
+            return !!(window.Store && window.Store.available());
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function kurulumKaydet(tur, yontem) {
+        depoyaYaz(KURULUM_ANAHTAR, ['bekliyor', tur, platform(), yontem].join('|'));
+        kurulumGonder();
+    }
+
+    // Bekleyen kurulum kaydını gönderir. Çevrimdışıysa bağlantıyı bekler;
+    // o da olmazsa kayıt depoda durur ve sonraki açılışta gönderilir.
+    function kurulumGonder() {
+        var durum = depodanOku(KURULUM_ANAHTAR);
+        if (!durum || String(durum).indexOf('bekliyor|') !== 0) return;
+
+        if (navigator.onLine === false) {
+            window.addEventListener('online', function cevrimici() {
+                window.removeEventListener('online', cevrimici);
+                kurulumGonder();
+            });
+            return;
+        }
+
+        var parca = String(durum).split('|');
+        var tur = parca[1];
+        var plt = PLATFORM_ETIKET[parca[2]] ? parca[2] : platform();
+        var yontem = parca[3] || '';
+        var veri = { platform: PLATFORM_ETIKET[plt], yontem: yontem };
+
+        // Önce işaretle: olay kuyruğa girdikten sonra tekrar sayılmasın
+        depoyaYaz(KURULUM_ANAHTAR, String(Date.now()));
+
+        if (tur === 'yeni') {
+            olay('kurulum', 'Uygulama telefona kuruldu', veri);
+            olay('kurulum/' + plt, 'Kurulum: ' + PLATFORM_ETIKET[plt], veri);
+        } else {
+            olay('kurulum-eski/' + plt, 'Önceden kurulmuş cihaz: ' + PLATFORM_ETIKET[plt], veri);
+        }
+    }
+
+    // (a) Tarayıcının kurulum sinyali. Dinleyici dosya yüklenir yüklenmez
+    // bağlanır; olay kuyrukta bekler, açılış kaydından sonra gönderilir.
+    window.addEventListener('appinstalled', function () {
+        var son = parseInt(depodanOku(KURULUM_ANAHTAR), 10);
+        // Aynı kurulum az önce (b) yoluyla sayıldıysa tekrar sayma.
+        // Daha eski bir damga varsa bu bir yeniden kurulumdur, sayılır.
+        if (son && Date.now() - son < 120000) return;
+        kurulumKaydet('yeni', 'appinstalled');
+    });
+
+    // (b) Kurulu olduğu görülen ama henüz sayılmamış cihaz.
+    function kurulumSiniflandir(yontem, oncedenGoruldu) {
+        if (depodanOku(KURULUM_ANAHTAR)) return;
+        var yeni = depoAyriMi()
+            // Ayrı depo: uygulama ilk kez açılıyorsa depo boştur → yeni kurulum.
+            // Depoda eski veri varsa uygulama bu sayımdan önce kurulmuştur.
+            ? (window.Store && window.Store.ilkAcilis === true)
+            // Ortak depo: bu sürüm tarayıcıda daha önce çalıştıysa ve kurulum
+            // hâlâ sayılmadıysa appinstalled kaçmıştır → yeni kurulum.
+            // Bu sürüm ilk kez çalışıyorsa uygulama zaten kuruluydu.
+            : oncedenGoruldu;
+        kurulumKaydet(yeni ? 'yeni' : 'eski', yontem);
+    }
+
+    function kurulumTespit() {
+        var oncedenGoruldu = depodanOku(SURUM_ANAHTAR) !== null;
+        if (!oncedenGoruldu) depoyaYaz(SURUM_ANAHTAR, bugun());
+
+        // Depo kalıcı değilse (gizli mod vb.) "ilk açılış" her seferinde
+        // doğru çıkar ve her açılış kurulum sayılırdı — hiç deneme.
+        if (!depoKalici()) return;
+
+        if (depodanOku(KURULUM_ANAHTAR)) {
+            kurulumGonder(); // önceki açılıştan bekleyen kayıt varsa
+            return;
+        }
+
+        if (uygulamaPenceresi()) {
+            kurulumSiniflandir('ilk-acilis', oncedenGoruldu);
+            return;
+        }
+
+        // Tarayıcıdayız: destekleyen tarayıcıda (Android Chrome) kurulu mu sor
+        try {
+            if (navigator.getInstalledRelatedApps) {
+                navigator.getInstalledRelatedApps().then(function (uygulamalar) {
+                    if (uygulamalar && uygulamalar.length) {
+                        kurulumSiniflandir('tarayici-tespit', oncedenGoruldu);
+                    }
+                }).catch(function () { /* desteklenmiyor */ });
+            }
+        } catch (e) { /* yoksay */ }
+    }
+
     window.OYAnalytics = {
         universiteSecildi: universiteSecildi,
         universiteMenuTiklandi: universiteMenuTiklandi,
@@ -331,10 +500,8 @@
 
         gunlukAktifUniversite();
 
-        // Kurulum tamamlandığı an (iOS bu olayı tetiklemez)
-        window.addEventListener('appinstalled', function () {
-            olay('kurulum', 'Uygulama telefona kuruldu');
-        });
+        // Kurulum: iPhone dahil, appinstalled gelmeyen durumları yakalar
+        kurulumTespit();
 
         // İlk '/' ana sayfa görüntülemesinin her iki sayaçta da önce kaydolması için kısa gecikme
         setTimeout(function () {

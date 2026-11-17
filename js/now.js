@@ -178,7 +178,7 @@ var NowOpen = window.NowOpen = {
                 const menu = APP_DATA.cankayaGenclikSofrasi.weeklyMenu || [];
                 const row = menu.find(d => d.date === this._dateStr(now));
                 if (row) item.dishes = row.items.slice();
-                else item.hint = 'Kızılay ve 100. Yıl · Adresler için dokun';
+                else item.hint = 'Güncel menü için dokun';
             } else if (slot.screen === 'external-etimesgut') {
                 item.hint = 'Günün menüsü için dokun (belediye sitesi)';
             } else if (slot.screen === 'cankaya-kent') {

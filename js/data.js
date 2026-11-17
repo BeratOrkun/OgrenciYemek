@@ -261,14 +261,16 @@ var APP_DATA = window.APP_DATA = {
     // Kaynaklar: Yeni Ankara (11 ve 16 Kasım 2026), Manşet Ankara (11 Kasım 2026)
     cankayaGenclikSofrasi: {
         title: 'Çankaya Gençlik Sofrası',
+        analyticsKey: 'cankaya-genclik-sofrasi',
         subtitle: 'Çankaya Belediyesi',
         hours: '17:30 - 19:00',
         days: 'Hafta içi her gün',
         price: 'Ücretsiz',
         description: "Ankara'da okuyan üniversite öğrencilerine ücretsiz sıcak akşam yemeği (4 çeşit).",
         eligibility: 'Öğrenci kimliğini göstermen yeterli; ayrıca başvuru gerekmiyor.',
-        phone: '444 06 01',
-        pageUrl: 'https://www.cankaya.bel.tr/',
+        // Belediye menüleri haftalık GÖRSEL olarak yayınlıyor (metin değil); otomatik
+        // çekilemez. Güncel menü için her zaman bu sayfaya yönlendirilir.
+        menuUrl: 'https://www.cankaya.bel.tr/sayfalar/menulerimiz',
         locations: [
             {
                 name: 'Çankaya Belediye Başkanlığı Yemekhanesi',
@@ -281,8 +283,10 @@ var APP_DATA = window.APP_DATA = {
                 mapQuery: '100. Yıl Çankaya Evi İşçi Blokları Mahallesi 1534. Cadde No:3/1 Çankaya Ankara'
             }
         ],
-        // Haftalık menü (belediyenin paylaştığı). Yalnızca tarihi BUGÜNE eşit olan
-        // gün gösterilir; hafta geçince otomatik olarak gizlenir.
+        // Haftalık menü — ELLE girildi (belediye görselinden), kendiliğinden
+        // GÜNCELLENMEZ. Yalnızca tarihi bugüne eşit gün gösterilir; hafta geçince
+        // gizlenir ve kullanıcı menuUrl'deki güncel menüye yönlendirilir.
+        // Yeni haftanın menüsü eklenmek istenirse buraya tarihli satır eklenir.
         weeklyMenu: [
             { date: '2026-11-16', items: ['Tarhana Çorbası', 'Karnıyarık', 'Pirinç Pilavı', 'Puding'] },
             { date: '2026-11-17', items: ['Kırmızı Mercimek Çorbası', 'Fırın Tavuk', 'Erişte', 'Meyve'] },
@@ -297,13 +301,13 @@ var APP_DATA = window.APP_DATA = {
     // saatler 2 Kasım 2026'dan itibaren geçerli)
     cankayaKentLokantasi: {
         title: 'Çankaya Kent Lokantası',
+        analyticsKey: 'cankaya-kent-lokantasi',
         subtitle: 'Çankaya Belediyesi',
         hours: '11:00 - 16:00',
         days: 'Hafta içi her gün',
         price: '115 ₺',
         description: 'Dört çeşit sıcak yemek uygun fiyata; su ve ekmek ücretsiz.',
-        phone: '444 06 01',
-        pageUrl: 'https://www.cankaya.bel.tr/hizmetler/kent-lokantalari',
+        menuUrl: 'https://www.cankaya.bel.tr/sayfalar/menulerimiz',
         locations: [
             {
                 name: 'Cebeci Kent Lokantası',

@@ -1055,13 +1055,15 @@ var Screens = window.Screens = {
 
             ${today ? `
                 <div class="section-title">Bugünün Menüsü</div>
-                <div class="gs-board mb-lg">
+                <div class="gs-board mb-md">
                     <div class="gs-dish-list">
                         ${today.items.map(d => this._renderGenclikDishRow(d)).join('')}
                     </div>
                     ${todayMenuNote ? `<div class="gs-board-foot">${esc(todayMenuNote)}</div>` : ''}
                 </div>
             ` : ''}
+
+            ${this._placeMenuButton(data, today)}
 
             ${data.eligibility ? `
                 <div class="place-note">
@@ -1084,13 +1086,23 @@ var Screens = window.Screens = {
                 </a>
             `).join('')}
 
-            <a href="${esc(data.pageUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-full mt-md mb-lg">
-                🔗 Çankaya Belediyesi sayfasını aç
-            </a>
-
-            <p class="text-muted text-center" style="font-size: 0.78rem;">
-                Bilgi: Çankaya İletişim Merkezi ${esc(data.phone)}. Saat ve fiyatlar belediye tarafından değiştirilebilir.
+            <p class="text-muted text-center mt-md" style="font-size: 0.78rem;">
+                Saat ve fiyatlar belediye tarafından değiştirilebilir.
             </p>
+        `;
+    },
+
+    // Menü uygulamada varsa: "Menü güncel değilse tıklayınız".
+    // Yoksa (hafta geçti / henüz girilmedi): güncel menünün yayınlandığı sayfaya git.
+    _placeMenuButton(data, today) {
+        if (!data.menuUrl) return '';
+        const label = today ? 'Menü güncel değilse tıklayınız' : 'Güncel menü için tıklayınız';
+        return `
+            <a href="${this._esc(data.menuUrl)}" target="_blank" rel="noopener noreferrer"
+               class="btn btn-secondary btn-full mb-lg place-menu-btn"
+               onclick="if(window.OYAnalytics)window.OYAnalytics.menuLinkiTiklandi('${this._esc(data.analyticsKey)}', ${today ? 'true' : 'false'})">
+                📋 ${label} <span aria-hidden="true">↗</span>
+            </a>
         `;
     },
 

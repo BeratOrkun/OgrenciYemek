@@ -353,6 +353,18 @@
             { kaynak: 'Ana menü kartı', hedef: 'etimesgut.bel.tr/ahi-kent-lokantasi' });
     }
 
+    // Çankaya sayfalarındaki "Menü güncel değilse / Güncel menü için tıklayınız"
+    // butonu (cankaya.bel.tr/sayfalar/menulerimiz açılır)
+    var MENU_LINK_SAYFALAR = {
+        'cankaya-genclik-sofrasi': 'Çankaya Gençlik Sofrası',
+        'cankaya-kent-lokantasi':  'Çankaya Kent Lokantası'
+    };
+    function menuLinkiTiklandi(sayfa, menuVardi) {
+        if (!MENU_LINK_SAYFALAR[sayfa]) return;
+        olay('dis-link/cankaya-menulerimiz', 'Çankaya menülerimiz sayfası açıldı',
+            { sayfa: MENU_LINK_SAYFALAR[sayfa], uygulamadaMenuVardi: menuVardi ? 'evet' : 'hayir' });
+    }
+
     // Instagram takip kartına tıklandığında
     function instagramTiklandi() {
         olay('instagram-tiklama', 'Instagram takip kartına tıklandı', { hesap: '@ogrenciyemek.com_' });
@@ -524,6 +536,7 @@
         sayfaAcildi: sayfaAcildi,
         instagramTiklandi: instagramTiklandi,
         etimesgutKentTiklandi: etimesgutKentTiklandi,
+        menuLinkiTiklandi: menuLinkiTiklandi,
         simdiAcikTiklandi: simdiAcikTiklandi
     };
 
@@ -534,6 +547,16 @@
             return;
         }
         baslatildi = true;
+
+        // Yavaş bağlantıda sayaç betiği ~10 sn'lik deneme süresinden sonra
+        // yüklenirse kuyruk bir sonraki olaya kadar beklemesin: betik
+        // yüklendiği anda deneme sayacı sıfırlanıp kuyruk boşaltılır.
+        try {
+            var gcBetik = document.querySelector('script[data-goatcounter]');
+            if (gcBetik) gcBetik.addEventListener('load', function () { denemeGC = 0; bosaltGC(); });
+            var umBetik = document.querySelector('script[data-website-id]');
+            if (umBetik) umBetik.addEventListener('load', function () { denemeUmami = 0; bosaltUmami(); });
+        } catch (e) { /* yoksay */ }
 
         if (uygulamadanMiAcildi()) {
             olay('uygulamadan-acilis', 'Kurulu uygulamadan açıldı', { ortam: 'Uygulama (PWA)' });

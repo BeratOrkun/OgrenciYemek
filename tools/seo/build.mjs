@@ -11,7 +11,7 @@
 //   • js/data.js (saatler, fiyatlar, adresler — uygulamayla tek kaynak)
 //   • KYK: github.com/BeratOrkun/kyk-yemek-api (81 il)
 //   • Gazi / Hacettepe / Ankü: beratorkun.github.io/uniyemekscrapper
-//   • ABB Gençlik Sofrası: sosyalhizmetler.ankara.bel.tr
+//   • ABB Gençlik Sofrası: menü tarayıcıda yüklenir (ABB sunuculara 403 veriyor)
 //
 // Önlem: bir kaynağa ulaşılamazsa o kaynağa bağlı sayfalar YAZILMAZ (eski hali
 // korunur). İçerik değişmediyse dosyaya dokunulmaz (gereksiz commit olmaz).
@@ -22,7 +22,7 @@ import path from "node:path";
 import vm from "node:vm";
 import crypto from "node:crypto";
 import {
-  SITE, fetchJson, fetchText, esc, clean, decodeEntities, niceCase,
+  SITE, fetchJson, esc, clean, niceCase,
   istanbulNow, addDays, weekday, trDate, mondayOf, renderPage, DAYS, MONTHS,
 } from "./lib.mjs";
 
@@ -30,7 +30,6 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", ".
 const MANIFEST = path.join(ROOT, "tools", "seo", "manifest.json");
 const KYK_API = "https://raw.githubusercontent.com/BeratOrkun/kyk-yemek-api/main/data";
 const UNI_API = "https://beratorkun.github.io/uniyemekscrapper/data";
-const ABB_URL = "https://sosyalhizmetler.ankara.bel.tr/hizmetler/genclik-sofralari";
 
 const { iso: TODAY } = istanbulNow();
 const log = (...a) => console.log(...a);
@@ -448,67 +447,92 @@ function ankuPage(D, json) {
   };
 }
 
-/* ---------------- ABB Gençlik Sofrası (sosyalhizmetler sayfası) ---------------- */
+/* ---------------- ABB Gençlik Sofrası ---------------- */
+// Not: ABB sitesi GitHub sunucularına 403 veriyor; bu yüzden menü sunucuda
+// sayfaya işlenmez. Sayfa tarihsiz, hiç eskimeyen bilgileri içerir; günün menüsü
+// ziyaretçinin tarayıcısında (uygulamadaki yöntemle) yüklenir. Yüklenemezse resmi
+// bağlantı görünür kalır. Böylece yanlış/bayat "bugün" menüsü asla yayımlanmaz.
 
-function parseAbbWeek(html) {
-  const sec = html.match(/<div class="hz-gs-hafta">([\s\S]*?)<\/ol>/);
-  if (!sec) return [];
-  const yearM = decodeEntities(sec[1]).match(/(\d{4})/);
-  const year = yearM ? Number(yearM[1]) : Number(TODAY.slice(0, 4));
-  const fold = (s) => s.toLocaleLowerCase("tr");
-  const out = [];
-  for (const li of sec[1].matchAll(/<li[^>]*>([\s\S]*?)<\/li>/g)) {
-    const gun = li[1].match(/<span class="hz-gs-gun">([\s\S]*?)<small>([\s\S]*?)<\/small>/);
-    const yem = li[1].match(/<span class="hz-gs-yemekler">([\s\S]*?)<\/span>/);
-    if (!gun || !yem) continue;
-    const dayName = clean(decodeEntities(gun[1].replace(/<[^>]+>/g, "")));
-    const dm = clean(decodeEntities(gun[2])).match(/^(\d{1,2})\s+(\S+)/);
-    if (!dm) continue;
-    const month = MONTHS.findIndex((m) => fold(m) === fold(dm[2])) + 1;
-    if (!month) continue;
-    const iso = `${year}-${String(month).padStart(2, "0")}-${dm[1].padStart(2, "0")}`;
-    if (DAYS[weekday(iso)] !== dayName) continue; // gün adı tarihle uyuşmuyorsa alma
-    const dishes = decodeEntities(yem[1].replace(/<[^>]+>/g, " "))
-      .split(/\s*[·•|]\s*/)
-      .map((d) => niceCase(d))
-      .filter((d) => d && !/^[-–—\s]*$/.test(d));
-    if (dishes.length) out.push({ iso, dishes });
+const GENCLIK_LIVE_SCRIPT = `<script>
+(function () {
+  var box = document.getElementById("gs-live"), note = document.getElementById("gs-live-note");
+  if (!box || !window.fetch || !window.DOMParser) return;
+  var U = "https://sosyalhizmetler.ankara.bel.tr/hizmetler/genclik-sofralari";
+  var P = [function (u) { return u; },
+           function (u) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
+           function (u) { return "https://corsproxy.io/?url=" + encodeURIComponent(u); }];
+  var M = ["ocak","şubat","mart","nisan","mayıs","haziran","temmuz","ağustos","eylül","ekim","kasım","aralık"];
+  var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+  var d = new Date(), today = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  var esc = function (x) { return String(x).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var tc = function (x) {
+    x = x.replace(/\\s+/g, " ").trim();
+    if (x !== x.toLocaleUpperCase("tr")) return x;
+    return x.toLocaleLowerCase("tr").replace(/\\s*\\+\\s*/g, " + ").replace(/(^|[\\s(\\/+-])(\\S)/g, function (m, p, c) { return p + c.toLocaleUpperCase("tr"); });
+  };
+  function parse(html) {
+    var sec = new DOMParser().parseFromString(html, "text/html").querySelector(".hz-gs-hafta");
+    if (!sec) return null;
+    var yr = (sec.textContent.match(/(\\d{4})/) || [])[1] || String(d.getFullYear()), out = null;
+    sec.querySelectorAll("li").forEach(function (li) {
+      var sm = li.querySelector(".hz-gs-gun small"), ym = li.querySelector(".hz-gs-yemekler");
+      if (!sm || !ym) return;
+      var m = sm.textContent.trim().toLocaleLowerCase("tr").match(/^(\\d{1,2})\\s+(\\S+)/);
+      if (!m || M.indexOf(m[2]) < 0) return;
+      if (yr + "-" + pad(M.indexOf(m[2]) + 1) + "-" + pad(+m[1]) === today) {
+        out = ym.textContent.split(/\\s*[·•|]\\s*/).map(tc).filter(Boolean);
+      }
+    });
+    return out;
   }
-  return out;
-}
+  (async function () {
+    for (var i = 0; i < P.length; i++) {
+      try {
+        var c = new AbortController(), t = setTimeout(function () { c.abort(); }, 8000);
+        var r = await fetch(P[i](U), { signal: c.signal });
+        clearTimeout(t);
+        if (!r.ok) continue;
+        var items = parse(await r.text());
+        if (items && items.length) {
+          box.innerHTML = '<ul class="s-dishes">' + items.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>";
+          box.hidden = false;
+          if (note) note.hidden = true;
+          return;
+        }
+      } catch (e) { /* sıradaki yolu dene */ }
+    }
+  })();
+})();
+</script>`;
 
-function genclikPage(D, abbHtml) {
+function genclikPage(D) {
   const g = D.genclikSofrasi;
-  const week = abbHtml ? parseAbbWeek(abbHtml) : [];
-  const todayRow = week.find((w) => w.iso === TODAY);
-  const later = week.filter((w) => w.iso > TODAY);
   const hours = hoursText(String(g.hours).replace(/\s*\(.*\)\s*/, ""));
   return {
     key: "genclik",
     path: "/genclik-sofrasi/",
     title: "Gençlik Sofrası Menü Bugün – Ankara Gençlik Sofrası Saatleri ve Kayıt",
-    description: `Ankara Gençlik Sofrası menüsü${todayRow ? ` (bugün: ${todayRow.dishes.slice(0, 2).join(", ")})` : ""}, saatleri (hafta içi ${hours}), Sıhhiye, Kızılay, Anıttepe ve Gazi Mahallesi adresleri, kayıt.`,
+    description: `Ankara Gençlik Sofrası menü, saatleri (hafta içi ${hours}), Sıhhiye, Kızılay, Anıttepe ve Gazi Mahallesi adresleri ve kayıt bilgisi. Öğrencilere ücretsiz.`,
     h1: "Ankara Gençlik Sofrası Menüsü",
-    lead: "Gençlik Sofrası menü, saatleri ve kayıt bilgisi: Ankara Büyükşehir Belediyesi'nin üniversite öğrencilerine hafta içi her akşam verdiği ücretsiz sıcak yemek; günün menüsü, haftalık liste ve hizmet noktaları (Sıhhiye, Kızılay, Anıttepe, Gazi Mahallesi).",
+    lead: "Gençlik Sofrası menü, saatleri ve kayıt bilgisi: Ankara Büyükşehir Belediyesi'nin üniversite öğrencilerine hafta içi her akşam verdiği ücretsiz sıcak yemek; günün menüsü ve hizmet noktaları (Sıhhiye, Kızılay, Anıttepe, Gazi Mahallesi).",
     crumbs: [{ name: "Ücretsiz yemek", path: "/ankara-ogrenci-ucretsiz-yemek/" }, { name: "Gençlik Sofrası", path: "/genclik-sofrasi/" }],
     body: `
-<section class="s-card${todayRow ? " s-today" : ""}"><h2>Bugün · ${esc(trDate(TODAY))}</h2>${todayRow
-      ? mealBlock("🍲 Akşam yemeği", hours, null, dishList(todayRow.dishes))
-      : note(weekday(TODAY) % 6 === 0 ? "Gençlik Sofrası hafta sonu hizmet vermez." : "Bugünün menüsü henüz yayımlanmadı ya da alınamadı. Güncel menü için ABB sayfasına bakabilirsin.")}</section>
-${later.length ? `<section class="s-sec"><h2>Bu haftanın Gençlik Sofrası menüsü</h2><div class="s-days">${later
-      .map((w) => `<article class="s-day"><h3>${esc(trDate(w.iso, { year: false }))}</h3><p>${esc(w.dishes.join(", "))}</p></article>`).join("")}</div></section>` : ""}
-<section class="s-sec"><h2>Saatler ve kayıt</h2>${infoGrid([
+<section class="s-card"><h2>Günün Gençlik Sofrası menüsü</h2>
+<div id="gs-live" hidden></div>
+<p class="s-note" id="gs-live-note">Günün menüsü ABB'nin <a href="${esc(g.pageUrl)}" rel="noopener">Gençlik Sofraları sayfasında</a> yayımlanır; ÖğrenciYemek uygulamasında da her gün otomatik görünür. Gençlik Sofrası hafta sonu hizmet vermez.</p>
+</section>
+<section class="s-sec"><h2>Gençlik Sofrası saatleri ve kayıt</h2>${infoGrid([
       ["Saat", `${esc(hours)} (hafta içi)`],
       ["Ücret", "Ücretsiz"],
       ["Kimler yararlanabilir", "Ankara'da okuyan üniversite öğrencileri"],
       ["Kayıt", "TC kimlik kartı veya öğrenci kimliği ile karekod sistemi üzerinden başvuru yapılır."],
     ])}</section>
-<section class="s-sec"><h2>Gençlik Sofrası noktaları</h2><ul class="s-places">${g.locations
+<section class="s-sec"><h2>Gençlik Sofrası nerede?</h2><ul class="s-places">${g.locations
       .map((l) => `<li><b>${esc(l.name)}</b><span>${esc(l.address)}</span><a href="${esc(mapsUrl(`${l.name} ${l.address} Ankara`))}" rel="noopener">Haritada aç</a></li>`).join("")}</ul></section>
-<section class="s-sec"><h2>Resmi kaynak</h2>${note(`Güncel menü ve duyurular: <a href="${esc(g.pageUrl)}" rel="noopener">ABB Sosyal Hizmetler — Gençlik Sofraları</a>.`)}</section>`,
+${GENCLIK_LIVE_SCRIPT}`,
     app: { screen: "genclik", ctaText: "Gençlik Sofrası menüsünü uygulamada aç" },
     faq: [
-      { q: "Gençlik Sofrası menüsü nereden görülür?", a: "Ankara Gençlik Sofrası menüsü bu sayfada ve ÖğrenciYemek uygulamasında günlük ve haftalık olarak yer alır; resmi kaynak ABB Sosyal Hizmetler sayfasıdır." },
+      { q: "Gençlik Sofrası menüsü nereden görülür?", a: "Ankara Gençlik Sofrası menüsü ABB Sosyal Hizmetler sayfasında yayımlanır; bu sayfada ve ÖğrenciYemek uygulamasında günün menüsü otomatik gösterilir." },
       { q: "Gençlik Sofrası saat kaçta?", a: `Gençlik Sofrası hafta içi her gün ${hours} saatleri arasında hizmet verir.` },
       { q: "Gençlik Sofrası ücretli mi?", a: "Hayır, Ankara'da okuyan üniversite öğrencileri için ücretsizdir." },
       { q: "Gençlik Sofrası nerede?", a: `Hizmet noktaları: ${g.locations.map((l) => `${l.name} (${l.address})`).join("; ")}.` },
@@ -519,7 +543,7 @@ ${later.length ? `<section class="s-sec"><h2>Bu haftanın Gençlik Sofrası men�
     related: [
       { href: "/cankaya-genclik-sofrasi/", text: "Çankaya Gençlik Sofrası" },
       { href: "/ankara-ogrenci-ucretsiz-yemek/", text: "Ankara'da öğrencilere ücretsiz yemek" },
-      { href: "/kyk-yemek-listesi/ankara/", text: "Ankara KYK yemek listesi" },
+      { href: "/kyk-yemek-listesi/ankara/", text: "KYK menü Ankara" },
     ],
   };
 }
@@ -769,14 +793,13 @@ const hash = (s) => crypto.createHash("sha256").update(s).digest("hex").slice(0,
 
 async function main() {
   const D = await loadAppData();
-  const [kykToday, kykArchive, gazi, hu1, hu2, anku, abbHtml] = await Promise.all([
+  const [kykToday, kykArchive, gazi, hu1, hu2, anku] = await Promise.all([
     safe("KYK bugün", () => fetchJson(`${KYK_API}/kyk_today.json`)),
     safe("KYK arşiv", () => fetchJson(`${KYK_API}/kyk_menus.json`)),
     safe("Gazi", () => fetchJson(`${UNI_API}/gazi.json`)),
     safe("Hacettepe Beytepe", () => fetchJson(`${UNI_API}/hacettepe-1.json`)),
     safe("Hacettepe Sıhhiye", () => fetchJson(`${UNI_API}/hacettepe-2.json`)),
     safe("Ankara Üniversitesi", () => fetchJson(`${UNI_API}/anku.json`)),
-    safe("ABB Gençlik Sofrası", () => fetchText(ABB_URL)),
   ]);
 
   const kykAnkara = kykToday?.date === TODAY ? kykMeal(kykToday.menus?.ankara?.dinner) : kykMeal(kykArchive?.by_date?.[TODAY]?.ankara?.dinner);
@@ -786,7 +809,7 @@ async function main() {
     gazi && gaziPage(D, gazi),
     (hu1 || hu2) && hacettepePage(D, hu1, hu2),
     anku && ankuPage(D, anku),
-    genclikPage(D, abbHtml),
+    genclikPage(D),
     cankayaGenclikPage(D),
     cankayaKentPage(D),
     etimesgutKentPage(D),

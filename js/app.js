@@ -100,6 +100,11 @@ var App = window.App = {
             try {
                 if (window.GaziMenu) GaziMenu.load().then(refreshNow).catch(() => {});
             } catch { /* yoksay */ }
+
+            // Seçili üniversite Hacettepe / Ankü ise onun menüsü
+            try {
+                if (window.UniMenus) UniMenus.prefetchSelected().then(refreshNow).catch(() => {});
+            } catch { /* yoksay */ }
         };
 
         // İlk boyamayı geciktirmemek için boşta çalıştır
@@ -312,6 +317,11 @@ var App = window.App = {
                     GaziMenu.render(targetEl);
                     break;
 
+                case 'hacettepe':
+                case 'anku':
+                    UniMenus.render(targetEl, screenId);
+                    break;
+
                 case 'cankaya-genclik':
                     Screens.renderCankayaGenclikScreen(targetEl);
                     break;
@@ -508,6 +518,15 @@ var App = window.App = {
 
         this.closeUniPicker();
         this.renderHome();
+
+        // Yeni seçilen üniversitenin menüsü uygulamadaysa çekip "Şu an" kartını tazele
+        try {
+            if (window.UniMenus) {
+                UniMenus.prefetchSelected().then(() => {
+                    if (this.currentScreen === 'home' && window.NowOpen) NowOpen.render();
+                }).catch(() => {});
+            }
+        } catch { /* yoksay */ }
     }
 };
 

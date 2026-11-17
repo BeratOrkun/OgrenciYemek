@@ -196,6 +196,14 @@ var NowOpen = window.NowOpen = {
                         item.hint = null;
                     }
                     item.screen = 'gazi';
+                } else if (uni && uni.inApp && window.UniMenus && UniMenus.UNIS[uni.inApp]) {
+                    // Hacettepe / Ankara Üniversitesi (uniyemekscrapper verisi)
+                    const d = UniMenus.todayDishes(uni.inApp);
+                    if (d && d.length) {
+                        item.dishes = d;
+                        item.hint = null;
+                    }
+                    item.screen = uni.inApp;
                 }
             }
 

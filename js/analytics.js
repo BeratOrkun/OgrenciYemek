@@ -301,7 +301,9 @@
         millet:       { sayfaYolu: '/millet-kutuphanesi',   baslik: 'Millet Kütüphanesi' },
         'cankaya-genclik': { sayfaYolu: '/cankaya-genclik-sofrasi', baslik: 'Çankaya Gençlik Sofrası' },
         'cankaya-kent':    { sayfaYolu: '/cankaya-kent-lokantasi',  baslik: 'Çankaya Kent Lokantası' },
-        gazi:              { sayfaYolu: '/gazi-yemek-menusu',       baslik: 'Gazi Üniversitesi Yemek Menüsü' }
+        gazi:              { sayfaYolu: '/gazi-yemek-menusu',       baslik: 'Gazi Üniversitesi Yemek Menüsü' },
+        hacettepe:         { sayfaYolu: '/hacettepe-yemek-menusu',  baslik: 'Hacettepe Üniversitesi Yemek Menüsü' },
+        anku:              { sayfaYolu: '/ankara-universitesi-yemek-menusu', baslik: 'Ankara Üniversitesi Yemek Menüsü' }
     };
 
     function sayfaAcildi(ekranKodu) {
@@ -368,6 +370,18 @@
 
     // Gazi menü ekranındaki "Menü güncel değilse tıklayınız" butonu
     // (mediko.gazi.edu.tr yemek listesi açılır)
+    // Hacettepe / Ankü ekranlarındaki "Menü güncel değilse tıklayınız" butonu
+    var RESMI_MENU = {
+        hacettepe: { ad: 'hacettepe-resmi-menu', baslik: 'Hacettepe Üniversitesi' },
+        anku:      { ad: 'anku-resmi-menu',      baslik: 'Ankara Üniversitesi' }
+    };
+    function resmiMenuLinkiTiklandi(uni, menuVardi) {
+        var b = RESMI_MENU[uni];
+        if (!b) return;
+        olay('dis-link/' + b.ad, b.baslik + ' resmi menü sayfası açıldı',
+            { sayfa: b.baslik, uygulamadaMenuVardi: menuVardi ? 'evet' : 'hayir' });
+    }
+
     function gaziMenuLinkiTiklandi(menuVardi) {
         olay('dis-link/gazi-yemek-listesi', 'Gazi resmi yemek listesi açıldı',
             { sayfa: 'Gazi Üniversitesi', uygulamadaMenuVardi: menuVardi ? 'evet' : 'hayir' });
@@ -546,6 +560,7 @@
         etimesgutKentTiklandi: etimesgutKentTiklandi,
         menuLinkiTiklandi: menuLinkiTiklandi,
         gaziMenuLinkiTiklandi: gaziMenuLinkiTiklandi,
+        resmiMenuLinkiTiklandi: resmiMenuLinkiTiklandi,
         simdiAcikTiklandi: simdiAcikTiklandi
     };
 

@@ -16,8 +16,10 @@ var APP_DATA = window.APP_DATA = {
             type: 'Devlet',
             menuStatus: 'available', // ✅
             menuUrl: 'https://sks.ankara.edu.tr/yemek-hizmetleri-2/',
+            // Menü uygulama içinde (js/unimenu.js — uniyemekscrapper verisi)
+            inApp: 'anku',
             accessChannel: '✅ Açık Menü',
-            note: 'Öğle, akşam ve vejetaryen menüler ayrı listeler halinde yayınlanır. Aylık menü indirilebilir.',
+            note: "Aylık öğle menüsü ogrenciyemek.com'da: çorba, ana yemek, yardımcı yemek ve kalori.",
             icon: '🏛️'
         },
         {
@@ -40,8 +42,10 @@ var APP_DATA = window.APP_DATA = {
             type: 'Devlet',
             menuStatus: 'available', // ✅
             menuUrl: 'https://beslenme.hacettepe.edu.tr/',
+            // Menü uygulama içinde (js/unimenu.js — uniyemekscrapper verisi)
+            inApp: 'hacettepe',
             accessChannel: '✅ Açık Menü',
-            note: 'Günlük/haftalık/aylık görünüm; öğle, akşam ve vegan menüler; alerjen kodları ve kalori bilgisi.',
+            note: "Beytepe ve Sıhhiye menüleri ogrenciyemek.com'da: kahvaltı, öğle, akşam, vegan; kalori ve alerjen.",
             icon: '🏛️'
         },
         {

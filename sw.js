@@ -1,5 +1,5 @@
 // ÖğrenciYemek Service Worker
-const CACHE_NAME = 'ogrenciyemek-v45';
+const CACHE_NAME = 'ogrenciyemek-v46';
 
 // Göreceli yollar: SW'nin bulunduğu dizine göre çözümlenir, böylece
 // hem alan adı kökünde hem de /OgrenciYemek/ alt dizininde çalışır.
@@ -7,21 +7,21 @@ const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './css/style.css',
-    './css/style.css?v=45',
+    './css/style.css?v=46',
     './js/storage.js',
-    './js/storage.js?v=45',
+    './js/storage.js?v=46',
     './js/analytics.js',
-    './js/analytics.js?v=45',
+    './js/analytics.js?v=46',
     './js/app.js',
-    './js/app.js?v=45',
+    './js/app.js?v=46',
     './js/data.js',
-    './js/data.js?v=45',
+    './js/data.js?v=46',
     './js/screens.js',
-    './js/screens.js?v=45',
+    './js/screens.js?v=46',
     './js/unimenu.js',
-    './js/unimenu.js?v=45',
+    './js/unimenu.js?v=46',
     './js/now.js',
-    './js/now.js?v=45',
+    './js/now.js?v=46',
     './manifest.json',
     './manifest.json?v=15',
     './icons/icon-192.png',
@@ -162,9 +162,16 @@ self.addEventListener('fetch', (event) => {
                     new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2500))
                 ]);
                 if (cachelenebilir(agYaniti)) {
+                    // Ek güvenlik: önbelleğe yalnızca gerçek uygulama kabuğu yazılır.
+                    // (Eski sürümlerde başka bir sayfa buraya yazılabiliyor ve uygulama
+                    // o sayfayla açılabiliyordu.)
                     const kopya = agYaniti.clone();
-                    caches.open(CACHE_NAME)
-                        .then((cache) => cache.put('./index.html', kopya))
+                    kopya.text()
+                        .then((html) => {
+                            if (!html.includes('id="home-screen"')) return;
+                            return caches.open(CACHE_NAME).then((cache) => cache.put('./index.html',
+                                new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })));
+                        })
                         .catch(() => {});
                     return agYaniti;
                 }

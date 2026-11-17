@@ -1,7 +1,7 @@
 // SEO sayfa üreticisi — ortak yardımcılar ve sayfa iskeleti (bağımlılık yok)
 
 export const SITE = "https://ogrenciyemek.com";
-export const SEO_CSS_VERSION = "6";
+export const SEO_CSS_VERSION = "7";
 
 const UA = "Mozilla/5.0 (compatible; ogrenciyemek-seo/1.0; +https://ogrenciyemek.com)";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -180,11 +180,12 @@ export function renderPage(page, updatedIso) {
     { sayfa: page.path, konum }
   );
 
-  return `<!doctype html>
+  return (`<!doctype html>
 <html lang="tr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>/* Kurulu uygulamanın içinde açıldıysa bu sayfayı değil, uygulamanın ilgili ekranını göster */(function(){try{if((window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true)location.replace(${JSON.stringify("__APPHREF__")});}catch(e){}})();</script>
 <title>${esc(page.title)}</title>
 <meta name="description" content="${esc(page.description)}">
 <meta name="robots" content="index, follow, max-image-preview:large">
@@ -205,6 +206,9 @@ ${page.noindex ? "" : `<link rel="canonical" href="${esc(url)}">`}
 <link rel="icon" href="/icons/favicon-32.png?v=15" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=15">
 <link rel="manifest" href="/manifest.json?v=15">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
 <link rel="stylesheet" href="/seo/seo.css?v=${SEO_CSS_VERSION}">
 <script type="application/ld+json">${jsonld}</script>
 </head>
@@ -232,5 +236,5 @@ ${relatedHtml(page.related)}
 </footer>${COUNTERS}
 </body>
 </html>
-`;
+`).replace('"__APPHREF__"', JSON.stringify(appHref));
 }

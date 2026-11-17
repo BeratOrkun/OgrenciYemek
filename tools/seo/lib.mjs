@@ -102,7 +102,15 @@ export function clampText(s, max = 155) {
 
 const COUNTERS = `
 <script data-goatcounter="https://beratorkune.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script defer src="https://cloud.umami.is/script.js" data-website-id="0fcc0f5a-49ce-4bdb-88b7-55492e04d394" data-exclude-search="true" data-exclude-hash="true"></script>`;
+<script defer src="https://cloud.umami.is/script.js" data-website-id="0fcc0f5a-49ce-4bdb-88b7-55492e04d394" data-tag="seo-sayfasi" data-exclude-search="true" data-exclude-hash="true"></script>`;
+
+// Tıklama ölçümü (JS gerekmez): GoatCounter data-goatcounter-click, Umami data-umami-event.
+// Olay adları iki panelde birebir aynıdır (≤ 50 karakter).
+export function trackAttrs(name, title, props = {}) {
+  const n = String(name).slice(0, 50);
+  return ` data-goatcounter-click="${esc(n)}" data-goatcounter-title="${esc(title)}" data-umami-event="${esc(n)}"` +
+    Object.entries(props).map(([k, v]) => ` data-umami-event-${k}="${esc(String(v).slice(0, 100))}"`).join("");
+}
 
 export function faqHtml(faq) {
   if (!faq?.length) return "";
@@ -165,6 +173,12 @@ export function renderPage(page, updatedIso) {
   const jsonld = JSON.stringify({ "@context": "https://schema.org", "@graph": graph }).replace(/</g, "\\u003c");
 
   const appHref = page.app?.screen ? `/?ekran=${encodeURIComponent(page.app.screen)}` : "/";
+  // "Uygulamada aç" ölçümü: hangi SEO sayfasından uygulamaya geçildi
+  const appTrack = (konum) => trackAttrs(
+    `seo-uygulamaya-gecis/${page.app?.screen || "ana-sayfa"}`,
+    `SEO sayfasından uygulamaya geçiş: ${page.h1}`,
+    { sayfa: page.path, konum }
+  );
 
   return `<!doctype html>
 <html lang="tr">
@@ -174,7 +188,7 @@ export function renderPage(page, updatedIso) {
 <title>${esc(page.title)}</title>
 <meta name="description" content="${esc(page.description)}">
 <meta name="robots" content="index, follow, max-image-preview:large">
-<link rel="canonical" href="${esc(url)}">
+${page.noindex ? "" : `<link rel="canonical" href="${esc(url)}">`}
 <meta name="theme-color" content="#15102b">
 <meta name="color-scheme" content="dark">
 <meta property="og:type" content="website">
@@ -197,7 +211,7 @@ export function renderPage(page, updatedIso) {
 <body>
 <header class="s-top">
   <a class="s-brand" href="/"><img src="/icons/icon-192.png?v=15" width="30" height="30" alt="">ÖğrenciYemek</a>
-  <a class="s-open" href="${appHref}">${esc(page.app?.label || "Uygulamada aç")}</a>
+  <a class="s-open" href="${appHref}"${appTrack("ust-cubuk")}>${esc(page.app?.label || "Uygulamada aç")}</a>
 </header>
 <main class="s-main">
 <nav class="s-crumbs" aria-label="Sayfa yolu">${crumbs
@@ -207,7 +221,7 @@ export function renderPage(page, updatedIso) {
 <p class="s-lead">${page.leadHtml || esc(page.lead)}</p>
 <p class="s-updated">Son güncelleme: <time datetime="${updatedIso}">${esc(trDate(updatedIso, { day: false }))}</time></p>
 ${page.body || ""}
-<a class="s-cta" href="${appHref}">📲 ${esc(page.app?.ctaText || "ÖğrenciYemek uygulamasında aç")}</a>
+<a class="s-cta" href="${appHref}"${appTrack("alt-buton")}>📲 ${esc(page.app?.ctaText || "ÖğrenciYemek uygulamasında aç")}</a>
 ${faqHtml(page.faq)}
 ${relatedHtml(page.related)}
 </main>

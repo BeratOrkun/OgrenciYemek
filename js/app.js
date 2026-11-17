@@ -71,7 +71,10 @@ var App = window.App = {
         // (geri tuşu ana ekrana döner). Yalnızca bilinen ekranlar kabul edilir.
         try {
             const ekran = new URLSearchParams(window.location.search).get('ekran');
-            if (ekran && this.DEEP_LINK_SCREENS.includes(ekran)) this.showScreen(ekran);
+            if (ekran && this.DEEP_LINK_SCREENS.includes(ekran)) {
+                try { if (window.OYAnalytics) window.OYAnalytics.derinBaglanti(ekran); } catch { /* yoksay */ }
+                this.showScreen(ekran);
+            }
         } catch { /* eski tarayıcı — ana ekranda kal */ }
 
         // Menüleri arka planda hazırla (ilk açılışta da)

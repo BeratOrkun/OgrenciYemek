@@ -5,11 +5,12 @@
 // ve Umami script'leri tarafından otomatik sayılır.
 //
 // Bu modül:
-// 1) Alt menü ekranlarını (/universite-yemekleri, /kyk-yemekleri,
-//    /genclik-sofrasi, /millet-kutuphanesi) her iki sayaca birebir
+// 1) Uygulama ekranlarını (/uygulama/kyk-yemekleri, /uygulama/genclik-sofrasi …)
+//    her iki sayaca birebir
 //    Sayfa Görüntülemesi (Pageview) olarak gönderir.
 // 2) Özel olayları (uygulamadan-acilis, kurulum, uni-secim/*,
-//    uni-aktif/*, uni-menu/*, simdi-acik/*, dis-link/*, instagram-tiklama) her iki sayaca
+//    uni-aktif/*, uni-menu/*, simdi-acik/*, dis-link/*, derin-baglanti/*,
+//    instagram-tiklama) her iki sayaca
 //    birebir Olay (Event) olarak gönderir.
 // 3) İki sayacı iki bağımsız kuyrukla (kuyrukGC, kuyrukUmami)
 //    birbirinden tamamen izole çalıştırır; dış yönlendirmelerin
@@ -130,7 +131,10 @@
             while (kuyrukUmami.length) {
                 var oge = kuyrukUmami.shift();
                 try {
-                    if (oge.tip === 'sayfa') {
+                    if (oge.tip === 'kimlik') {
+                        // Oturum özellikleri: Umami'de tüm metrikleri üniversiteye göre süzmek için
+                        if (typeof window.umami.identify === 'function') window.umami.identify(oge.veri);
+                    } else if (oge.tip === 'sayfa') {
                         (function (hedefYol, hedefBaslik) {
                             window.umami.track(function (props) {
                                 return Object.assign({}, props, {
@@ -279,9 +283,30 @@
     }
 
     // Kullanıcı üniversitesini seçtiğinde / değiştirdiğinde
+    // Umami oturumuna üniversite ve ortam bilgisi (Umami → Oturumlar/Özellikler'den süzülür)
+    function umamiKimlik() {
+        var ad = depodanOku(UNI_ANAHTAR);
+        kuyrukUmami.push({
+            tip: 'kimlik',
+            veri: {
+                universite: (ad && typeof ad === 'string') ? ad : 'Seçilmedi',
+                ortam: uygulamadanMiAcildi() ? 'Uygulama (PWA)' : 'Web tarayıcı',
+                platform: platform() === 'ios' ? 'iPhone/iPad' : platform() === 'android' ? 'Android' : 'Masaüstü'
+            }
+        });
+        bosaltUmami();
+    }
+
+    // SEO sayfasındaki "Uygulamada aç" ile gelen ziyaret (/?ekran=kyk)
+    function derinBaglanti(ekran) {
+        if (!ekran) return;
+        olay('derin-baglanti/' + kisaAd(ekran), 'Bağlantıyla doğrudan ekran açıldı: ' + ekran, { ekran: ekran });
+    }
+
     function universiteSecildi(ad) {
         if (!ad) return;
         olay('uni-secim/' + kisaAd(ad), 'Üniversite seçildi: ' + ad, { universite: ad });
+        umamiKimlik();
         // İlk kez bugün seçim yapan öğrenci de bugünün aktif öğrencileri arasında sayılsın
         gunlukAktifUniversite();
     }
@@ -295,15 +320,18 @@
     // Ana menü sayfalarına (Üniversite, KYK, Gençlik, Millet) girildiğinde
     // Her iki sayaca da 1 adet gerçek Pageview gönderilir (çift sayım yapılmaz).
     var SAYFA_HARITASI = {
-        universities: { sayfaYolu: '/universite-yemekleri', baslik: 'Üniversite Yemekleri' },
-        kyk:          { sayfaYolu: '/kyk-yemekleri',        baslik: 'KYK Yemekleri' },
-        genclik:      { sayfaYolu: '/genclik-sofrasi',      baslik: 'Gençlik Sofrası' },
-        millet:       { sayfaYolu: '/millet-kutuphanesi',   baslik: 'Millet Kütüphanesi' },
-        'cankaya-genclik': { sayfaYolu: '/cankaya-genclik-sofrasi', baslik: 'Çankaya Gençlik Sofrası' },
-        'cankaya-kent':    { sayfaYolu: '/cankaya-kent-lokantasi',  baslik: 'Çankaya Kent Lokantası' },
-        gazi:              { sayfaYolu: '/gazi-yemek-menusu',       baslik: 'Gazi Üniversitesi Yemek Menüsü' },
-        hacettepe:         { sayfaYolu: '/hacettepe-yemek-menusu',  baslik: 'Hacettepe Üniversitesi Yemek Menüsü' },
-        anku:              { sayfaYolu: '/ankara-universitesi-yemek-menusu', baslik: 'Ankara Üniversitesi Yemek Menüsü' }
+        // Uygulama içi ekranlar "/uygulama/…" altında sayılır. Google'dan gelinen
+        // SEO sayfaları ("/genclik-sofrasi/" gibi) kendi gerçek adresleriyle sayılır;
+        // böylece panelde ikisi asla karışmaz.
+        universities: { sayfaYolu: '/uygulama/universite-yemekleri', baslik: 'Uygulama · Üniversite Yemekleri' },
+        kyk:          { sayfaYolu: '/uygulama/kyk-yemekleri',        baslik: 'Uygulama · KYK Yemekleri' },
+        genclik:      { sayfaYolu: '/uygulama/genclik-sofrasi',      baslik: 'Uygulama · Gençlik Sofrası' },
+        millet:       { sayfaYolu: '/uygulama/millet-kutuphanesi',   baslik: 'Uygulama · Millet Kütüphanesi' },
+        'cankaya-genclik': { sayfaYolu: '/uygulama/cankaya-genclik-sofrasi', baslik: 'Uygulama · Çankaya Gençlik Sofrası' },
+        'cankaya-kent':    { sayfaYolu: '/uygulama/cankaya-kent-lokantasi',  baslik: 'Uygulama · Çankaya Kent Lokantası' },
+        gazi:              { sayfaYolu: '/uygulama/gazi-yemek-menusu',       baslik: 'Uygulama · Gazi Üniversitesi Yemek Menüsü' },
+        hacettepe:         { sayfaYolu: '/uygulama/hacettepe-yemek-menusu',  baslik: 'Uygulama · Hacettepe Yemek Menüsü' },
+        anku:              { sayfaYolu: '/uygulama/ankara-universitesi-yemek-menusu', baslik: 'Uygulama · Ankara Üniversitesi Yemek Menüsü' }
     };
 
     function sayfaAcildi(ekranKodu) {
@@ -555,7 +583,8 @@
         etimesgutKentTiklandi: etimesgutKentTiklandi,
         menuLinkiTiklandi: menuLinkiTiklandi,
         resmiMenuLinkiTiklandi: resmiMenuLinkiTiklandi,
-        simdiAcikTiklandi: simdiAcikTiklandi
+        simdiAcikTiklandi: simdiAcikTiklandi,
+        derinBaglanti: derinBaglanti
     };
 
     var baslatildi = false;
@@ -583,6 +612,7 @@
         }
 
         gunlukAktifUniversite();
+        umamiKimlik();
 
         // Kurulum: iPhone dahil, appinstalled gelmeyen durumları yakalar
         kurulumTespit();

@@ -22,7 +22,7 @@ import path from "node:path";
 import vm from "node:vm";
 import crypto from "node:crypto";
 import {
-  SITE, fetchJson, esc, clean, niceCase,
+  SITE, fetchJson, esc, clean, niceCase, trackAttrs,
   istanbulNow, addDays, weekday, trDate, mondayOf, renderPage, DAYS, MONTHS,
 } from "./lib.mjs";
 
@@ -558,7 +558,7 @@ function genclikPage(D) {
       ["Kayıt", "TC kimlik kartı veya öğrenci kimliği ile karekod sistemi üzerinden başvuru yapılır."],
     ])}</section>
 <section class="s-sec"><h2>Gençlik Sofrası nerede?</h2><ul class="s-places">${g.locations
-      .map((l) => `<li><b>${esc(l.name)}</b><span>${esc(l.address)}</span><a href="${esc(mapsUrl(`${l.name} ${l.address} Ankara`))}" rel="noopener">Haritada aç</a></li>`).join("")}</ul></section>
+      .map((l) => `<li><b>${esc(l.name)}</b><span>${esc(l.address)}</span><a href="${esc(mapsUrl(`${l.name} ${l.address} Ankara`))}" rel="noopener"${trackAttrs("seo-harita", "SEO sayfasından haritada aç: " + l.name, { yer: l.name })}>Haritada aç</a></li>`).join("")}</ul></section>
 ${GENCLIK_LIVE_SCRIPT}`,
     app: { screen: "genclik", ctaText: "Gençlik Sofrası menüsünü uygulamada aç" },
     faq: [
@@ -599,7 +599,7 @@ ${week.filter((w) => w.date > TODAY).length ? `<section class="s-sec"><h2>Bu haf
       .map((w) => `<article class="s-day"><h3>${esc(trDate(w.date, { year: false }))}</h3><p>${esc(w.items.join(", "))}</p></article>`).join("")}</div></section>` : ""}
 <section class="s-sec"><h2>Saatler</h2>${infoGrid([["Saat", `${esc(hours)} (${esc(g.days.toLocaleLowerCase("tr"))})`], ["Ücret", esc(g.price)], ["Kimler yararlanabilir", "Ankara'da okuyan üniversite öğrencileri"]])}</section>
 <section class="s-sec"><h2>Hizmet noktaları</h2><ul class="s-places">${g.locations
-      .map((l) => `<li><b>${esc(l.name)}</b><span>${esc(l.address)}</span><a href="${esc(mapsUrl(l.mapQuery || l.address))}" rel="noopener">Haritada aç</a></li>`).join("")}</ul></section>
+      .map((l) => `<li><b>${esc(l.name)}</b><span>${esc(l.address)}</span><a href="${esc(mapsUrl(l.mapQuery || l.address))}" rel="noopener"${trackAttrs("seo-harita", "SEO sayfasından haritada aç: " + l.name, { yer: l.name })}>Haritada aç</a></li>`).join("")}</ul></section>
 <section class="s-sec"><h2>Güncel menü</h2>${note(`Çankaya Belediyesi haftalık menüyü görsel olarak yayımlıyor: <a href="${esc(g.menuUrl)}" rel="noopener">Çankaya Belediyesi — Menülerimiz</a>.`)}</section>`,
     app: { screen: "cankaya-genclik", ctaText: "Uygulamada aç" },
     faq: [
@@ -630,7 +630,7 @@ function cankayaKentPage(D) {
     body: `
 <section class="s-sec"><h2>Fiyat ve çalışma saatleri</h2>${infoGrid([["Fiyat", `${esc(k.price)} (4 çeşit yemek)`], ["Saat", `${esc(hours)} (${esc(k.days.toLocaleLowerCase("tr"))})`], ["Not", esc(k.description)]])}</section>
 <section class="s-sec"><h2>Şubeler</h2><ul class="s-places">${k.locations
-      .map((l) => `<li><b>${esc(l.name)}</b><span>${esc(l.address)}</span><a href="${esc(mapsUrl(l.mapQuery || l.address))}" rel="noopener">Haritada aç</a></li>`).join("")}</ul></section>
+      .map((l) => `<li><b>${esc(l.name)}</b><span>${esc(l.address)}</span><a href="${esc(mapsUrl(l.mapQuery || l.address))}" rel="noopener"${trackAttrs("seo-harita", "SEO sayfasından haritada aç: " + l.name, { yer: l.name })}>Haritada aç</a></li>`).join("")}</ul></section>
 <section class="s-sec"><h2>Haftalık menü</h2>${note(`Çankaya Belediyesi kent lokantası menüsünü her hafta görsel olarak yayımlıyor: <a href="${esc(k.menuUrl)}" rel="noopener">Çankaya Belediyesi — Menülerimiz</a>.`)}</section>`,
     app: { screen: "cankaya-kent", ctaText: "Uygulamada aç" },
     faq: [

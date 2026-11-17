@@ -273,7 +273,6 @@ var APP_DATA = window.APP_DATA = {
         days: 'Hafta içi her gün',
         price: 'Ücretsiz',
         description: "Ankara'da okuyan üniversite öğrencilerine ücretsiz sıcak akşam yemeği (4 çeşit).",
-        eligibility: 'Öğrenci kimliğini göstermen yeterli; ayrıca başvuru gerekmiyor.',
         // Belediye menüleri haftalık GÖRSEL olarak yayınlıyor (metin değil); otomatik
         // çekilemez. Güncel menü için her zaman bu sayfaya yönlendirilir.
         menuUrl: 'https://www.cankaya.bel.tr/sayfalar/menulerimiz',

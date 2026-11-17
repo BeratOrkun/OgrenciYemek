@@ -171,8 +171,8 @@ function kykPages(D, today, archive) {
     const day = dayOf(slug, iso);
     if (!day) return `<section class="s-card"><h2>${esc(heading)}</h2>${note("Bu günün menüsü henüz yayımlanmadı. Yurt yönetiminin duyurularını takip edebilirsin.")}</section>`;
     return `<section class="s-card${iso === TODAY ? " s-today" : ""}"><h2>${esc(heading)}</h2>
-${day.b ? mealBlock("🍳 Kahvaltı", bH, day.b.kcal, dishList(day.b.items)) : mealBlock("🍳 Kahvaltı", bH, null, note("Kahvaltı menüsü henüz yayımlanmadı."))}
-${day.d ? mealBlock("🍲 Akşam yemeği", dH, day.d.kcal, dishList(day.d.items)) : mealBlock("🍲 Akşam yemeği", dH, null, note("Akşam menüsü henüz yayımlanmadı."))}
+${day.b ? mealBlock("🍳 KYK kahvaltı menüsü", bH, day.b.kcal, dishList(day.b.items)) : mealBlock("🍳 KYK kahvaltı menüsü", bH, null, note("Kahvaltı menüsü henüz yayımlanmadı."))}
+${day.d ? mealBlock("🍲 KYK akşam yemeği menüsü", dH, day.d.kcal, dishList(day.d.items)) : mealBlock("🍲 KYK akşam yemeği menüsü", dH, null, note("Akşam menüsü henüz yayımlanmadı."))}
 </section>`;
   };
 
@@ -211,8 +211,8 @@ ${day.d ? mealBlock("🍲 Akşam yemeği", dH, day.d.kcal, dishList(day.d.items)
     const preview = todayDay?.d ? todayDay.d.items.slice(0, 3).join(", ") : todayDay?.b ? todayDay.b.items.slice(0, 3).join(", ") : "";
 
     const body = `
-${dayCard(slug, TODAY, `Bugün · ${trDate(TODAY)}`)}
-${dayOf(slug, tomorrow) ? dayCard(slug, tomorrow, `Yarın · ${trDate(tomorrow)}`) : ""}
+${dayCard(slug, TODAY, `${name} KYK menü bugün · ${trDate(TODAY)}`)}
+${dayOf(slug, tomorrow) ? dayCard(slug, tomorrow, `${name} KYK menü yarın · ${trDate(tomorrow)}`) : ""}
 ${upcoming.length ? `<section class="s-sec"><h2>${esc(name)} KYK yemek listesi ${esc(MONTH_LABEL)} (aylık)</h2><div class="s-days">${upcoming
       .map(([iso, d]) => `<article class="s-day"><h3>${esc(trDate(iso, { year: false }))}</h3>${d.b ? `<p><b>Kahvaltı:</b> ${esc(d.b.items.join(", "))}</p>` : ""}${d.d ? `<p><b>Akşam:</b> ${esc(d.d.items.join(", "))}</p>` : ""}</article>`)
       .join("")}</div></section>` : ""}
@@ -225,9 +225,9 @@ ${upcoming.length ? `<section class="s-sec"><h2>${esc(name)} KYK yemek listesi $
       path: `/kyk-yemek-listesi/${slug}/`,
       title: `${name} KYK Yemek Listesi ${MONTH_LABEL} – Bugünün KYK Menüsü`,
       description: preview
-        ? `${name} KYK yemek listesi ${trDate(TODAY, { day: false, year: false })}: ${preview}. Kahvaltı, akşam menüsü ve yemek saatleri.`
-        : `${name} KYK yemek listesi: bugünün kahvaltı ve akşam menüsü, aylık liste ve yemek saatleri.`,
-      h1: `${name} KYK Yemek Listesi ve Menüsü`,
+        ? `${name} KYK yemek ${trDate(TODAY, { day: false, year: false })}: ${preview}. ${name} KYK menü — kahvaltı, akşam yemeği ve yemek saatleri.`
+        : `${name} KYK yemek listesi ve KYK menü: bugünün kahvaltı ve akşam yemeği, aylık liste ve yemek saatleri.`,
+      h1: `${name} KYK Yemek Listesi ve KYK Menü`,
       lead: `${name} KYK yurt yemek listesi (KYK menü): ${name} KYK'da bugün ne yemek var? Günün kahvaltı ve akşam menüsü, yarının menüsü${upcoming.length ? `, ${MONTH_LABEL} aylık listesi` : ""}, KYK yemekhane saatleri ve yemek ücretleri aşağıda.`,
       crumbs: [{ name: "KYK yemek listesi", path: "/kyk-yemek-listesi/" }, { name, path: `/kyk-yemek-listesi/${slug}/` }],
       body,
@@ -254,13 +254,13 @@ ${upcoming.length ? `<section class="s-sec"><h2>${esc(name)} KYK yemek listesi $
   pages.push({
     key: "kyk",
     path: "/kyk-yemek-listesi/",
-    title: `KYK Yemek Listesi ${MONTH_LABEL} – Bugünün KYK Menüsü (81 İl)`,
+    title: `KYK Yemek Listesi ve KYK Menü Bugün – ${MONTH_LABEL} (81 İl)`,
     description: `KYK yemek listesi ve KYK menü ${trDate(TODAY, { day: false, year: false })}: 81 il için bugünün kahvaltı ve akşam yemeği, KYK yemekhane saatleri ve 2026 yemek ücretleri.`,
-    h1: "KYK Yemek Listesi ve KYK Menü — Bugün",
+    h1: "KYK Yemek Listesi ve KYK Menü — Bugün KYK'da Ne Var?",
     lead: `KYK yemek listesi (KYK menü) her gün güncel: KYK'da bugün ne yemek var? Türkiye'deki tüm KYK yurtlarının kahvaltı ve akşam yemeği menüsü, ${MONTH_LABEL} aylık yurt yemek listesi, KYK yemekhane saatleri ve yemek ücretleri. İlini seç.`,
     crumbs: [{ name: "KYK yemek listesi", path: "/kyk-yemek-listesi/" }],
     body: `
-${hasAnkara ? dayCard("ankara", TODAY, `Ankara · Bugün · ${trDate(TODAY)}`) : ""}
+${hasAnkara ? dayCard("ankara", TODAY, `Ankara KYK yemek bugün · ${trDate(TODAY)}`) : ""}
 <section class="s-sec"><h2>İl seç</h2><ul class="s-grid">${sorted
       .map(([s, n]) => `<li><a href="/kyk-yemek-listesi/${s}/">${esc(n)}</a></li>`).join("")}</ul></section>
 <section class="s-sec"><h2>KYK yemekhane saatleri ve yemek ücretleri</h2>${infoBox}</section>`,

@@ -106,6 +106,9 @@ ErrorDocument 404 /404.html
 
     # Kısa ve akılda kalır adresler (Instagram biyografisi, paylaşım) → asıl sayfa
     RedirectMatch 301 ^/(kyk|kyk-menu|kyk-yemek|kyk-yemekleri|kyk-yemek-menusu|kyk-menusu)/?$ /kyk-yemek-listesi/
+    RedirectMatch 301 ^/(ankara-kyk|kyk-ankara|ankara-kyk-yemek|ankara-kyk-menu|ankara-kyk-yemek-listesi)/?$ /kyk-yemek-listesi/ankara/
+    # /kyk/sivas → /kyk-yemek-listesi/sivas/ (yalnızca küçük harf il adları)
+    RedirectMatch 301 ^/kyk/([a-z]+)/?$ /kyk-yemek-listesi/$1/
     RedirectMatch 301 ^/(gazi|gazi-yemek|gazi-yemek-listesi|gazi-yemekhane)/?$ /gazi-universitesi-yemek-listesi/
     RedirectMatch 301 ^/(hacettepe|hacettepe-yemek|hacettepe-yemekhane)/?$ /hacettepe-yemek-listesi/
     RedirectMatch 301 ^/(anku|ankara-universitesi|ankara-universitesi-yemek)/?$ /ankara-universitesi-yemek-listesi/

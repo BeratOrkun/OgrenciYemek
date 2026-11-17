@@ -206,20 +206,13 @@ var NowOpen = window.NowOpen = {
         // Ana öğünler: en erken kapanan en üstte
         items.sort((a, b) => a.minutesLeft - b.minutesLeft);
 
-        // Millet Kütüphanesi — o an açık ikramlar (her gün)
-        const ml = APP_DATA.milletKutuphanesi;
-        const openServices = (ml.services || []).filter(s =>
-            Array.isArray(s.windows) && s.windows.some(w => this._isOpen(w, nowMin)));
-        if (openServices.length) {
-            // 7/24 olanlar sona, zamanlı ikramlar öne
-            const parts = openServices
-                .map(s => {
-                    const win = s.windows.find(w => this._isOpen(w, nowMin));
-                    const allDay = win.start === '00:00' && win.end === '24:00';
-                    return { allDay, text: allDay ? s.shortName : `${s.shortName} (${win.start}–${win.end})` };
-                })
-                .sort((a, b) => Number(a.allDay) - Number(b.allDay))
-                .map(p => p.text);
+        // Millet Kütüphanesi — yalnızca zamanlı yemek ikramları (çorba, kek).
+        // 7/24 sıcak içecek ikramı bu kartta gösterilmez.
+        const openWins = this._milletWindows()
+            .filter(w => this._isOpen(w, nowMin))
+            .sort((a, b) => this._toMin(a.end) - this._toMin(b.end));
+        if (openWins.length) {
+            const first = openWins[0];
             items.push({
                 key: 'millet-kutuphanesi',
                 screen: 'millet',
@@ -227,44 +220,59 @@ var NowOpen = window.NowOpen = {
                 accent: 'purple',
                 name: 'Millet Kütüphanesi',
                 free: true,
-                end: null,
-                minutesLeft: null,
-                dishes: parts,
+                end: first.end,
+                minutesLeft: this._toMin(first.end) - nowMin,
+                dishes: openWins.map(w => `${w.service} ikramı`),
                 hint: null,
-                estimated: false,
-                always: true
+                estimated: false
             });
+            items.sort((a, b) => a.minutesLeft - b.minutesLeft);
         }
 
         return { items, next: this._nextOpenings(now, nowMin) };
     },
 
+    // Millet Kütüphanesi'nin zamanlı yemek ikramları (her gün). Tüm gün süren
+    // (00:00–24:00) ikramlar — çay/kahve — dahil edilmez.
+    _milletWindows() {
+        const ml = APP_DATA.milletKutuphanesi;
+        const out = [];
+        (ml.services || []).forEach(s => {
+            (Array.isArray(s.windows) ? s.windows : []).forEach(w => {
+                if (w.start === '00:00' && w.end === '24:00') return;
+                out.push({ start: w.start, end: w.end, service: s.shortName || s.name });
+            });
+        });
+        return out;
+    },
+
     // Bugün daha sonra açılacak ana öğünler; bugün yoksa yarının ilki
     _nextOpenings(now, nowMin) {
-        const slots = this._slots();
-        const today = slots
-            .filter(s => this._slotAvailableOn(s, now) && this._toMin(s.hours.start) > nowMin)
-            .sort((a, b) => this._toMin(a.hours.start) - this._toMin(b.hours.start))
+        // Bir günün tüm açılışları: ana öğünler + Millet Kütüphanesi çorba/kek
+        const openingsOn = (date) => [
+            ...this._slots()
+                .filter(s => this._slotAvailableOn(s, date))
+                .map(s => ({ name: s.name, start: s.hours.start })),
+            ...this._milletWindows()
+                .map(w => ({ name: `Millet Kütüphanesi (${w.service})`, start: w.start }))
+        ].sort((a, b) => this._toMin(a.start) - this._toMin(b.start));
+
+        const today = openingsOn(now)
+            .filter(o => this._toMin(o.start) > nowMin)
             .slice(0, 2)
-            .map(s => ({ name: s.name, start: s.hours.start, tomorrow: false }));
+            .map(o => ({ ...o, tomorrow: false }));
         if (today.length) return today;
 
         const tmr = new Date(now);
         tmr.setDate(tmr.getDate() + 1);
-        const first = slots
-            .filter(s => this._slotAvailableOn(s, tmr))
-            .sort((a, b) => this._toMin(a.hours.start) - this._toMin(b.hours.start))[0];
-        return first ? [{ name: first.name, start: first.hours.start, tomorrow: true }] : [];
+        return openingsOn(tmr).slice(0, 2).map(o => ({ ...o, tomorrow: true }));
     },
 
     // ---------------------------------------------------
     // Çizim
     // ---------------------------------------------------
-    // Sağdaki sabit saat sütunu: "19:00 / kapanış", "15 dk / kaldı", "7/24 / açık"
+    // Sağdaki sabit saat sütunu: "19:00 / kapanış" ya da son 30 dk'da "15 dk / kaldı"
     _timeCol(item) {
-        if (item.always) {
-            return '<span class="now-row-time always"><strong>7/24</strong><small>açık</small></span>';
-        }
         if (item.minutesLeft != null && item.minutesLeft <= 30) {
             return `<span class="now-row-time soon"><strong>${item.minutesLeft} dk</strong><small>kaldı</small></span>`;
         }
@@ -310,18 +318,18 @@ var NowOpen = window.NowOpen = {
                 `${now.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' })}, saat ${hm}`);
         }
 
-        const hasMeal = items.some(i => !i.always);
         const leadEl = document.getElementById('now-lead');
         if (leadEl) {
-            leadEl.textContent = hasMeal
+            leadEl.textContent = items.length
                 ? 'Şu anda aşağıdaki yemeklerden faydalanabilirsin'
-                : 'Şu an açık yemekhane yok, ama bunlardan faydalanabilirsin';
+                : 'Şu an açık bir yemek hizmeti yok';
         }
 
         // Gereksiz yeniden çizimi önle (dakikada bir çağrılıyor)
         const html = items.map(i => this._row(i)).join('');
         if (html !== this._lastKey) {
-            listEl.innerHTML = html || '<p class="now-empty">Şu an açık bir yer yok.</p>';
+            listEl.innerHTML = html;
+            listEl.hidden = !html;
             this._lastKey = html;
         }
 
@@ -330,7 +338,11 @@ var NowOpen = window.NowOpen = {
             if (next.length) {
                 nextEl.hidden = false;
                 nextEl.innerHTML = `<span class="now-next-label">Sıradaki</span> ` + next
-                    .map(n => `${this._esc(n.name)} <strong>${n.tomorrow ? 'yarın ' : ''}${this._esc(n.start)}</strong>`)
+                    .map(n => {
+                        // Gece yarısından sonraki ilk saatler "gece", diğerleri "yarın"
+                        const when = !n.tomorrow ? '' : (this._toMin(n.start) < 5 * 60 ? 'gece ' : 'yarın ');
+                        return `${this._esc(n.name)} <strong>${when}${this._esc(n.start)}</strong>`;
+                    })
                     .join('<span class="now-next-sep">·</span>');
             } else {
                 nextEl.hidden = true;

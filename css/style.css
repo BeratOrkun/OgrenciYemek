@@ -3006,6 +3006,8 @@ img.install-card-icon {
     flex-direction: column;
 }
 
+.now-list[hidden] { display: none; }
+
 .now-row {
     position: relative;
     display: flex;
@@ -3135,7 +3137,6 @@ img.install-card-icon {
 }
 
 .now-row-time.soon strong { color: #fb923c; }
-.now-row-time.always strong { color: #86efac; }
 
 .now-next {
     display: flex;

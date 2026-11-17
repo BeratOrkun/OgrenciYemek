@@ -368,10 +368,10 @@
             { sayfa: MENU_LINK_SAYFALAR[sayfa], uygulamadaMenuVardi: menuVardi ? 'evet' : 'hayir' });
     }
 
-    // Gazi menü ekranındaki "Menü güncel değilse tıklayınız" butonu
-    // (mediko.gazi.edu.tr yemek listesi açılır)
-    // Hacettepe / Ankü ekranlarındaki "Menü güncel değilse tıklayınız" butonu
+    // Gazi / Hacettepe / Ankü ekranlarındaki "Menü güncel değilse tıklayınız" butonu
+    // (Gazi'nin olay adı önceki sürümle aynı kalır: dis-link/gazi-yemek-listesi)
     var RESMI_MENU = {
+        gazi:      { ad: 'gazi-yemek-listesi',   baslik: 'Gazi Üniversitesi' },
         hacettepe: { ad: 'hacettepe-resmi-menu', baslik: 'Hacettepe Üniversitesi' },
         anku:      { ad: 'anku-resmi-menu',      baslik: 'Ankara Üniversitesi' }
     };
@@ -380,11 +380,6 @@
         if (!b) return;
         olay('dis-link/' + b.ad, b.baslik + ' resmi menü sayfası açıldı',
             { sayfa: b.baslik, uygulamadaMenuVardi: menuVardi ? 'evet' : 'hayir' });
-    }
-
-    function gaziMenuLinkiTiklandi(menuVardi) {
-        olay('dis-link/gazi-yemek-listesi', 'Gazi resmi yemek listesi açıldı',
-            { sayfa: 'Gazi Üniversitesi', uygulamadaMenuVardi: menuVardi ? 'evet' : 'hayir' });
     }
 
     // Instagram takip kartına tıklandığında
@@ -559,7 +554,6 @@
         instagramTiklandi: instagramTiklandi,
         etimesgutKentTiklandi: etimesgutKentTiklandi,
         menuLinkiTiklandi: menuLinkiTiklandi,
-        gaziMenuLinkiTiklandi: gaziMenuLinkiTiklandi,
         resmiMenuLinkiTiklandi: resmiMenuLinkiTiklandi,
         simdiAcikTiklandi: simdiAcikTiklandi
     };

@@ -29,7 +29,7 @@ var APP_DATA = window.APP_DATA = {
             type: 'Devlet',
             menuStatus: 'available', // ✅
             menuUrl: 'https://mediko.gazi.edu.tr/view/page/20412/yemek-listesi',
-            // Menü uygulama içinde gösterilir (js/gazi.js — Google Sheet'ten canlı)
+            // Menü uygulama içinde (js/unimenu.js — uniyemekscrapper gazi.json, kaynak: Google Sheet)
             inApp: 'gazi',
             accessChannel: '✅ Açık Menü',
             note: "Günlük öğle menüsü ogrenciyemek.com'da: çorba, ana yemek, etsiz alternatif ve kalori.",

@@ -96,12 +96,7 @@ var App = window.App = {
                 GenclikSofralariAPI.loadMenu().then(refreshNow).catch(() => {});
             } catch { /* yoksay */ }
 
-            // Gazi Üniversitesi menüsü (Google Sheet)
-            try {
-                if (window.GaziMenu) GaziMenu.load().then(refreshNow).catch(() => {});
-            } catch { /* yoksay */ }
-
-            // Seçili üniversite Hacettepe / Ankü ise onun menüsü
+            // Seçili üniversite Gazi / Hacettepe / Ankü ise onun menüsü
             try {
                 if (window.UniMenus) UniMenus.prefetchSelected().then(refreshNow).catch(() => {});
             } catch { /* yoksay */ }
@@ -312,11 +307,6 @@ var App = window.App = {
                     break;
 
                 case 'gazi':
-                    // Her girişte bugünün (hafta sonu: pazartesinin) menüsüyle başla
-                    GaziMenu.selectedDate = null;
-                    GaziMenu.render(targetEl);
-                    break;
-
                 case 'hacettepe':
                 case 'anku':
                     UniMenus.render(targetEl, screenId);

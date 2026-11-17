@@ -128,7 +128,7 @@ var NowOpen = window.NowOpen = {
             { key: 'kyk-kahvalti', screen: 'kyk', meal: 'breakfast', icon: '🍳', accent: 'green', name: 'KYK Kahvaltı', hours: H.kykBreakfast },
             { key: 'kyk-aksam', screen: 'kyk', meal: 'dinner', icon: '🍲', accent: 'green', name: 'KYK Akşam Yemeği', hours: H.kykDinner },
             { key: 'universite', screen: 'universities', icon: '🎓', accent: 'orange', name: 'Üniversite Yemekhanesi', hours: H.university },
-            { key: 'genclik-sofrasi', screen: 'genclik', icon: '🥘', accent: 'blue', name: 'Gençlik Sofrası', hours: H.genclik, free: true },
+            { key: 'genclik-sofrasi', screen: 'genclik', icon: '🥘', accent: 'blue', name: 'ABB Gençlik Sofrası', hours: H.genclik, free: true },
             { key: 'cankaya-genclik-sofrasi', screen: 'cankaya-genclik', icon: '🥗', accent: 'cyan', name: 'Çankaya Gençlik Sofrası', hours: H.cankayaGenclik, free: true },
             { key: 'cankaya-kent-lokantasi', screen: 'cankaya-kent', icon: '🍛', accent: 'yellow', name: 'Çankaya Kent Lokantası', hours: H.cankayaKent, price: APP_DATA.cankayaKentLokantasi.price },
             { key: 'etimesgut-kent-lokantasi', screen: 'external-etimesgut', icon: '🍲', accent: 'pink', name: 'Etimesgut Kent Lokantası', hours: H.etimesgutKent, price: APP_DATA.etimesgutKentLokantasi.price }
@@ -178,26 +178,19 @@ var NowOpen = window.NowOpen = {
                 const menu = APP_DATA.cankayaGenclikSofrasi.weeklyMenu || [];
                 const row = menu.find(d => d.date === this._dateStr(now));
                 if (row) item.dishes = row.items.slice();
-                else item.hint = 'Güncel menü için dokun';
+                else item.hint = 'Menü için dokun';
             } else if (slot.screen === 'external-etimesgut') {
-                item.hint = 'Günün menüsü için dokun (belediye sitesi)';
+                item.hint = 'Günün menüsü için dokun';
             } else if (slot.screen === 'cankaya-kent') {
-                item.hint = '4 çeşit yemek · Cebeci, Sokullu, Seyranbağları';
+                item.hint = 'Cebeci · Sokullu · Seyranbağları';
             } else if (slot.screen === 'universities') {
                 const uniName = Store.get('oy_university');
                 const uni = uniName && APP_DATA.universities.find(u => u.name === uniName);
                 if (uni) item.name = `${uni.shortName || uni.name} Yemekhanesi`;
-                item.hint = 'Öğle yemeği · Menüye bakmak için dokun';
+                item.hint = 'Öğle yemeği · Menü için dokun';
                 // Menüsü uygulamada olan üniversite: bugünün yemekleri + kendi ekranı
-                if (uni && uni.inApp === 'gazi' && window.GaziMenu) {
-                    const d = GaziMenu.todayDishes(now);
-                    if (d && d.length) {
-                        item.dishes = d;
-                        item.hint = null;
-                    }
-                    item.screen = 'gazi';
-                } else if (uni && uni.inApp && window.UniMenus && UniMenus.UNIS[uni.inApp]) {
-                    // Hacettepe / Ankara Üniversitesi (uniyemekscrapper verisi)
+                if (uni && uni.inApp && window.UniMenus && UniMenus.UNIS[uni.inApp]) {
+                    // Gazi / Hacettepe / Ankara Üniversitesi (uniyemekscrapper verisi)
                     const d = UniMenus.todayDishes(uni.inApp);
                     if (d && d.length) {
                         item.dishes = d;
@@ -267,12 +260,15 @@ var NowOpen = window.NowOpen = {
     // ---------------------------------------------------
     // Çizim
     // ---------------------------------------------------
-    _statusPill(item) {
-        if (item.always) return '<span class="now-pill now-pill-open">7/24</span>';
-        if (item.minutesLeft != null && item.minutesLeft <= 30) {
-            return `<span class="now-pill now-pill-soon">Son ${item.minutesLeft} dk</span>`;
+    // Sağdaki sabit saat sütunu: "19:00 / kapanış", "15 dk / kaldı", "7/24 / açık"
+    _timeCol(item) {
+        if (item.always) {
+            return '<span class="now-row-time always"><strong>7/24</strong><small>açık</small></span>';
         }
-        return `<span class="now-pill now-pill-open">Kapanış ${this._esc(item.end)}</span>`;
+        if (item.minutesLeft != null && item.minutesLeft <= 30) {
+            return `<span class="now-row-time soon"><strong>${item.minutesLeft} dk</strong><small>kaldı</small></span>`;
+        }
+        return `<span class="now-row-time"><strong>${this._esc(item.end)}</strong><small>kapanış</small></span>`;
     },
 
     _row(item) {
@@ -290,12 +286,10 @@ var NowOpen = window.NowOpen = {
                     data-now-key="${item.key}" data-now-screen="${item.screen}">
                 <span class="now-row-icon" aria-hidden="true">${item.icon}</span>
                 <span class="now-row-main">
-                    <span class="now-row-top">
-                        <span class="now-row-name">${this._esc(item.name)}</span>
-                        ${this._statusPill(item)}
-                    </span>
+                    <span class="now-row-name">${this._esc(item.name)}</span>
                     <span class="now-row-dishes${item.dishes ? '' : ' is-hint'}">${tags.join('')}${body}</span>
                 </span>
+                ${this._timeCol(item)}
             </button>
         `;
     },
@@ -320,8 +314,8 @@ var NowOpen = window.NowOpen = {
         const leadEl = document.getElementById('now-lead');
         if (leadEl) {
             leadEl.textContent = hasMeal
-                ? 'Şu anda aşağıdaki yemeklerden faydalanabilirsin:'
-                : 'Şu an açık yemekhane yok, ama bunlardan faydalanabilirsin:';
+                ? 'Şu anda aşağıdaki yemeklerden faydalanabilirsin'
+                : 'Şu an açık yemekhane yok, ama bunlardan faydalanabilirsin';
         }
 
         // Gereksiz yeniden çizimi önle (dakikada bir çağrılıyor)

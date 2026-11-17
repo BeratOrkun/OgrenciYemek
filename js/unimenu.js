@@ -3,7 +3,10 @@
 //
 // Veri: github.com/BeratOrkun/uniyemekscrapper (GitHub Actions saatte bir
 // üniversite sitelerini çekip GitHub Pages'e JSON yazar; CORS açık).
-//   hacettepe-1.json (Beytepe), hacettepe-2.json (Sıhhiye), anku.json
+//   gazi.json (Google Sheet), hacettepe-1.json (Beytepe),
+//   hacettepe-2.json (Sıhhiye), anku.json
+// Gün işaretleri: holiday:{text} → resmi tatil, invalid:{reason} → doğrulanamadı
+// (bu günlerin menüsü asla gösterilmez).
 //
 // Önlemler:
 //  • Her JSON tarayıcıda yeniden doğrulanır: geçersiz tarih, tarihle uyuşmayan
@@ -19,6 +22,17 @@ var UniMenus = window.UniMenus = {
     CACHE_PREFIX: 'oy_um_',
 
     UNIS: {
+        gazi: {
+            key: 'gazi',
+            title: 'Gazi Üniversitesi',
+            shortTitle: 'Gazi Üniversitesi',
+            icon: '🍽️',
+            locations: null,
+            file: () => 'gazi.json',
+            meals: ['ogle'],
+            officialUrl: 'https://mediko.gazi.edu.tr/view/page/20412/yemek-listesi',
+            sourceNote: 'Kaynak: Gazi Üniversitesi yemek listesi · Menü zorunlu hallerde değişebilir.'
+        },
         hacettepe: {
             key: 'hacettepe',
             title: 'Hacettepe Üniversitesi',
@@ -107,7 +121,13 @@ var UniMenus = window.UniMenus = {
                     items
                 };
             }
-            if (Object.keys(meals).length) days[iso] = { date: iso, meals };
+            if (day.invalid && typeof day.invalid.reason === 'string') {
+                days[iso] = { date: iso, meals: {}, invalid: { reason: this._clean(day.invalid.reason).slice(0, 120) } };
+            } else if (day.holiday && typeof day.holiday.text === 'string') {
+                days[iso] = { date: iso, meals: {}, holiday: { text: this._clean(day.holiday.text).slice(0, 120) } };
+            } else if (Object.keys(meals).length) {
+                days[iso] = { date: iso, meals };
+            }
         }
         if (!Object.keys(days).length) return null;
         return { days, updated: typeof json.updated === 'string' ? json.updated : null };
@@ -216,6 +236,8 @@ var UniMenus = window.UniMenus = {
     },
 
     prefetchSelected() {
+        // Eski (doğrudan sheet okuyan) Gazi sürümünün önbelleği artık kullanılmıyor
+        try { Store.remove('oy_gazi_menu_v1'); } catch { /* yoksay */ }
         const uniName = Store.get('oy_university');
         const uni = uniName && APP_DATA.universities.find(u => u.name === uniName);
         if (!uni || !this.UNIS[uni.inApp]) return Promise.resolve(null);
@@ -430,17 +452,20 @@ var UniMenus = window.UniMenus = {
 
         const chips = week.map(iso => {
             const d = this._dateOf(iso);
-            const has = !!data.days[iso];
+            const dd = data.days[iso];
             const cls = ['gz-chip'];
             if (iso === sel) cls.push('active');
             if (iso === todayIso) cls.push('today');
-            if (!has) cls.push('missing');
+            let mark = '<span class="gz-chip-mark gz-chip-dot" aria-hidden="true"></span>';
+            if (!dd) { cls.push('missing'); mark = '<span class="gz-chip-mark">—</span>'; }
+            else if (dd.holiday) { cls.push('holiday'); mark = '<span class="gz-chip-mark">Tatil</span>'; }
+            else if (dd.invalid) { cls.push('invalid'); mark = '<span class="gz-chip-mark">!</span>'; }
             return `
                 <button type="button" class="${cls.join(' ')}" onclick="UniMenus.selectDate('${uni}','${iso}')"
                         aria-pressed="${iso === sel}" aria-label="${esc(this._label(iso))}">
                     <span class="gz-chip-day">${this.DAY_SHORT[d.getDay()]}</span>
                     <span class="gz-chip-date">${d.getDate()}</span>
-                    ${has ? '<span class="gz-chip-mark gz-chip-dot" aria-hidden="true"></span>' : '<span class="gz-chip-mark">—</span>'}
+                    ${mark}
                 </button>`;
         }).join('');
 
@@ -469,7 +494,22 @@ var UniMenus = window.UniMenus = {
 
         let card;
         const meal = day && day.meals[st.meal];
-        if (!day) {
+        if (day && day.holiday) {
+            const generic = /^\s*resmi\s+tatil\s*$/i.test(day.holiday.text);
+            card = `
+                <div class="gz-card gz-card-holiday">
+                    <span class="gz-empty-icon" aria-hidden="true">🎉</span>
+                    <p class="gz-empty-title">Resmi tatil</p>
+                    <p class="gz-empty-text">${esc(generic ? 'Bu gün yemekhane hizmet vermiyor.' : day.holiday.text)}</p>
+                </div>`;
+        } else if (day && day.invalid) {
+            card = `
+                <div class="gz-card gz-card-empty">
+                    <span class="gz-empty-icon" aria-hidden="true">⚠️</span>
+                    <p class="gz-empty-title">Bu günün menüsü doğrulanamadı</p>
+                    <p class="gz-empty-text">${esc(day.invalid.reason)}. Lütfen aşağıdan resmi menüye bak.</p>
+                </div>`;
+        } else if (!day) {
             card = `
                 <div class="gz-card gz-card-empty">
                     <span class="gz-empty-icon" aria-hidden="true">🗒️</span>

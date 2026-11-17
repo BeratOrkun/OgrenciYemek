@@ -3417,3 +3417,277 @@ img.install-card-icon {
 .menu-card[role="link"]:focus-visible { outline: 2px solid #ec4899; outline-offset: 2px; }
 .menu-card-external { font-size: 1.1rem; }
 .now-row[data-accent="pink"] { --now-accent: #ec4899; }
+
+/* =====================================================
+   GAZİ ÜNİVERSİTESİ MENÜ EKRANI
+   ===================================================== */
+.gz-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: var(--space-md);
+    min-width: 0;
+}
+
+.gz-head-text { min-width: 0; }
+
+.gz-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.25;
+}
+
+.gz-sub {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.gz-head .kyk-status-pill { flex-shrink: 0; white-space: nowrap; }
+
+.gz-week {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+}
+
+.gz-week-arrow {
+    flex-shrink: 0;
+    width: 28px;
+    border-radius: var(--radius-md);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-family: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.gz-week-arrow:disabled {
+    opacity: 0.25;
+    cursor: default;
+}
+
+.gz-week-chips {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 5px;
+}
+
+.gz-chip {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    min-width: 0;
+    padding: 7px 2px 6px;
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-family: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.gz-chip-day {
+    font-size: 0.66rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.gz-chip-date {
+    font-size: 1.05rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+
+.gz-chip-mark {
+    min-height: 12px;
+    font-size: 0.58rem;
+    font-weight: 700;
+    line-height: 12px;
+    color: var(--text-muted);
+}
+
+.gz-chip-dot {
+    width: 5px;
+    height: 5px;
+    min-height: 0;
+    margin-top: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.gz-chip.today .gz-chip-dot { background: var(--accent-orange); }
+.gz-chip.today .gz-chip-day { color: var(--accent-orange); }
+
+.gz-chip.active {
+    background: rgba(249, 115, 22, 0.14);
+    border-color: rgba(249, 115, 22, 0.55);
+}
+
+.gz-chip.holiday .gz-chip-mark { color: #fcd34d; }
+.gz-chip.invalid .gz-chip-mark { color: #f87171; }
+.gz-chip.missing { opacity: 0.55; }
+
+.gz-chip:focus-visible,
+.gz-week-arrow:focus-visible {
+    outline: 2px solid var(--accent-orange);
+    outline-offset: 2px;
+}
+
+.gz-week-range {
+    margin: 8px 0 var(--space-md);
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.gz-note {
+    margin: -4px 0 var(--space-md);
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.22);
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: var(--text-secondary);
+}
+
+.gz-card {
+    margin-bottom: var(--space-lg);
+    padding: 14px;
+    border-radius: var(--radius-lg);
+    background:
+        linear-gradient(160deg, rgba(249, 115, 22, 0.08) 0%, rgba(255, 255, 255, 0.025) 50%);
+    border: 1px solid rgba(249, 115, 22, 0.22);
+}
+
+.gz-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.gz-card-kicker {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-orange);
+}
+
+.gz-card-date {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-top: 2px;
+}
+
+.gz-card-head .kyk-calorie-badge { flex-shrink: 0; }
+
+.gz-dishes {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.gz-dish {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid var(--border-color);
+    min-width: 0;
+}
+
+.gz-dish.veg {
+    background: rgba(34, 197, 94, 0.07);
+    border-color: rgba(34, 197, 94, 0.22);
+}
+
+.gz-dish-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 1.05rem;
+}
+
+.gz-dish-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.gz-dish-name {
+    font-size: 0.9rem;
+    font-weight: 650;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+    line-height: 1.3;
+}
+
+.gz-dish-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+
+.gz-dish.veg .gz-dish-label { color: #86efac; }
+
+.gz-card-empty,
+.gz-card-holiday {
+    text-align: center;
+    padding: var(--space-xl) var(--space-lg);
+    background: var(--bg-card);
+    border: 1px dashed rgba(255, 255, 255, 0.14);
+}
+
+.gz-card-holiday {
+    background: rgba(234, 179, 8, 0.07);
+    border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.gz-empty-icon {
+    display: block;
+    font-size: 1.9rem;
+    margin-bottom: 6px;
+}
+
+.gz-empty-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.gz-empty-text {
+    margin-top: 4px;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gz-chip { transition: none; }
+}

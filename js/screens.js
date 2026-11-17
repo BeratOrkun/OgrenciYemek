@@ -88,7 +88,9 @@ var Screens = window.Screens = {
                     <div class="uni-card-name">${uni.name}</div>
                     <div class="uni-card-meta">
                         <span>${uni.type}</span>
-                        <span class="status-badge ${uni.menuStatus}">${statusLabels[uni.menuStatus] || uni.menuStatus}</span>
+                        ${uni.inApp
+                            ? '<span class="status-badge available">📋 Menü uygulamada</span>'
+                            : `<span class="status-badge ${uni.menuStatus}">${statusLabels[uni.menuStatus] || uni.menuStatus}</span>`}
                     </div>
                     ${uni.note ? `<div class="uni-card-note">${uni.note}</div>` : ''}
                 </div>
@@ -126,6 +128,13 @@ var Screens = window.Screens = {
             if (window.OYAnalytics) window.OYAnalytics.universiteMenuTiklandi(name);
         } catch {
             /* sayaç asla uygulamayı bozmamalı */
+        }
+
+        // Menüsü uygulama içinde olan üniversite (ör. Gazi) → kendi ekranı
+        const uni = APP_DATA.universities.find(u => u.name === name);
+        if (uni && uni.inApp) {
+            App.showScreen(uni.inApp);
+            return;
         }
 
         if (url && url !== '#') {

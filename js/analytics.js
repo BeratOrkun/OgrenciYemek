@@ -300,7 +300,8 @@
         genclik:      { sayfaYolu: '/genclik-sofrasi',      baslik: 'Gençlik Sofrası' },
         millet:       { sayfaYolu: '/millet-kutuphanesi',   baslik: 'Millet Kütüphanesi' },
         'cankaya-genclik': { sayfaYolu: '/cankaya-genclik-sofrasi', baslik: 'Çankaya Gençlik Sofrası' },
-        'cankaya-kent':    { sayfaYolu: '/cankaya-kent-lokantasi',  baslik: 'Çankaya Kent Lokantası' }
+        'cankaya-kent':    { sayfaYolu: '/cankaya-kent-lokantasi',  baslik: 'Çankaya Kent Lokantası' },
+        gazi:              { sayfaYolu: '/gazi-yemek-menusu',       baslik: 'Gazi Üniversitesi Yemek Menüsü' }
     };
 
     function sayfaAcildi(ekranKodu) {
@@ -363,6 +364,13 @@
         if (!MENU_LINK_SAYFALAR[sayfa]) return;
         olay('dis-link/cankaya-menulerimiz', 'Çankaya menülerimiz sayfası açıldı',
             { sayfa: MENU_LINK_SAYFALAR[sayfa], uygulamadaMenuVardi: menuVardi ? 'evet' : 'hayir' });
+    }
+
+    // Gazi menü ekranındaki "Menü güncel değilse tıklayınız" butonu
+    // (mediko.gazi.edu.tr yemek listesi açılır)
+    function gaziMenuLinkiTiklandi(menuVardi) {
+        olay('dis-link/gazi-yemek-listesi', 'Gazi resmi yemek listesi açıldı',
+            { sayfa: 'Gazi Üniversitesi', uygulamadaMenuVardi: menuVardi ? 'evet' : 'hayir' });
     }
 
     // Instagram takip kartına tıklandığında
@@ -537,6 +545,7 @@
         instagramTiklandi: instagramTiklandi,
         etimesgutKentTiklandi: etimesgutKentTiklandi,
         menuLinkiTiklandi: menuLinkiTiklandi,
+        gaziMenuLinkiTiklandi: gaziMenuLinkiTiklandi,
         simdiAcikTiklandi: simdiAcikTiklandi
     };
 

@@ -27,8 +27,10 @@ var APP_DATA = window.APP_DATA = {
             type: 'Devlet',
             menuStatus: 'available', // ✅
             menuUrl: 'https://mediko.gazi.edu.tr/view/page/20412/yemek-listesi',
+            // Menü uygulama içinde gösterilir (js/gazi.js — Google Sheet'ten canlı)
+            inApp: 'gazi',
             accessChannel: '✅ Açık Menü',
-            note: 'Haftalık tablo formatında öğle menüsü; vejetaryen seçenekler işaretli. Kalori bilgisi mevcut.',
+            note: 'Günlük öğle menüsü uygulamada: çorba, ana yemek, etsiz alternatif ve kalori.',
             icon: '🏛️'
         },
         {

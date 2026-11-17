@@ -188,6 +188,15 @@ var NowOpen = window.NowOpen = {
                 const uni = uniName && APP_DATA.universities.find(u => u.name === uniName);
                 if (uni) item.name = `${uni.shortName || uni.name} Yemekhanesi`;
                 item.hint = 'Öğle yemeği · Menüye bakmak için dokun';
+                // Menüsü uygulamada olan üniversite: bugünün yemekleri + kendi ekranı
+                if (uni && uni.inApp === 'gazi' && window.GaziMenu) {
+                    const d = GaziMenu.todayDishes(now);
+                    if (d && d.length) {
+                        item.dishes = d;
+                        item.hint = null;
+                    }
+                    item.screen = 'gazi';
+                }
             }
 
             items.push(item);

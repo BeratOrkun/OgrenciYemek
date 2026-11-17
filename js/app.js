@@ -95,6 +95,11 @@ var App = window.App = {
             try {
                 GenclikSofralariAPI.loadMenu().then(refreshNow).catch(() => {});
             } catch { /* yoksay */ }
+
+            // Gazi Üniversitesi menüsü (Google Sheet)
+            try {
+                if (window.GaziMenu) GaziMenu.load().then(refreshNow).catch(() => {});
+            } catch { /* yoksay */ }
         };
 
         // İlk boyamayı geciktirmemek için boşta çalıştır
@@ -299,6 +304,12 @@ var App = window.App = {
 
                 case 'millet':
                     Screens.renderMilletKutuphanesiScreen(targetEl);
+                    break;
+
+                case 'gazi':
+                    // Her girişte bugünün (hafta sonu: pazartesinin) menüsüyle başla
+                    GaziMenu.selectedDate = null;
+                    GaziMenu.render(targetEl);
                     break;
 
                 case 'cankaya-genclik':

@@ -353,6 +353,17 @@ var GaziMenu = window.GaziMenu = {
         return out;
     },
 
+    // Yemek türü → renk sınıfı. Etsiz alternatif bilerek nötr ('etsiz').
+    _kind(item) {
+        if (item.veg) return 'etsiz';
+        return ({
+            'Çorba': 'corba',
+            'Ana Yemek': 'ana',
+            'Yardımcı Yemek': 'yardimci',
+            'Tatlı / Yanında': 'tatli'
+        })[item.label] || 'diger';
+    },
+
     _label(iso, withDay = true) {
         const d = this._dateOf(iso);
         const base = `${d.getDate()} ${this.MONTH_LABELS[d.getMonth()]}`;
@@ -566,8 +577,8 @@ var GaziMenu = window.GaziMenu = {
                     </div>
                     <div class="gz-dishes">
                         ${selDay.items.map(it => `
-                            <div class="gz-dish${it.veg ? ' veg' : ''}">
-                                <span class="gz-dish-icon" aria-hidden="true">${it.veg ? '🥦' : (window.Screens ? Screens._categorizeDishIcon(it.name) : '🍽️')}</span>
+                            <div class="gz-dish" data-kind="${this._kind(it)}">
+                                <span class="gz-dish-icon" aria-hidden="true">${window.Screens ? Screens._categorizeDishIcon(it.name) : '🍽️'}</span>
                                 <span class="gz-dish-text">
                                     <span class="gz-dish-name">${esc(it.name)}</span>
                                     ${it.label ? `<span class="gz-dish-label">${esc(it.label)}</span>` : ''}

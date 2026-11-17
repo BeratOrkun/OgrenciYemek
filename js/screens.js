@@ -89,7 +89,7 @@ var Screens = window.Screens = {
                     <div class="uni-card-meta">
                         <span>${uni.type}</span>
                         ${uni.inApp
-                            ? '<span class="status-badge available">📋 Menü uygulamada</span>'
+                            ? '<span class="status-badge available">📋 Menü ogrenciyemek.com\'da</span>'
                             : `<span class="status-badge ${uni.menuStatus}">${statusLabels[uni.menuStatus] || uni.menuStatus}</span>`}
                     </div>
                     ${uni.note ? `<div class="uni-card-note">${uni.note}</div>` : ''}

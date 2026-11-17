@@ -3617,10 +3617,6 @@ img.install-card-icon {
     min-width: 0;
 }
 
-.gz-dish.veg {
-    background: rgba(34, 197, 94, 0.07);
-    border-color: rgba(34, 197, 94, 0.22);
-}
 
 .gz-dish-icon {
     flex-shrink: 0;
@@ -3654,7 +3650,34 @@ img.install-card-icon {
     margin-top: 1px;
 }
 
-.gz-dish.veg .gz-dish-label { color: #86efac; }
+/* Yemek türüne göre belirgin renkler (etsiz alternatif ve diğer: nötr) */
+.gz-dish[data-kind="corba"]    { --gz-kind: #fb923c; --gz-kind-bg: rgba(251, 146, 60, 0.16); }
+.gz-dish[data-kind="ana"]      { --gz-kind: #f87171; --gz-kind-bg: rgba(248, 113, 113, 0.16); }
+.gz-dish[data-kind="yardimci"] { --gz-kind: #facc15; --gz-kind-bg: rgba(250, 204, 21, 0.15); }
+.gz-dish[data-kind="tatli"]    { --gz-kind: #f472b6; --gz-kind-bg: rgba(244, 114, 182, 0.16); }
+
+.gz-dish[data-kind="corba"],
+.gz-dish[data-kind="ana"],
+.gz-dish[data-kind="yardimci"],
+.gz-dish[data-kind="tatli"] {
+    border-left: 3px solid var(--gz-kind);
+    background: linear-gradient(90deg, var(--gz-kind-bg) 0%, rgba(255, 255, 255, 0.04) 70%);
+}
+
+.gz-dish[data-kind="corba"] .gz-dish-icon,
+.gz-dish[data-kind="ana"] .gz-dish-icon,
+.gz-dish[data-kind="yardimci"] .gz-dish-icon,
+.gz-dish[data-kind="tatli"] .gz-dish-icon {
+    background: var(--gz-kind-bg);
+}
+
+.gz-dish[data-kind="corba"] .gz-dish-label,
+.gz-dish[data-kind="ana"] .gz-dish-label,
+.gz-dish[data-kind="yardimci"] .gz-dish-label,
+.gz-dish[data-kind="tatli"] .gz-dish-label {
+    color: var(--gz-kind);
+    font-weight: 600;
+}
 
 .gz-card-empty,
 .gz-card-holiday {

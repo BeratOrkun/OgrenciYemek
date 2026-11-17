@@ -30,7 +30,7 @@ var APP_DATA = window.APP_DATA = {
             // Menü uygulama içinde gösterilir (js/gazi.js — Google Sheet'ten canlı)
             inApp: 'gazi',
             accessChannel: '✅ Açık Menü',
-            note: 'Günlük öğle menüsü uygulamada: çorba, ana yemek, etsiz alternatif ve kalori.',
+            note: "Günlük öğle menüsü ogrenciyemek.com'da: çorba, ana yemek, etsiz alternatif ve kalori.",
             icon: '🏛️'
         },
         {

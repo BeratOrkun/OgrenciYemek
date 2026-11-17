@@ -91,6 +91,16 @@
 Options -Indexes
 
 # ----------------------------------------------------------
-# 6) Varsayılan belge
+# 6) Varsayılan belge ve 404 sayfası
+#    /kyk-yemek-listesi/ankara/ gibi SEO sayfaları klasör/index.html olarak durur.
 # ----------------------------------------------------------
 DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+# ----------------------------------------------------------
+# 7) Yalnızca geliştirme amaçlı klasörleri dışarıya kapat
+#    (sayfa üreticisi, GitHub iş akışları). Ziyaretçi 404 görür.
+# ----------------------------------------------------------
+<IfModule mod_alias.c>
+    RedirectMatch 404 ^/(tools|\.github|instagram-posts)(/|$)
+</IfModule>

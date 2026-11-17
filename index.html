@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#15102b">
     <meta name="color-scheme" content="dark">
-    <meta name="description" content="Ankara'daki öğrenciler için ücretsiz ve uygun fiyatlı yemek rehberi: üniversite yemekhane menüleri, günlük KYK menüsü, ABB Gençlik Sofrası ve Millet Kütüphanesi ikramları.">
+    <meta name="description" content="KYK yemek listesi ve KYK menü (81 il), Gazi yemek, Hacettepe yemek ve Ankara Üniversitesi yemekhane menüleri, Gençlik Sofrası menü — her gün güncel, tek yerde.">
+    <meta name="robots" content="index, follow, max-image-preview:large">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <!-- Ana ekranda iki satira bolunebilsin diye bosluklu yazildi -->
     <meta name="apple-mobile-web-app-title" content="Öğrenci Yemek">
 
-    <title>ÖğrenciYemek — Öğrenci Yemek Rehberi</title>
+    <title>KYK Yemek Listesi, Gazi ve Hacettepe Yemek Menüsü | ÖğrenciYemek</title>
     <link rel="canonical" href="https://ogrenciyemek.com/">
 
     <!-- Sosyal paylasim -->
@@ -20,15 +21,15 @@
     <meta property="og:site_name" content="ÖğrenciYemek">
     <meta property="og:locale" content="tr_TR">
     <meta property="og:url" content="https://ogrenciyemek.com/">
-    <meta property="og:title" content="ÖğrenciYemek — Öğrenci Yemek Rehberi">
-    <meta property="og:description" content="Üniversite yemekhane menüleri, günlük KYK menüsü, ABB Gençlik Sofrası ve Millet Kütüphanesi ikramları — tek uygulamada.">
+    <meta property="og:title" content="KYK Yemek Listesi, Gazi ve Hacettepe Yemek Menüsü | ÖğrenciYemek">
+    <meta property="og:description" content="Bugünün KYK yemek listesi, Gazi, Hacettepe ve Ankara Üniversitesi menüleri, Gençlik Sofrası ve kent lokantaları — tek uygulamada.">
     <meta property="og:image" content="https://ogrenciyemek.com/icons/og-image.png?v=15">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="ÖğrenciYemek logosu">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="ÖğrenciYemek — Öğrenci Yemek Rehberi">
-    <meta name="twitter:description" content="Üniversite, KYK ve Gençlik Sofrası menüleri tek uygulamada.">
+    <meta name="twitter:title" content="KYK Yemek Listesi, Gazi ve Hacettepe Yemek Menüsü | ÖğrenciYemek">
+    <meta name="twitter:description" content="Bugünün KYK, üniversite ve Gençlik Sofrası menüleri tek uygulamada.">
     <meta name="twitter:image" content="https://ogrenciyemek.com/icons/og-image.png?v=15">
 
     <!-- PWA Manifest -->
@@ -41,8 +42,49 @@
     <link rel="icon" href="icons/icon-192.png?v=15" sizes="192x192" type="image/png">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=15">
 
+    <!-- Yazı tipi: bağlantıyı önceden aç, CSS'i engellemeden yükle -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+
     <!-- Styles -->
-    <link rel="stylesheet" href="css/style.css?v=39">
+    <link rel="stylesheet" href="css/style.css?v=40">
+
+    <!-- Yapısal veri (Google): site, kuruluş ve öne çıkan sayfalar -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebSite",
+                "@id": "https://ogrenciyemek.com/#website",
+                "url": "https://ogrenciyemek.com/",
+                "name": "ÖğrenciYemek",
+                "alternateName": ["Öğrenci Yemek", "ogrenciyemek.com"],
+                "description": "KYK yemek listesi, üniversite yemekhane menüleri ve öğrenciler için ücretsiz yemek rehberi.",
+                "inLanguage": "tr-TR",
+                "publisher": { "@id": "https://ogrenciyemek.com/#organization" }
+            },
+            {
+                "@type": "Organization",
+                "@id": "https://ogrenciyemek.com/#organization",
+                "name": "ÖğrenciYemek",
+                "url": "https://ogrenciyemek.com/",
+                "logo": "https://ogrenciyemek.com/icons/icon-512.png",
+                "sameAs": ["https://www.instagram.com/ogrenciyemek.com_/"]
+            },
+            {
+                "@type": "WebApplication",
+                "name": "ÖğrenciYemek",
+                "url": "https://ogrenciyemek.com/",
+                "applicationCategory": "LifestyleApplication",
+                "operatingSystem": "Android, iOS, Web",
+                "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY" },
+                "inLanguage": "tr-TR"
+            }
+        ]
+    }
+    </script>
 
     <!-- Acil durum kurtarma: Beklenmedik bir JS hatasinda dahi ana ekranin asla bos zeminde kalmamasini garanti eder -->
     <script>
@@ -254,6 +296,29 @@
             </a>
 
             <!-- Footer -->
+            <!-- Popüler sayfalar (arama motorları ve hızlı erişim için) -->
+            <nav class="home-links" aria-labelledby="home-links-title">
+                <h2 class="home-links-title" id="home-links-title">KYK ve üniversite yemek listeleri</h2>
+                <ul class="home-links-list">
+                    <li><a href="/kyk-yemek-listesi/">KYK yemek listesi</a></li>
+                    <li><a href="/kyk-yemek-listesi/ankara/">KYK menü Ankara</a></li>
+                    <li><a href="/gazi-universitesi-yemek-listesi/">Gazi yemek listesi</a></li>
+                    <li><a href="/hacettepe-yemek-listesi/">Hacettepe yemek listesi</a></li>
+                    <li><a href="/ankara-universitesi-yemek-listesi/">Ankara Üniversitesi yemek listesi</a></li>
+                    <li><a href="/ankara-universite-yemek-listeleri/">Ankara üniversite yemek listeleri</a></li>
+                    <li><a href="/genclik-sofrasi/">Gençlik Sofrası menü</a></li>
+                    <li><a href="/cankaya-genclik-sofrasi/">Çankaya Gençlik Sofrası</a></li>
+                    <li><a href="/cankaya-kent-lokantasi/">Çankaya Kent Lokantası menü</a></li>
+                    <li><a href="/etimesgut-kent-lokantasi/">Etimesgut Kent Lokantası</a></li>
+                    <li><a href="/millet-kutuphanesi-corba-saatleri/">Millet Kütüphanesi çorba saatleri</a></li>
+                    <li><a href="/ankara-ogrenci-ucretsiz-yemek/">Ankara öğrenci ücretsiz yemek</a></li>
+                    <li><a href="/kyk-yemek-listesi/istanbul/">İstanbul KYK yemek listesi</a></li>
+                    <li><a href="/kyk-yemek-listesi/izmir/">İzmir KYK yemek listesi</a></li>
+                    <li><a href="/kyk-yemek-listesi/sivas/">Sivas KYK yemek listesi</a></li>
+                    <li><a href="/kyk-yemek-listesi/sakarya/">Sakarya KYK yemek listesi</a></li>
+                </ul>
+            </nav>
+
             <div class="home-footer">
                 <p class="home-footer-text">
                     <strong>ÖğrenciYemek</strong>
@@ -296,12 +361,12 @@
 </div>
 
 <!-- Scripts (order matters) -->
-<script src="js/storage.js?v=39"></script>
-<script src="js/data.js?v=39"></script>
-<script src="js/screens.js?v=39"></script>
-<script src="js/unimenu.js?v=39"></script>
-<script src="js/now.js?v=39"></script>
-<script src="js/app.js?v=39"></script>
+<script src="js/storage.js?v=40"></script>
+<script src="js/data.js?v=40"></script>
+<script src="js/screens.js?v=40"></script>
+<script src="js/unimenu.js?v=40"></script>
+<script src="js/now.js?v=40"></script>
+<script src="js/app.js?v=40"></script>
 
 <!-- GoatCounter & Umami — cerezsiz ziyaret sayaclari. -->
 <script data-goatcounter="https://beratorkune.goatcounter.com/count"
@@ -310,7 +375,7 @@
         data-website-id="0fcc0f5a-49ce-4bdb-88b7-55492e04d394"
         data-exclude-search="true"
         data-exclude-hash="true"></script>
-<script src="js/analytics.js?v=39"></script>
+<script src="js/analytics.js?v=40"></script>
 
 </body>
 </html>

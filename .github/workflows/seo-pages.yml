@@ -1,0 +1,71 @@
+name: SEO sayfalarını güncelle
+
+# Menüleri HTML'e işlenmiş statik sayfaları (KYK 81 il, Gazi, Hacettepe, Ankü,
+# Gençlik Sofrası, belediye lokantaları…) yeniden üretir. Hostinger GitHub'dan
+# otomatik yayınladığı için değişen sayfalar dakikalar içinde canlıya çıkar.
+on:
+  schedule:
+    # İstanbul saatiyle 00:20, 06:20, 11:20, 16:20 (UTC = İstanbul − 3)
+    - cron: "20 21 * * *"
+    - cron: "20 3 * * *"
+    - cron: "20 8 * * *"
+    - cron: "20 13 * * *"
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "tools/seo/build.mjs"
+      - "tools/seo/lib.mjs"
+      - "js/data.js"
+      - "index.html"
+      - ".github/workflows/seo-pages.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: seo-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Eylemler sabit commit'e kilitli (etiket sonradan değiştirilse bile aynı kod çalışır)
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 22
+
+      - name: Sayfaları üret
+        run: node tools/seo/build.mjs
+
+      - name: Değişiklik varsa commit'le
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Değişiklik yok."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- sitemap.xml 404.html tools/seo/manifest.json \
+            kyk-yemek-listesi gazi-universitesi-yemek-listesi hacettepe-yemek-listesi \
+            ankara-universitesi-yemek-listesi genclik-sofrasi cankaya-genclik-sofrasi \
+            cankaya-kent-lokantasi etimesgut-kent-lokantasi millet-kutuphanesi-corba-saatleri \
+            ankara-ogrenci-ucretsiz-yemek ankara-universite-yemek-listeleri
+          if git diff --cached --quiet; then
+            echo "Yalnızca beklenmeyen dosyalar değişti; commit atılmadı."
+            git status --porcelain
+            exit 0
+          fi
+          git commit -m "SEO sayfaları güncellendi"
+          for i in 1 2 3; do
+            if git push; then exit 0; fi
+            echo "Push reddedildi, uzaktaki değişiklikler alınıp tekrar deneniyor ($i/3)..."
+            git pull --rebase -X theirs origin main || git rebase --abort
+            sleep $((i * 5))
+          done
+          echo "::error::Push 3 denemede başarısız oldu."
+          exit 1

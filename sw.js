@@ -1,5 +1,5 @@
 // ÖğrenciYemek Service Worker
-const CACHE_NAME = 'ogrenciyemek-v39';
+const CACHE_NAME = 'ogrenciyemek-v40';
 
 // Göreceli yollar: SW'nin bulunduğu dizine göre çözümlenir, böylece
 // hem alan adı kökünde hem de /OgrenciYemek/ alt dizininde çalışır.
@@ -7,21 +7,21 @@ const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './css/style.css',
-    './css/style.css?v=39',
+    './css/style.css?v=40',
     './js/storage.js',
-    './js/storage.js?v=39',
+    './js/storage.js?v=40',
     './js/analytics.js',
-    './js/analytics.js?v=39',
+    './js/analytics.js?v=40',
     './js/app.js',
-    './js/app.js?v=39',
+    './js/app.js?v=40',
     './js/data.js',
-    './js/data.js?v=39',
+    './js/data.js?v=40',
     './js/screens.js',
-    './js/screens.js?v=39',
+    './js/screens.js?v=40',
     './js/unimenu.js',
-    './js/unimenu.js?v=39',
+    './js/unimenu.js?v=40',
     './js/now.js',
-    './js/now.js?v=39',
+    './js/now.js?v=40',
     './manifest.json',
     './manifest.json?v=15',
     './icons/icon-192.png',
@@ -140,6 +140,15 @@ self.addEventListener('fetch', (event) => {
     }
     if (request.method !== 'GET' || url.origin !== self.location.origin) {
         return;
+    }
+
+    // Uygulama kabuğu dışındaki sayfalar (ör. /kyk-yemek-listesi/ankara/) SW'ye
+    // hiç uğramadan ağdan gelir. Aksi halde bu sayfalar './index.html' önbelleğinin
+    // üzerine yazılır ve çevrimdışı açılışta uygulama yerine o sayfa görünürdü.
+    if (request.mode === 'navigate') {
+        const scopePath = new URL(self.registration.scope).pathname; // genelde "/"
+        const shellPaths = [scopePath, scopePath + 'index.html'];
+        if (!shellPaths.includes(url.pathname)) return;
     }
 
     event.respondWith((async () => {

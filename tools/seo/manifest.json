@@ -1,0 +1,471 @@
+{
+ "/": {
+  "hash": "29f2a151a14975d3",
+  "updated": "2026-11-18"
+ },
+ "/404.html": {
+  "hash": "e769a7905d07a52a",
+  "updated": "2026-11-18",
+  "noindex": true
+ },
+ "/ankara-ogrenci-ucretsiz-yemek/": {
+  "hash": "094eb48e0326cd94",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/ankara-universite-yemek-listeleri/": {
+  "hash": "3b43667a1a5abd98",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/ankara-universitesi-yemek-listesi/": {
+  "hash": "54f947c07f23350b",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/cankaya-genclik-sofrasi/": {
+  "hash": "f913c20d8d66af48",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/cankaya-kent-lokantasi/": {
+  "hash": "3e281cfe15010cdb",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/etimesgut-kent-lokantasi/": {
+  "hash": "3feab3d8cad1bf40",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/gazi-universitesi-yemek-listesi/": {
+  "hash": "eb604640cf278201",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/genclik-sofrasi/": {
+  "hash": "57aeeab0edcfe4f8",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/hacettepe-yemek-listesi/": {
+  "hash": "ebc41b65d2bd3383",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/": {
+  "hash": "d3372ffd21119ad5",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/adana/": {
+  "hash": "69ab8e6ea1d63edb",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/adiyaman/": {
+  "hash": "33fc723baa6ed223",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/afyonkarahisar/": {
+  "hash": "2b227f41bd7e22d8",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/agri/": {
+  "hash": "c2ca51081cd0871f",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/aksaray/": {
+  "hash": "559803ef1e650ae0",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/amasya/": {
+  "hash": "7ba3503c39419c01",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/ankara/": {
+  "hash": "fcdf38f6a5d9d6d5",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/antalya/": {
+  "hash": "b6b233ad88ba62d7",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/ardahan/": {
+  "hash": "ca74ba1992443c12",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/artvin/": {
+  "hash": "a7335368cff39d70",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/aydin/": {
+  "hash": "093859038125cd85",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/balikesir/": {
+  "hash": "3a3ff1c9c2a20990",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/bartin/": {
+  "hash": "9c705451c3fd5670",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/batman/": {
+  "hash": "70c3e61130d3ecfe",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/bayburt/": {
+  "hash": "02ae6615f58e6fb2",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/bilecik/": {
+  "hash": "eecaf432e6705e69",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/bingol/": {
+  "hash": "fdb793b625add55f",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/bitlis/": {
+  "hash": "68f44987dedc588a",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/bolu/": {
+  "hash": "6f58ccc71d3d699f",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/burdur/": {
+  "hash": "0c5c50cfbaebfcd8",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/bursa/": {
+  "hash": "29ccc42f02664269",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/canakkale/": {
+  "hash": "70ef5ca54c3e746c",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/cankiri/": {
+  "hash": "9a88524917ac2b2f",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/corum/": {
+  "hash": "f344af2fd9ec966d",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/denizli/": {
+  "hash": "6dc68f247287fe41",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/diyarbakir/": {
+  "hash": "5dffceb3aa98e17d",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/duzce/": {
+  "hash": "3ece1d14f345663d",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/edirne/": {
+  "hash": "6ebe6eddca4d6392",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/elazig/": {
+  "hash": "b18b36e552205edb",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/erzincan/": {
+  "hash": "a9987592c1fec957",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/erzurum/": {
+  "hash": "b1d560579dc09c59",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/eskisehir/": {
+  "hash": "538f50dccde9c2a4",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/gaziantep/": {
+  "hash": "b827a1606fbd5f7b",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/giresun/": {
+  "hash": "35731d1f488d295f",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/gumushane/": {
+  "hash": "f22061de6be5f6e2",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/hakkari/": {
+  "hash": "8f5d163d05d48f86",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/hatay/": {
+  "hash": "713a60017b4a9c68",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/igdir/": {
+  "hash": "ea8b39375c15a338",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/isparta/": {
+  "hash": "580a327dbdbe5bf6",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/istanbul/": {
+  "hash": "ee8b3c06e316a392",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/izmir/": {
+  "hash": "a72d30425db953ca",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/kahramanmaras/": {
+  "hash": "6811ff7514011738",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/karabuk/": {
+  "hash": "3b513d5ba6b090b8",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/karaman/": {
+  "hash": "69b89e4d7bcb9373",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/kars/": {
+  "hash": "798fee7606c0d93b",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/kastamonu/": {
+  "hash": "2a4d666d0d6c257d",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/kayseri/": {
+  "hash": "0875de29c59c6ddf",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/kilis/": {
+  "hash": "97ed656a2cebc539",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/kirikkale/": {
+  "hash": "2e827ed442ea3d58",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/kirklareli/": {
+  "hash": "498f6ab7f9a55bf3",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/kirsehir/": {
+  "hash": "ae9422151f7ca367",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/kocaeli/": {
+  "hash": "d6deb27679601ef1",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/konya/": {
+  "hash": "1cc47b3d85b12c63",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/kutahya/": {
+  "hash": "21253c3e0bee6995",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/malatya/": {
+  "hash": "c31bd89488c41223",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/manisa/": {
+  "hash": "26edd970adfa7bb2",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/mardin/": {
+  "hash": "f7b227003237e64a",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/mersin/": {
+  "hash": "e111007ba0eb41a3",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/mugla/": {
+  "hash": "8d4f1e73a3d41964",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/mus/": {
+  "hash": "19bfbe1e1206c5f1",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/nevsehir/": {
+  "hash": "5768503c878de5d2",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/nigde/": {
+  "hash": "35377b54a81f760c",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/ordu/": {
+  "hash": "173a4f934c340bd6",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/osmaniye/": {
+  "hash": "3141b5f0258e56aa",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/rize/": {
+  "hash": "9e173386b63887e0",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/sakarya/": {
+  "hash": "74f8f8c9ed6598bd",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/samsun/": {
+  "hash": "99b72dd2dc8580f6",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/sanliurfa/": {
+  "hash": "78c45784703fe005",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/siirt/": {
+  "hash": "4d53b8b2b442989b",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/sinop/": {
+  "hash": "51de587d2b1582c5",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/sirnak/": {
+  "hash": "53904991b35110bc",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/sivas/": {
+  "hash": "ee03e40cb0dc94cc",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/tekirdag/": {
+  "hash": "d927db5f67775377",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/tokat/": {
+  "hash": "ed82bf47e82510e9",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/trabzon/": {
+  "hash": "5d7f2ce218cd798a",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/tunceli/": {
+  "hash": "9aba7dc1e0014555",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/usak/": {
+  "hash": "cb24c063a67b4a70",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/van/": {
+  "hash": "db28615b6139ddb2",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/yalova/": {
+  "hash": "dc4c400ae1f96a46",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/yozgat/": {
+  "hash": "a72e997c83f5cedd",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/kyk-yemek-listesi/zonguldak/": {
+  "hash": "06c6c327a7d72229",
+  "updated": "2026-11-18",
+  "noindex": false
+ },
+ "/millet-kutuphanesi-corba-saatleri/": {
+  "hash": "7711f85b8907ef6f",
+  "updated": "2026-11-18",
+  "noindex": false
+ }
+}

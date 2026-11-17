@@ -13,6 +13,10 @@ var App = window.App = {
 
     currentScreen: null,
 
+    // ?ekran= ile açılabilecek ekranlar
+    DEEP_LINK_SCREENS: ['universities', 'kyk', 'genclik', 'millet', 'gazi', 'hacettepe', 'anku',
+        'cankaya-genclik', 'cankaya-kent'],
+
     // Uygulamanın geçmişe eklediği girdi sayısı (geri tuşu yönetimi)
     _historyDepth: 0,
 
@@ -62,6 +66,13 @@ var App = window.App = {
 
         // Karşılama ekranı yok; doğrudan ana ekran açılır
         this.showScreen('home');
+
+        // Derin bağlantı: /?ekran=kyk → ana ekranın üstüne o ekran açılır
+        // (geri tuşu ana ekrana döner). Yalnızca bilinen ekranlar kabul edilir.
+        try {
+            const ekran = new URLSearchParams(window.location.search).get('ekran');
+            if (ekran && this.DEEP_LINK_SCREENS.includes(ekran)) this.showScreen(ekran);
+        } catch { /* eski tarayıcı — ana ekranda kal */ }
 
         // Menüleri arka planda hazırla (ilk açılışta da)
         this.prefetchMenus();

@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /tools/
+Disallow: /*?mod=app
+Disallow: /*?ekran=
 
 Sitemap: https://ogrenciyemek.com/sitemap.xml

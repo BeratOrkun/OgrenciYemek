@@ -102,6 +102,30 @@ function uniItems(items) {
 const mealBlock = (title, time, kcal, inner) =>
   `<div class="s-meal"><h3>${esc(title)}${time ? ` <span class="s-time">${esc(time)}</span>` : ""}${kcal ? ` <span class="s-kcal">${kcal} kcal</span>` : ""}</h3>${inner}</div>`;
 
+// İlk `visible` gün görünür; kalanlar açılır-kapanır bölümde (içerik HTML'de, Google okur)
+function dayList(articles, visible = 5) {
+  if (articles.length <= visible + 1) return `<div class="s-days">${articles.join("")}</div>`;
+  return `<div class="s-days">${articles.slice(0, visible).join("")}</div>
+<details class="s-more-days"><summary>Diğer günleri göster (${articles.length - visible} gün)</summary><div class="s-days">${articles.slice(visible).join("")}</div></details>`;
+}
+
+// Öğrenciler için kısa karşılaştırma (ince sayfalara faydalı bağlam + iç bağlantı)
+function optionsTable(D, exclude) {
+  const k = D.kykInfo;
+  const rows = [
+    ["ABB Gençlik Sofrası", `Hafta içi ${hoursText(String(D.genclikSofrasi.hours).replace(/\s*\(.*\)/, ""))}`, "Ücretsiz", "/genclik-sofrasi/"],
+    ["Çankaya Gençlik Sofrası", `Hafta içi ${hoursText(D.cankayaGenclikSofrasi.hours)}`, "Ücretsiz", "/cankaya-genclik-sofrasi/"],
+    ["Millet Kütüphanesi", "Çorba, kek, çay ikramı", "Ücretsiz", "/millet-kutuphanesi-corba-saatleri/"],
+    ["Çankaya Kent Lokantası", `Hafta içi ${hoursText(D.cankayaKentLokantasi.hours)}`, D.cankayaKentLokantasi.price, "/cankaya-kent-lokantasi/"],
+    ["Etimesgut Kent Lokantası", `Hafta içi ${hoursText(D.etimesgutKentLokantasi.hours)}`, D.etimesgutKentLokantasi.price, "/etimesgut-kent-lokantasi/"],
+    ["KYK yurtları", `Kahvaltı ${hoursText(k.breakfastHours)}, akşam ${hoursText(k.dinnerHours)}`, `Beslenme yardımı ${k.totalSubsidy}/gün`, "/kyk-yemek-listesi/ankara/"],
+  ].filter((r) => r[3] !== exclude);
+  return `<div class="s-table" role="table">
+<div class="s-tr s-th" role="row"><span role="columnheader">Yer</span><span role="columnheader">Saat</span><span role="columnheader">Ücret</span></div>
+${rows.map(([n, h, p, href]) => `<a class="s-tr" role="row" href="${href}"><span role="cell"><b>${esc(n)}</b></span><span role="cell">${esc(h)}</span><span role="cell">${esc(p)}</span></a>`).join("\n")}
+</div>`;
+}
+
 const note = (text, kind = "") => `<p class="s-note${kind ? " " + kind : ""}">${text}</p>`;
 
 const infoGrid = (rows) =>
@@ -213,9 +237,8 @@ ${day.d ? mealBlock("🍲 KYK akşam yemeği menüsü", dH, day.d.kcal, dishList
     const body = `
 ${dayCard(slug, TODAY, `${name} KYK menü bugün · ${trDate(TODAY)}`)}
 ${dayOf(slug, tomorrow) ? dayCard(slug, tomorrow, `${name} KYK menü yarın · ${trDate(tomorrow)}`) : ""}
-${upcoming.length ? `<section class="s-sec"><h2>${esc(name)} KYK yemek listesi ${esc(MONTH_LABEL)} (aylık)</h2><div class="s-days">${upcoming
-      .map(([iso, d]) => `<article class="s-day"><h3>${esc(trDate(iso, { year: false }))}</h3>${d.b ? `<p><b>Kahvaltı:</b> ${esc(d.b.items.join(", "))}</p>` : ""}${d.d ? `<p><b>Akşam:</b> ${esc(d.d.items.join(", "))}</p>` : ""}</article>`)
-      .join("")}</div></section>` : ""}
+${upcoming.length ? `<section class="s-sec"><h2>${esc(name)} KYK yemek listesi ${esc(MONTH_LABEL)} (aylık)</h2>${dayList(upcoming
+      .map(([iso, d]) => `<article class="s-day"><h3>${esc(trDate(iso, { year: false }))}</h3>${d.b ? `<p><b>Kahvaltı:</b> ${esc(d.b.items.join(", "))}</p>` : ""}${d.d ? `<p><b>Akşam:</b> ${esc(d.d.items.join(", "))}</p>` : ""}</article>`))}</section>` : ""}
 <section class="s-sec"><h2>KYK yemekhane saatleri ve yemek ücretleri</h2>${infoBox}</section>
 <section class="s-sec"><h2>Diğer illerin KYK yemek listesi</h2><ul class="s-chips">${KYK_POPULAR.filter((s) => s !== slug && cities.has(s))
       .map((s) => `<li><a href="/kyk-yemek-listesi/${s}/">${esc(cityName(s))}</a></li>`).join("")}<li><a href="/kyk-yemek-listesi/">Tüm iller</a></li></ul></section>`;
@@ -313,7 +336,7 @@ function uniDayInner(day, mealKeys, { withTimes = true } = {}) {
 function uniUpcoming(days, fromIso, mealKeys) {
   const out = Object.keys(days).filter((iso) => iso > fromIso).sort().slice(0, 25);
   if (!out.length) return "";
-  return `<div class="s-days">${out
+  return dayList(out
     .map((iso) => {
       const d = days[iso];
       let inner;
@@ -325,8 +348,7 @@ function uniUpcoming(days, fromIso, mealKeys) {
           .map((k) => `<p><b>${{ sabah: "Kahvaltı", ogle: "Öğle", aksam: "Akşam", vegan: "Vegan" }[k]}:</b> ${esc(d.meals[k].items.map((i) => i.name).join(", "))}</p>`)
           .join("");
       return `<article class="s-day"><h3>${esc(trDate(iso, { year: false }))}</h3>${inner}</article>`;
-    })
-    .join("")}</div>`;
+    }));
 }
 
 const todayHeading = (iso) =>
@@ -390,7 +412,7 @@ function hacettepePage(D, beytepe, sihhiye) {
   return {
     key: "hacettepe",
     path: "/hacettepe-yemek-listesi/",
-    title: "Hacettepe Yemek Listesi Bugün – Beytepe ve Sıhhiye Yemekhane Menüsü, Saatleri",
+    title: "Hacettepe Yemek Listesi Bugün – Beytepe, Sıhhiye Yemekhane Menüsü",
     description: `Hacettepe yemek listesi ${trDate(t, { day: false, year: false })}${preview ? `: ${preview}` : ""}. Hacettepe yemekhane menüsü (Beytepe, Sıhhiye), yemekhane saatleri, vegan menü ve kalori.`,
     h1: "Hacettepe Yemek Listesi ve Yemekhane Menüsü",
     lead: "Hacettepe yemek listesi her gün güncel: Beytepe ve Sıhhiye yemekhanelerinin kahvaltı, öğle, akşam ve vegan menüsü; Hacettepe yemekhane saatleri, kalori ve alerjen bilgisiyle.",
@@ -519,7 +541,7 @@ function genclikPage(D) {
   return {
     key: "genclik",
     path: "/genclik-sofrasi/",
-    title: "Gençlik Sofrası Menü Bugün – Ankara Gençlik Sofrası Saatleri ve Kayıt",
+    title: "Gençlik Sofrası Menü Bugün – Ankara Gençlik Sofrası Saatleri",
     description: `Ankara Gençlik Sofrası menü, saatleri (hafta içi ${hours}), Sıhhiye, Kızılay, Anıttepe ve Gazi Mahallesi adresleri ve kayıt bilgisi. Öğrencilere ücretsiz.`,
     h1: "Ankara Gençlik Sofrası Menüsü",
     lead: "Gençlik Sofrası menü, saatleri ve kayıt bilgisi: Ankara Büyükşehir Belediyesi'nin üniversite öğrencilerine hafta içi her akşam verdiği ücretsiz sıcak yemek; günün menüsü ve hizmet noktaları (Sıhhiye, Kızılay, Anıttepe, Gazi Mahallesi).",
@@ -643,12 +665,15 @@ function etimesgutKentPage(D) {
       ["Çay, kahve, simit", "Hafta sonu dahil 09:00–18:00 (uygun fiyatlı)"],
       ["Kapasite", "144 kişilik oturma alanı"],
     ])}</section>
-<section class="s-sec"><h2>Günün menüsü</h2>${note(`Etimesgut Belediyesi günün menüsünü her gün görsel olarak yayımlıyor: <a href="${esc(e.pageUrl)}" rel="noopener">Ahi-Kent Lokantası — günün menüsü</a>.`)}</section>`,
+<section class="s-sec"><h2>Etimesgut Kent Lokantası günün menüsü</h2>${note(`Etimesgut Belediyesi günün menüsünü her gün görsel olarak yayımlıyor: <a href="${esc(e.pageUrl)}" rel="noopener">Ahi-Kent Lokantası — günün menüsü</a>. Sıcak yemek, belediyenin besin değerlerine göre porsiyonladığı günlük menüden oluşur ve günde yaklaşık 500 kişiye servis edilir.`)}</section>
+<section class="s-sec"><h2>Kimler yararlanabilir?</h2>${note("Ahi-Kent Lokantası tüm vatandaşlara açıktır; öğrenciler de aynı fiyattan yararlanabilir. Lokantada iç mekânın yanı sıra teras, bahçe ve kamelya alanlarında oturma yeri bulunur.")}</section>
+<section class="s-sec"><h2>Ankara'da öğrenciler için diğer uygun yemek seçenekleri</h2>${optionsTable(D, "/etimesgut-kent-lokantasi/")}</section>`,
     app: { screen: null, label: "Uygulamayı aç", ctaText: "ÖğrenciYemek uygulamasını aç" },
     faq: [
       { q: "Etimesgut Kent Lokantası fiyatı ne kadar?", a: `Hafta içi verilen sıcak yemek ${e.price}.` },
       { q: "Etimesgut Kent Lokantası saat kaçta açık?", a: `Sıcak yemek hafta içi ${hours}; çay, kahve ve simit gibi ürünler hafta sonu dahil 09:00–18:00.` },
       { q: "Etimesgut Kent Lokantası menüsü nereden görülür?", a: "Günün menüsü Etimesgut Belediyesi'nin Ahi-Kent Lokantası sayfasında yayımlanır." },
+      { q: "Etimesgut Kent Lokantası'ndan öğrenciler yararlanabilir mi?", a: `Evet. Lokanta tüm vatandaşlara açıktır; öğrenciler de hafta içi ${hours} saatleri arasında sıcak yemeği ${e.price} ödeyerek alabilir.` },
     ],
     related: [
       { href: "/cankaya-kent-lokantasi/", text: "Çankaya Kent Lokantası" },
@@ -676,13 +701,16 @@ function milletPage(D) {
     body: `
 <section class="s-sec"><h2>Ücretsiz ikram saatleri</h2>${infoGrid([...timed, ...allDay].map((s) => [s.name, `${esc(winText(s) === "00:00–24:00" ? "7/24" : winText(s))} · ${esc(s.schedule)}`]))}
 ${note("İkram saatleri kütüphane tarafından değiştirilebilir; ziyaretten önce teyit etmeni öneririz.")}</section>
-<section class="s-sec"><h2>Nerede?</h2>${infoGrid([["Yer", `${esc(m.title)} — ${esc(m.subtitle)}`], ["Ücret", "Ücretsiz"]])}</section>`,
+<section class="s-sec"><h2>Millet Kütüphanesi'nde ikram nerede?</h2>${infoGrid([["Yer", `${esc(m.title)} — ${esc(m.subtitle)}`], ["Ücret", "Ücretsiz"], ["Kütüphane", "7/24 açık; gece ders çalışan öğrenciler için kek ve sıcak içecek ikramı"]])}</section>
+<section class="s-sec"><h2>Gece ders çalışanlar için</h2>${note("Millet Kütüphanesi gece de açık olduğu için sınav dönemlerinde öğrencilerin uğrak noktasıdır. Gece yarısından sabaha kadar kek, gün boyu çay ve kahve ikramı yapılır; öğle ve akşam saatlerinde çorba dağıtılır. Ramazan ayında sahur ikramı da yapılmaktadır.")}</section>
+<section class="s-sec"><h2>Ankara'da öğrenciler için diğer ücretsiz yemek seçenekleri</h2>${optionsTable(D, "/millet-kutuphanesi-corba-saatleri/")}</section>`,
     app: { screen: "millet", ctaText: "Uygulamada aç" },
     faq: [
       ...(corba ? [{ q: "Millet Kütüphanesi çorba saat kaçta?", a: `Çorba ikramı ${winText(corba)} saatlerinde yapılır.` }] : []),
       ...(kek ? [{ q: "Millet Kütüphanesi kek saat kaçta?", a: `Kek ikramı gece ${winText(kek)} saatleri arasında yapılır.` }] : []),
       { q: "Millet Kütüphanesi'nde çay ve kahve ücretsiz mi?", a: allDay.length ? "Evet, sıcak içecek ikramı 7/24 ücretsizdir." : "Sıcak içecek ikramı yapılmaktadır." },
       { q: "Millet Kütüphanesi çorba ikramı hangi katta?", a: `İkramlar ${m.subtitle} bölümünde yapılır.` },
+      { q: "Millet Kütüphanesi 7/24 açık mı?", a: "Evet, Cumhurbaşkanlığı Millet Kütüphanesi günün her saati açıktır; gece ders çalışanlara kek ve sıcak içecek ikramı yapılır." },
     ],
     related: [
       { href: "/ankara-ogrenci-ucretsiz-yemek/", text: "Ankara'da öğrencilere ücretsiz yemek" },
@@ -708,7 +736,7 @@ function freeFoodHub(D, ctx) {
   return {
     key: "hub-free",
     path: "/ankara-ogrenci-ucretsiz-yemek/",
-    title: "Ankara Öğrencilere Ücretsiz Yemek – Gençlik Sofrası, KYK, Ucuz Yemek Yerleri",
+    title: "Ankara Öğrencilere Ücretsiz Yemek – Gençlik Sofrası ve Ucuz Yemek",
     description: "Ankara'da üniversite öğrencilerinin ücretsiz veya uygun fiyatlı yemek yiyebileceği yerler: Gençlik Sofrası, KYK, Millet Kütüphanesi çorba ikramı ve kent lokantaları; saatler ve fiyatlar.",
     h1: "Ankara'da Öğrencilere Ücretsiz ve Ucuz Yemek",
     lead: "Ankara'da öğrencilere ücretsiz yemek veren yerler ve ucuz yemek yerleri: Ankara Büyükşehir Belediyesi Gençlik Sofrası, Çankaya Belediyesi, KYK, Millet Kütüphanesi ve kent lokantaları — saatler, fiyatlar ve günün menüleri.",
@@ -757,7 +785,7 @@ function uniHub(D) {
   return {
     key: "hub-uni",
     path: "/ankara-universite-yemek-listeleri/",
-    title: "Ankara Üniversite Yemek Listeleri – Gazi, Hacettepe, Ankü, ODTÜ, Bilkent, AYBÜ",
+    title: "Ankara Üniversite Yemek Listeleri – Gazi, Hacettepe, Ankü, ODTÜ",
     description: "Ankara üniversite yemek listeleri: Gazi, Hacettepe ve Ankü günlük menüsü; ODTÜ, Bilkent, AYBÜ, Hacı Bayram Veli, ASBÜ, MGÜ ve Gülhane yemek listesi bağlantıları.",
     h1: "Ankara Üniversite Yemek Listeleri",
     lead: "Ankara'daki üniversitelerin yemekhane menüleri tek sayfada. Gazi, Hacettepe ve Ankara Üniversitesi menüleri günlük olarak burada; diğer üniversiteler için resmi menü sayfalarına bağlantılar.",

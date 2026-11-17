@@ -254,7 +254,7 @@ var APP_DATA = window.APP_DATA = {
             {
                 name: 'Kek İkramı',
                 schedule: 'Her gün',
-                hours: '24:00 - 08:00',
+                hours: '00:00 - 08:00',
                 shortName: 'Kek',
                 windows: [{ start: '00:00', end: '08:00' }],
                 icon: '🍰',

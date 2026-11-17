@@ -48,7 +48,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="css/style.css?v=43">
+    <link rel="stylesheet" href="css/style.css?v=44">
 
     <!-- Yapısal veri (Google): site, kuruluş ve öne çıkan sayfalar -->
     <script type="application/ld+json">
@@ -180,7 +180,7 @@
             <!-- Menu Cards -->
             <div class="menu-grid">
                 <!-- Üniversite Yemekleri -->
-                <div class="menu-card" data-accent="orange" onclick="App.showScreen('universities')">
+                <a class="menu-card" data-accent="orange" href="/ankara-universite-yemek-listeleri/" data-screen="universities">
                     <div class="menu-card-glow"></div>
                     <div class="menu-card-inner">
                         <div class="menu-card-icon">🎓</div>
@@ -190,23 +190,23 @@
                         </div>
                         <span class="menu-card-arrow">›</span>
                     </div>
-                </div>
+                </a>
 
                 <!-- KYK Yemekleri -->
-                <div class="menu-card" data-accent="green" onclick="App.showScreen('kyk')">
+                <a class="menu-card" data-accent="green" href="/kyk-yemek-listesi/" data-screen="kyk">
                     <div class="menu-card-glow"></div>
                     <div class="menu-card-inner">
                         <div class="menu-card-icon">🏠</div>
                         <div class="menu-card-content">
                             <h3 class="menu-card-title">KYK Yemekleri</h3>
-                            <p class="menu-card-desc">Günlük KYK kahvaltı ve akşam menüleri</p>
+                            <p class="menu-card-desc">KYK menü: günlük kahvaltı ve akşam yemeği</p>
                         </div>
                         <span class="menu-card-arrow">›</span>
                     </div>
-                </div>
+                </a>
 
                 <!-- Gençlik Sofrası -->
-                <div class="menu-card" data-accent="blue" onclick="App.showScreen('genclik')">
+                <a class="menu-card" data-accent="blue" href="/genclik-sofrasi/" data-screen="genclik">
                     <div class="menu-card-glow"></div>
                     <div class="menu-card-inner">
                         <div class="menu-card-icon">🍲</div>
@@ -216,10 +216,10 @@
                         </div>
                         <span class="menu-card-arrow">›</span>
                     </div>
-                </div>
+                </a>
 
                 <!-- Millet Kütüphanesi -->
-                <div class="menu-card" data-accent="purple" onclick="App.showScreen('millet')">
+                <a class="menu-card" data-accent="purple" href="/millet-kutuphanesi-corba-saatleri/" data-screen="millet">
                     <div class="menu-card-glow"></div>
                     <div class="menu-card-inner">
                         <div class="menu-card-icon">🏛️</div>
@@ -229,10 +229,10 @@
                         </div>
                         <span class="menu-card-arrow">›</span>
                     </div>
-                </div>
+                </a>
 
                 <!-- Çankaya Gençlik Sofrası -->
-                <div class="menu-card" data-accent="cyan" onclick="App.showScreen('cankaya-genclik')">
+                <a class="menu-card" data-accent="cyan" href="/cankaya-genclik-sofrasi/" data-screen="cankaya-genclik">
                     <div class="menu-card-glow"></div>
                     <div class="menu-card-inner">
                         <div class="menu-card-icon">🥗</div>
@@ -242,10 +242,10 @@
                         </div>
                         <span class="menu-card-arrow">›</span>
                     </div>
-                </div>
+                </a>
 
                 <!-- Çankaya Kent Lokantası -->
-                <div class="menu-card" data-accent="yellow" onclick="App.showScreen('cankaya-kent')">
+                <a class="menu-card" data-accent="yellow" href="/cankaya-kent-lokantasi/" data-screen="cankaya-kent">
                     <div class="menu-card-glow"></div>
                     <div class="menu-card-inner">
                         <div class="menu-card-icon">🍛</div>
@@ -255,12 +255,10 @@
                         </div>
                         <span class="menu-card-arrow">›</span>
                     </div>
-                </div>
+                </a>
 
                 <!-- Etimesgut Kent Lokantası (günün menüsü belediye sitesinde görsel olarak; doğrudan açılır) -->
-                <div class="menu-card" data-accent="pink" role="link" tabindex="0"
-                     onclick="App.openEtimesgutKent('menu-karti')"
-                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();App.openEtimesgutKent('menu-karti');}">
+                <a class="menu-card" data-accent="pink" href="/etimesgut-kent-lokantasi/" data-external="etimesgut">
                     <div class="menu-card-glow"></div>
                     <div class="menu-card-inner">
                         <div class="menu-card-icon">🍲</div>
@@ -270,7 +268,7 @@
                         </div>
                         <span class="menu-card-arrow menu-card-external" aria-hidden="true">↗</span>
                     </div>
-                </div>
+                </a>
 
             </div>
 
@@ -339,12 +337,12 @@
 </div>
 
 <!-- Scripts (order matters) -->
-<script src="js/storage.js?v=43"></script>
-<script src="js/data.js?v=43"></script>
-<script src="js/screens.js?v=43"></script>
-<script src="js/unimenu.js?v=43"></script>
-<script src="js/now.js?v=43"></script>
-<script src="js/app.js?v=43"></script>
+<script src="js/storage.js?v=44"></script>
+<script src="js/data.js?v=44"></script>
+<script src="js/screens.js?v=44"></script>
+<script src="js/unimenu.js?v=44"></script>
+<script src="js/now.js?v=44"></script>
+<script src="js/app.js?v=44"></script>
 
 <!-- GoatCounter & Umami — cerezsiz ziyaret sayaclari. -->
 <script data-goatcounter="https://beratorkune.goatcounter.com/count"
@@ -353,7 +351,7 @@
         data-website-id="0fcc0f5a-49ce-4bdb-88b7-55492e04d394"
         data-exclude-search="true"
         data-exclude-hash="true"></script>
-<script src="js/analytics.js?v=43"></script>
+<script src="js/analytics.js?v=44"></script>
 
 </body>
 </html>

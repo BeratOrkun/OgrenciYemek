@@ -515,9 +515,17 @@ var Screens = window.Screens = {
         // ["Tavuk Fajita +Lavaş", "Tavuk Fajita", "+Lavaş"]. Parçaları at,
         // birleşik hali ve sıralamayı koru.
         const cleanItems = (items) => {
-            const names = items
+            const raw = items
                 .map(n => String(n || '').replace(/\s+/g, ' ').trim())
                 .filter(Boolean);
+            // Kaynak "Siyah/Yeşil Zeytin"i iki maddeye bölüyor: birleştir
+            const names = [];
+            for (let i = 0; i < raw.length; i++) {
+                if (/^(siyah|yeşil)$/i.test(raw[i]) && /zeytin/i.test(raw[i + 1] || '')) {
+                    names.push(`${raw[i]} / ${raw[i + 1]}`);
+                    i++;
+                } else names.push(raw[i]);
+            }
             const seen = new Set();
             return names.filter(n => {
                 if (n.startsWith('+')) return false;
@@ -529,7 +537,7 @@ var Screens = window.Screens = {
             });
         };
 
-        const processItems = (mealObj) => {
+        const processItems = (mealObj, mealType) => {
             if (!mealObj || !Array.isArray(mealObj.items) || mealObj.items.length === 0) return [];
             const detailsMap = {};
             if (Array.isArray(mealObj.item_details)) {
@@ -548,7 +556,7 @@ var Screens = window.Screens = {
                 }
                 return {
                     name: name,
-                    category: detail.category || this._categorizeDishName(name),
+                    category: detail.category || this._categorizeDishName(name, mealType),
                     icon: this._categorizeDishIcon(name),
                     tags: tags,
                     calories: detail.calories ? `${detail.calories} kcal` : null
@@ -560,7 +568,7 @@ var Screens = window.Screens = {
 
         if (cityData.breakfast && Array.isArray(cityData.breakfast.items) && cityData.breakfast.items.length > 0) {
             const b = cityData.breakfast;
-            const items = processItems(b);
+            const items = processItems(b, 'breakfast');
             if (items.length) {
                 breakfast = {
                     title: 'Sabah Kahvaltısı',
@@ -574,7 +582,7 @@ var Screens = window.Screens = {
 
         if (cityData.dinner && Array.isArray(cityData.dinner.items) && cityData.dinner.items.length > 0) {
             const d = cityData.dinner;
-            const items = processItems(d);
+            const items = processItems(d, 'dinner');
             dinner = items.length ? {
                 title: 'Akşam Yemeği',
                 hours: info.dinnerHours || '16:00 - 22:30',
@@ -598,15 +606,23 @@ var Screens = window.Screens = {
         return { breakfast, dinner, botCommentary };
     },
 
-    _categorizeDishName(dish) {
-        const lower = dish.toLowerCase();
+    // Kelime bazlı eşleşme: "su" yalnızca "Su"/"500 ml Su" iken içecektir ("Su Böreği" değil)
+    _isWater(lower) {
+        return /(^|\s)su$/.test(lower) || /^\d+\s*ml\s+su$/.test(lower) || /(^|\s)(ayran|meyve suyu|şalgam|soda)(\s|$)/.test(lower);
+    },
+
+    // mealType: 'breakfast' → kahvaltılıklar "Ana Yemek" diye etiketlenmez
+    _categorizeDishName(dish, mealType) {
+        const lower = dish.toLocaleLowerCase('tr');
+        if (this._isWater(lower)) return 'İçecek';
+        if (/(^|\s)(çay|kahve|süt)(\s|$)/.test(lower) && mealType === 'breakfast') return 'İçecek';
+        if (lower.includes('ekmek')) return 'Ekmek';
+        if (mealType === 'breakfast') return lower.includes('çorba') ? 'Çorba' : 'Kahvaltılık';
         if (lower.includes('çorba')) return 'Çorba';
-        if (lower.includes('pilav') || lower.includes('makarna') || lower.includes('spagetti') || lower.includes('bulgur')) return 'Yardımcı Yemek';
-        if (lower.includes('tavuk') || lower.includes('köfte') || lower.includes('et') || lower.includes('kavurma') || lower.includes('tantuni') || lower.includes('fajita') || lower.includes('rosto') || lower.includes('kebap') || lower.includes('gulaş') || lower.includes('pane') || lower.includes('şnitzel') || lower.includes('nohut') || lower.includes('fasulye') || lower.includes('balık') || lower.includes('dolma') || lower.includes('sarma') || lower.includes('yahni')) return 'Ana Yemek';
+        if (lower.includes('pilav') || lower.includes('makarna') || lower.includes('spagetti') || lower.includes('bulgur') || /böre[kğ]/.test(lower) || lower.includes('erişte')) return 'Yardımcı Yemek';
+        if (lower.includes('tavuk') || lower.includes('köfte') || /(^|\s)et(li)?(\s|$)/.test(lower) || lower.includes('kavurma') || lower.includes('tantuni') || lower.includes('fajita') || lower.includes('rosto') || lower.includes('kebap') || lower.includes('gulaş') || lower.includes('pane') || lower.includes('şnitzel') || lower.includes('nohut') || lower.includes('fasulye') || lower.includes('balık') || lower.includes('dolma') || lower.includes('sarma') || lower.includes('yahni')) return 'Ana Yemek';
         if (lower.includes('tatlı') || lower.includes('helva') || lower.includes('baklava') || lower.includes('pasta') || lower.includes('sütlaç') || lower.includes('trileçe') || lower.includes('şekerpare') || lower.includes('supangle') || lower.includes('kadayıf') || lower.includes('kalburabastı') || lower.includes('browni')) return 'Tatlı';
         if (lower.includes('salata') || lower.includes('cacık') || lower.includes('ezme') || lower.includes('haydari') || lower.includes('yoğurt') || lower.includes('turşu')) return 'Salata / Meze';
-        if (lower.includes('su') || lower.includes('ayran') || lower.includes('meyve suyu')) return 'İçecek';
-        if (lower.includes('ekmek')) return 'Ekmek';
         return 'Ana Yemek';
     },
 
@@ -629,7 +645,9 @@ var Screens = window.Screens = {
             if (lower.includes('karpuz')) return '🍉';
             if (lower.includes('armut') || lower.includes('kayısı') || lower.includes('şeftali') || lower.includes('kavun')) return '🍐';
         }
-        if (lower.includes('su') || lower.includes('ayran') || lower.includes('meyve suyu')) return '💧';
+        if (this._isWater(lower)) return '💧';
+        if (/(^|\s)(çay|kahve)(\s|$)/.test(lower)) return '☕';
+        if (/böre[kğ]/.test(lower)) return '🥧';
         if (lower.includes('ekmek')) return '🍞';
         if (lower.includes('omlet') || lower.includes('yumurta') || lower.includes('menemen')) return '🍳';
         if (lower.includes('peynir')) return '🧀';
@@ -785,11 +803,20 @@ var Screens = window.Screens = {
         })[c]);
     },
 
+    // "SÜZME MERCİMEK ÇORBA" → "Süzme Mercimek Çorba" (yalnızca tamamı büyük harfse)
+    _niceDish(s) {
+        const t = String(s || '').replace(/\s+/g, ' ').trim();
+        if (!t || t !== t.toLocaleUpperCase('tr')) return t;
+        return t.toLocaleLowerCase('tr')
+            .replace(/\s*\+\s*/g, ' + ')
+            .replace(/(^|[\s(/+-])(\p{L})/gu, (m, p, c) => p + c.toLocaleUpperCase('tr'));
+    },
+
     _renderGenclikDishRow(dish) {
         return `
             <div class="gs-dish-item">
                 <span class="gs-dish-icon">${this._categorizeDishIcon(dish)}</span>
-                <span class="gs-dish-name">${this._esc(dish)}</span>
+                <span class="gs-dish-name">${this._esc(this._niceDish(dish))}</span>
             </div>
         `;
     },
@@ -847,7 +874,7 @@ var Screens = window.Screens = {
                                 ${day.tarih ? `<span class="gs-week-day-date">${this._esc(day.tarih)}</span>` : ''}
                             </div>
                             <div class="gs-week-dishes">
-                                ${day.dishes.map(d => `<span class="gs-week-dish">${this._esc(d)}</span>`).join('')}
+                                ${day.dishes.map(d => `<span class="gs-week-dish">${this._esc(this._niceDish(d))}</span>`).join('')}
                             </div>
                         </div>
                     `).join('')}
@@ -1152,14 +1179,6 @@ var Screens = window.Screens = {
                     <p class="service-card-desc">${service.description}</p>
                 </div>
             `).join('')}
-
-            <div class="divider"></div>
-
-            <div class="kyk-menu-placeholder">
-                <span class="kyk-menu-placeholder-icon">📍</span>
-                <p style="font-weight: 600;">Cumhurbaşkanlığı Millet Kütüphanesi</p>
-                <p class="mt-sm text-muted" style="font-size: 0.8rem;">Zemin Kat Restoran — Ücretsiz ikram hizmeti</p>
-            </div>
         `;
     }
 };

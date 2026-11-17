@@ -556,6 +556,21 @@ if (document.readyState === 'loading') {
     bootApp();
 }
 
+// Ana ekran menü kartları gerçek bağlantıdır (arama motorları SEO sayfalarına
+// ulaşsın diye). Uygulamada normal dokunuş ilgili ekranı açar; Ctrl/Cmd+tık,
+// orta tık vb. ise bağlantının kendi sayfasına gider.
+document.addEventListener('click', (e) => {
+    const card = e.target.closest && e.target.closest('a.menu-card');
+    if (!card) return;
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    if (card.dataset.external === 'etimesgut') {
+        App.openEtimesgutKent('menu-karti');
+    } else if (card.dataset.screen) {
+        App.showScreen(card.dataset.screen);
+    }
+});
+
 // Close modal on overlay click
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('modal-overlay')) {

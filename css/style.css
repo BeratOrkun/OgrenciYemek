@@ -3768,3 +3768,16 @@ img.install-card-icon {
     color: var(--text-muted);
 }
 
+
+/* Menü kartları bağlantı (<a>) olarak işaretlendi: görünüm aynı kalsın */
+a.menu-card {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+a.menu-card:focus-visible {
+    outline: 2px solid var(--accent-orange);
+    outline-offset: 3px;
+}

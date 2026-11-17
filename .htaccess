@@ -103,4 +103,13 @@ ErrorDocument 404 /404.html
 # ----------------------------------------------------------
 <IfModule mod_alias.c>
     RedirectMatch 404 ^/(tools|\.github|instagram-posts)(/|$)
+
+    # Kısa ve akılda kalır adresler (Instagram biyografisi, paylaşım) → asıl sayfa
+    RedirectMatch 301 ^/(kyk|kyk-menu|kyk-yemek|kyk-yemekleri|kyk-yemek-menusu|kyk-menusu)/?$ /kyk-yemek-listesi/
+    RedirectMatch 301 ^/(gazi|gazi-yemek|gazi-yemek-listesi|gazi-yemekhane)/?$ /gazi-universitesi-yemek-listesi/
+    RedirectMatch 301 ^/(hacettepe|hacettepe-yemek|hacettepe-yemekhane)/?$ /hacettepe-yemek-listesi/
+    RedirectMatch 301 ^/(anku|ankara-universitesi|ankara-universitesi-yemek)/?$ /ankara-universitesi-yemek-listesi/
+    RedirectMatch 301 ^/(genclik|genclik-sofrasi-menu)/?$ /genclik-sofrasi/
+    RedirectMatch 301 ^/(ucretsiz-yemek|ankara-ucretsiz-yemek)/?$ /ankara-ogrenci-ucretsiz-yemek/
+    RedirectMatch 301 ^/(universiteler|universite-yemek-listeleri)/?$ /ankara-universite-yemek-listeleri/
 </IfModule>

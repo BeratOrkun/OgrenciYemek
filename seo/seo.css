@@ -302,3 +302,5 @@ a.s-tr:hover { background: rgba(255, 255, 255, 0.07); color: var(--text); }
   .s-th > span:last-child { display: none; }
   .s-info > div { grid-template-columns: 1fr; gap: 2px; }
 }
+
+.s-places h3 { font-size: 0.95rem; font-weight: 700; }

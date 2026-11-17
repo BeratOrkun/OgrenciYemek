@@ -3815,3 +3815,10 @@ img.install-card-icon {
     color: var(--text-primary);
     outline: none;
 }
+
+.home-links-text {
+    margin: -2px 0 10px;
+    font-size: 0.76rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+}

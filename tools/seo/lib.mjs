@@ -1,7 +1,7 @@
 // SEO sayfa üreticisi — ortak yardımcılar ve sayfa iskeleti (bağımlılık yok)
 
 export const SITE = "https://ogrenciyemek.com";
-export const SEO_CSS_VERSION = "2";
+export const SEO_CSS_VERSION = "3";
 
 const UA = "Mozilla/5.0 (compatible; ogrenciyemek-seo/1.0; +https://ogrenciyemek.com)";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

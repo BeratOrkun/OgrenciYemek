@@ -32,6 +32,7 @@ const KYK_API = "https://raw.githubusercontent.com/BeratOrkun/kyk-yemek-api/main
 const UNI_API = "https://beratorkun.github.io/uniyemekscrapper/data";
 
 const { iso: TODAY } = istanbulNow();
+const MONTH_LABEL = `${MONTHS[Number(TODAY.slice(5, 7)) - 1]} ${TODAY.slice(0, 4)}`; // "Kasım 2026"
 const log = (...a) => console.log(...a);
 const warn = (m) => console.warn(`::warning::${m}`);
 
@@ -184,11 +185,11 @@ ${day.d ? mealBlock("🍲 Akşam yemeği", dH, day.d.kcal, dishList(day.d.items)
   ]);
 
   const baseFaq = [
-    { q: "KYK yemek listesine (KYK menü) nereden bakılır?", a: "ÖğrenciYemek'te ilini seçerek bugünün ve yarının KYK kahvaltı ve akşam yemeği menüsüne bakabilirsin. KYK yemek listesi her gün güncellenir; aynı menü ÖğrenciYemek uygulamasında da yer alır." },
-    { q: "KYK yemekhane saatleri nedir?", a: `KYK yemekhanelerinde kahvaltı ${bH}, akşam yemeği ${dH} saatleri arasında verilir. Saatler yurda göre küçük farklılık gösterebilir.` },
+    { q: "KYK yurt yemek listesine (KYK menü) nereden bakılır?", a: "ÖğrenciYemek'te ilini seçerek bugünün, yarının ve ayın KYK kahvaltı ve akşam yemeği menüsüne bakabilirsin. KYK yemek listesi her gün güncellenir; aynı menü ÖğrenciYemek uygulamasında da yer alır." },
+    { q: "KYK yemekhane saatleri nedir, kaçta açılıyor?", a: `KYK yemekhanelerinde kahvaltı ${bH}, akşam yemeği ${dH} saatleri arasında verilir. Saatler yurda göre küçük farklılık gösterebilir.` },
     { q: "KYK kahvaltısı saat kaçta başlıyor, kaça kadar?", a: `KYK yurtlarında kahvaltı genellikle ${bH} saatleri arasında verilir. Saatler yurda göre küçük farklılık gösterebilir.` },
     { q: "KYK akşam yemeği saat kaçta, kaça kadar?", a: `Akşam yemeği genellikle ${dH} saatleri arasında verilir.` },
-    { q: "KYK yemekleri ücretli mi?", a: "Yurtta kalan öğrencilerin yemekleri GSB günlük beslenme yardımıyla karşılanır; yardım yemekhanede kartla/parmak iziyle kullanılır. Yardımı aşan alımlar öğrenciye aittir." },
+    { q: "KYK yemekleri ücretli mi, paralı mı?", a: "Yurtta kalan öğrencilerin yemekleri GSB günlük beslenme yardımıyla karşılanır; yardım yemekhanede kartla/parmak iziyle kullanılır. Yardımı aşan alımlar öğrenciye aittir." },
     { q: "KYK yemek ücretleri 2026 (beslenme yardımı) ne kadar?", a: `2026-2027 döneminde günlük beslenme yardımı: ${clean(yardim)} Güncel tutar için yurt idaresine danışın.` },
     { q: "KYK yurtlarında öğle yemeği var mı?", a: "Hayır. KYK yurtlarında kahvaltı ve akşam yemeği verilir; öğle yemeği servisi yoktur." },
   ];
@@ -212,7 +213,7 @@ ${day.d ? mealBlock("🍲 Akşam yemeği", dH, day.d.kcal, dishList(day.d.items)
     const body = `
 ${dayCard(slug, TODAY, `Bugün · ${trDate(TODAY)}`)}
 ${dayOf(slug, tomorrow) ? dayCard(slug, tomorrow, `Yarın · ${trDate(tomorrow)}`) : ""}
-${upcoming.length ? `<section class="s-sec"><h2>${esc(name)} KYK ${esc(monthName)} yemek listesi</h2><div class="s-days">${upcoming
+${upcoming.length ? `<section class="s-sec"><h2>${esc(name)} KYK yemek listesi ${esc(MONTH_LABEL)} (aylık)</h2><div class="s-days">${upcoming
       .map(([iso, d]) => `<article class="s-day"><h3>${esc(trDate(iso, { year: false }))}</h3>${d.b ? `<p><b>Kahvaltı:</b> ${esc(d.b.items.join(", "))}</p>` : ""}${d.d ? `<p><b>Akşam:</b> ${esc(d.d.items.join(", "))}</p>` : ""}</article>`)
       .join("")}</div></section>` : ""}
 <section class="s-sec"><h2>KYK yemekhane saatleri ve yemek ücretleri</h2>${infoBox}</section>
@@ -222,19 +223,21 @@ ${upcoming.length ? `<section class="s-sec"><h2>${esc(name)} KYK ${esc(monthName
     pages.push({
       key: "kyk",
       path: `/kyk-yemek-listesi/${slug}/`,
-      title: `${name} KYK Yemek Listesi ve Menü Bugün – Kahvaltı, Akşam Yemeği`,
+      title: `${name} KYK Yemek Listesi ${MONTH_LABEL} – Bugünün KYK Menüsü`,
       description: preview
         ? `${name} KYK yemek listesi ${trDate(TODAY, { day: false, year: false })}: ${preview}. Kahvaltı, akşam menüsü ve yemek saatleri.`
         : `${name} KYK yemek listesi: bugünün kahvaltı ve akşam menüsü, aylık liste ve yemek saatleri.`,
       h1: `${name} KYK Yemek Listesi ve Menüsü`,
-      lead: `${name} KYK yemek listesi (KYK menü): yurtlarda bugün kahvaltıda ve akşam yemeğinde ne var? Günün menüsü, yarının menüsü${upcoming.length ? ", ayın kalan günleri" : ""}, KYK yemekhane saatleri ve yemek ücretleri aşağıda.`,
+      lead: `${name} KYK yurt yemek listesi (KYK menü): ${name} KYK'da bugün ne yemek var? Günün kahvaltı ve akşam menüsü, yarının menüsü${upcoming.length ? `, ${MONTH_LABEL} aylık listesi` : ""}, KYK yemekhane saatleri ve yemek ücretleri aşağıda.`,
       crumbs: [{ name: "KYK yemek listesi", path: "/kyk-yemek-listesi/" }, { name, path: `/kyk-yemek-listesi/${slug}/` }],
       body,
       app: { screen: "kyk", ctaText: "KYK menüsünü uygulamada aç" },
       faq: [
         {
-          q: `${name} KYK'da bugün akşam yemeğinde ne var?`,
-          a: todayDay?.d ? `${trDate(TODAY)} akşam menüsü: ${todayDay.d.items.join(", ")}.` : "Bugünün akşam menüsü henüz yayımlanmadı; yayımlandığında bu sayfada görünür.",
+          q: `${name} KYK'da bugün ne yemek var?`,
+          a: todayDay
+            ? `${trDate(TODAY)}${todayDay.b ? ` kahvaltı: ${todayDay.b.items.join(", ")}.` : ""}${todayDay.d ? ` Akşam yemeği: ${todayDay.d.items.join(", ")}.` : ""}`
+            : "Bugünün menüsü henüz yayımlanmadı; yayımlandığında bu sayfada görünür.",
         },
         ...baseFaq,
       ],
@@ -251,10 +254,10 @@ ${upcoming.length ? `<section class="s-sec"><h2>${esc(name)} KYK ${esc(monthName
   pages.push({
     key: "kyk",
     path: "/kyk-yemek-listesi/",
-    title: "KYK Yemek Listesi ve KYK Menü Bugün – 81 İl Kahvaltı, Akşam Yemeği",
+    title: `KYK Yemek Listesi ${MONTH_LABEL} – Bugünün KYK Menüsü (81 İl)`,
     description: `KYK yemek listesi ve KYK menü ${trDate(TODAY, { day: false, year: false })}: 81 il için bugünün kahvaltı ve akşam yemeği, KYK yemekhane saatleri ve 2026 yemek ücretleri.`,
     h1: "KYK Yemek Listesi ve KYK Menü — Bugün",
-    lead: "KYK yemek listesi (KYK menü) her gün güncel: Türkiye'deki tüm KYK yurtlarının kahvaltı ve akşam yemeği menüsü, KYK yemekhane saatleri ve yemek ücretleri. İlini seç.",
+    lead: `KYK yemek listesi (KYK menü) her gün güncel: KYK'da bugün ne yemek var? Türkiye'deki tüm KYK yurtlarının kahvaltı ve akşam yemeği menüsü, ${MONTH_LABEL} aylık yurt yemek listesi, KYK yemekhane saatleri ve yemek ücretleri. İlini seç.`,
     crumbs: [{ name: "KYK yemek listesi", path: "/kyk-yemek-listesi/" }],
     body: `
 ${hasAnkara ? dayCard("ankara", TODAY, `Ankara · Bugün · ${trDate(TODAY)}`) : ""}
@@ -262,7 +265,10 @@ ${hasAnkara ? dayCard("ankara", TODAY, `Ankara · Bugün · ${trDate(TODAY)}`) :
       .map(([s, n]) => `<li><a href="/kyk-yemek-listesi/${s}/">${esc(n)}</a></li>`).join("")}</ul></section>
 <section class="s-sec"><h2>KYK yemekhane saatleri ve yemek ücretleri</h2>${infoBox}</section>`,
     app: { screen: "kyk", ctaText: "KYK menüsünü uygulamada aç" },
-    faq: baseFaq,
+    faq: [
+      { q: "KYK'da bugün ne yemek var?", a: "KYK menüsü ilden ile değişir. Bu sayfadan ilini seçerek bugünün kahvaltı ve akşam yemeği menüsünü görebilirsin; Ankara'nın bugünkü menüsü sayfanın başında yer alır." },
+      ...baseFaq,
+    ],
     related: [
       { href: "/kyk-yemek-listesi/ankara/", text: "Ankara KYK yemek listesi" },
       { href: "/ankara-ogrenci-ucretsiz-yemek/", text: "Ankara'da öğrencilere ücretsiz yemek" },
@@ -336,10 +342,10 @@ function gaziPage(D, json) {
   return {
     key: "gazi",
     path: "/gazi-universitesi-yemek-listesi/",
-    title: "Gazi Yemek Listesi Bugün – Gazi Üniversitesi Yemekhane Menüsü",
+    title: `Gazi Yemek Listesi Bugün – Gazi Üni Yemekhane Menüsü ${MONTH_LABEL}`,
     description: `Gazi yemek listesi ${trDate(t, { day: false, year: false })}${preview ? `: ${preview}` : ""}. Gazi Üniversitesi yemekhane menüsü, haftalık liste, etsiz alternatif ve kalori.`,
     h1: "Gazi Üniversitesi Yemek Listesi ve Yemekhane Menüsü",
-    lead: "Gazi yemek listesi her gün güncel: Gazi Üniversitesi yemekhanesinin öğle menüsü — çorba, ana yemek, etsiz alternatif, yardımcı yemek, tatlı ve kalori. Gazi yemekhane menüsünün haftalık listesi aşağıda.",
+    lead: "Gazi yemek listesi (Gazi üni yemek listesi) her gün güncel: Gazi Üniversitesi yemekhanesinin öğle menüsü — çorba, ana yemek, etsiz alternatif, yardımcı yemek, tatlı ve kalori. Gazi yemekhane menüsünün haftalık listesi aşağıda.",
     crumbs: [{ name: "Üniversite yemek listeleri", path: "/ankara-universite-yemek-listeleri/" }, { name: "Gazi Üniversitesi", path: "/gazi-universitesi-yemek-listesi/" }],
     body: `
 <section class="s-card${t === TODAY ? " s-today" : ""}"><h2>${esc(todayHeading(t))}</h2>${weekday(TODAY) % 6 === 0 && t !== TODAY ? note("Hafta sonu yemekhane menüsü yayımlanmaz; pazartesi günün menüsü gösteriliyor.") : ""}${uniDayInner(day, ["ogle"])}</section>
@@ -384,15 +390,17 @@ function hacettepePage(D, beytepe, sihhiye) {
   return {
     key: "hacettepe",
     path: "/hacettepe-yemek-listesi/",
-    title: "Hacettepe Yemek Listesi Bugün – Hacettepe Yemekhane Menüsü ve Saatleri",
+    title: "Hacettepe Yemek Listesi Bugün – Beytepe ve Sıhhiye Yemekhane Menüsü, Saatleri",
     description: `Hacettepe yemek listesi ${trDate(t, { day: false, year: false })}${preview ? `: ${preview}` : ""}. Hacettepe yemekhane menüsü (Beytepe, Sıhhiye), yemekhane saatleri, vegan menü ve kalori.`,
     h1: "Hacettepe Yemek Listesi ve Yemekhane Menüsü",
     lead: "Hacettepe yemek listesi her gün güncel: Beytepe ve Sıhhiye yemekhanelerinin kahvaltı, öğle, akşam ve vegan menüsü; Hacettepe yemekhane saatleri, kalori ve alerjen bilgisiyle.",
     crumbs: [{ name: "Üniversite yemek listeleri", path: "/ankara-universite-yemek-listeleri/" }, { name: "Hacettepe Üniversitesi", path: "/hacettepe-yemek-listesi/" }],
     body: `
-<section class="s-card${t === TODAY ? " s-today" : ""}"><h2>${esc(todayHeading(t))} · Beytepe</h2>${uniDayInner(bDay, MEALS)}${same ? note("Sıhhiye yemekhanesinde de aynı menü uygulanıyor.") : ""}</section>
-${!same && sDay ? `<section class="s-card"><h2>${esc(todayHeading(t))} · Sıhhiye</h2>${uniDayInner(sDay, MEALS)}</section>` : ""}
-<section class="s-sec"><h2>Hacettepe yemekhane saatleri</h2>${infoGrid([tRow("sabah", "Kahvaltı"), tRow("ogle", "Öğle yemeği"), tRow("aksam", "Akşam yemeği"), tRow("vegan", "Vegan menü")])}</section>
+<section class="s-card${t === TODAY ? " s-today" : ""}"><h2>Hacettepe Beytepe yemekhane menüsü · ${esc(todayHeading(t))}</h2>${uniDayInner(bDay, MEALS)}</section>
+${!same && sDay
+      ? `<section class="s-card"><h2>Hacettepe Sıhhiye yemekhane menüsü · ${esc(todayHeading(t))}</h2>${uniDayInner(sDay, MEALS)}</section>`
+      : `<section class="s-sec"><h2>Hacettepe Sıhhiye yemek listesi</h2>${note(sDay ? "Sıhhiye yemekhanesinde bugün Beytepe ile aynı menü uygulanıyor; menü yukarıda." : "Sıhhiye yemekhanesinin bugünkü menüsü henüz yayımlanmadı.")}</section>`}
+<section class="s-sec"><h2>Hacettepe yemekhane saatleri (Beytepe, Sıhhiye)</h2>${infoGrid([tRow("sabah", "Kahvaltı"), tRow("ogle", "Öğle yemeği"), tRow("aksam", "Akşam yemeği"), tRow("vegan", "Vegan menü")])}</section>
 <section class="s-sec"><h2>Hacettepe haftalık yemek listesi (Beytepe)</h2>${uniUpcoming(bDays, t, ["ogle", "aksam", "vegan"]) || note("Sonraki günlerin menüsü henüz yayımlanmadı.")}</section>
 <section class="s-sec"><h2>Resmi kaynak</h2>${note(`Menü ve saat değişikliklerini <a href="https://beslenme.hacettepe.edu.tr/" rel="noopener">Hacettepe Beslenme Bilgi Sistemi</a> üzerinden teyit edebilirsin. Menü zorunlu hallerde değişebilir.`)}</section>`,
     app: { screen: "hacettepe", ctaText: "Hacettepe menüsünü uygulamada aç" },
@@ -423,10 +431,10 @@ function ankuPage(D, json) {
   return {
     key: "anku",
     path: "/ankara-universitesi-yemek-listesi/",
-    title: "Ankara Üniversitesi Yemek Listesi Bugün – Ankü Yemekhane Menüsü",
+    title: "Ankü Yemek Listesi Bugün – Ankara Üniversitesi Yemekhane Menüsü",
     description: `Ankara Üniversitesi yemek listesi ${trDate(t, { day: false, year: false })}${preview ? `: ${preview}` : ""}. Ankü yemekhane menüsü, aylık yemek listesi ve kalori değerleri.`,
-    h1: "Ankara Üniversitesi Yemek Listesi ve Yemekhane Menüsü",
-    lead: "Ankara Üniversitesi yemek listesi (Ankü yemekhane menüsü): günün öğle menüsü ve aylık yemek listesi — çorba, ana yemek, yardımcı yemek ve kalori değerleri.",
+    h1: "Ankara Üniversitesi (Ankü) Yemek Listesi",
+    lead: "Ankara Üniversitesi yemek listesi (Ankü yemek listesi, Ankara Üni yemekhane menüsü): günün öğle menüsü ve aylık yemek listesi — çorba, ana yemek, yardımcı yemek ve kalori değerleri.",
     crumbs: [{ name: "Üniversite yemek listeleri", path: "/ankara-universite-yemek-listeleri/" }, { name: "Ankara Üniversitesi", path: "/ankara-universitesi-yemek-listesi/" }],
     body: `
 <section class="s-card${t === TODAY ? " s-today" : ""}"><h2>${esc(todayHeading(t))}</h2>${weekday(TODAY) % 6 === 0 && t !== TODAY ? note("Hafta sonu menü yayımlanmaz; pazartesi günün menüsü gösteriliyor.") : ""}${uniDayInner(day, ["ogle"], { withTimes: false })}</section>
@@ -700,10 +708,10 @@ function freeFoodHub(D, ctx) {
   return {
     key: "hub-free",
     path: "/ankara-ogrenci-ucretsiz-yemek/",
-    title: "Ankara'da Öğrencilere Ücretsiz ve Ucuz Yemek – Güncel Rehber",
+    title: "Ankara Öğrencilere Ücretsiz Yemek – Gençlik Sofrası, KYK, Ucuz Yemek Yerleri",
     description: "Ankara'da üniversite öğrencilerinin ücretsiz veya uygun fiyatlı yemek yiyebileceği yerler: Gençlik Sofrası, KYK, Millet Kütüphanesi çorba ikramı ve kent lokantaları; saatler ve fiyatlar.",
     h1: "Ankara'da Öğrencilere Ücretsiz ve Ucuz Yemek",
-    lead: "Ankara'da öğrencilerin ücretsiz ya da düşük ücretle yemek yiyebileceği yerlerin güncel listesi: saatler, fiyatlar ve günün menüleri.",
+    lead: "Ankara'da öğrencilere ücretsiz yemek veren yerler ve ucuz yemek yerleri: Ankara Büyükşehir Belediyesi Gençlik Sofrası, Çankaya Belediyesi, KYK, Millet Kütüphanesi ve kent lokantaları — saatler, fiyatlar ve günün menüleri.",
     crumbs: [{ name: "Ücretsiz yemek", path: "/ankara-ogrenci-ucretsiz-yemek/" }],
     body: `
 <section class="s-sec"><h2>Nerede, ne zaman, kaç para?</h2><div class="s-table" role="table">
@@ -727,27 +735,48 @@ ${kykToday ? `<section class="s-card s-today"><h2>Bugün KYK Ankara akşam yeme�
   };
 }
 
+// Aranan kısa adlar (ör. "aybü yemek listesi", "hacı bayram veli yemek listesi")
+const UNI_SEARCH_NAME = {
+  "Ankara Üniversitesi": "Ankü (Ankara Üniversitesi)",
+  "Gazi Üniversitesi": "Gazi",
+  "Hacettepe Üniversitesi": "Hacettepe",
+  "Orta Doğu Teknik Üniversitesi": "ODTÜ",
+  "Ankara Yıldırım Beyazıt Üniversitesi": "AYBÜ",
+  "Ankara Sosyal Bilimler Üniversitesi": "ASBÜ",
+  "Ankara Hacı Bayram Veli Üniversitesi": "Hacı Bayram Veli (AHBV)",
+  "Ankara Müzik ve Güzel Sanatlar Üniversitesi": "MGÜ",
+  "SBÜ Gülhane Külliyesi": "Gülhane (SBÜ)",
+  "Bilkent Üniversitesi": "Bilkent",
+};
+
 function uniHub(D) {
   const internal = { gazi: "/gazi-universitesi-yemek-listesi/", hacettepe: "/hacettepe-yemek-listesi/", anku: "/ankara-universitesi-yemek-listesi/" };
+  const short = (u) => UNI_SEARCH_NAME[u.name] || u.shortName || u.name;
+  const host = (url) => { try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return url; } };
+  const others = D.universities.filter((u) => !internal[u.inApp]);
   return {
     key: "hub-uni",
     path: "/ankara-universite-yemek-listeleri/",
-    title: "Ankara Üniversite Yemek Listeleri – Gazi, Hacettepe, Ankü, ODTÜ, Bilkent",
-    description: "Ankara'daki üniversitelerin yemekhane menüleri: Gazi, Hacettepe ve Ankara Üniversitesi günlük menüsü; ODTÜ, Bilkent, AYBÜ, AHBV ve diğerlerinin resmi yemek listeleri.",
+    title: "Ankara Üniversite Yemek Listeleri – Gazi, Hacettepe, Ankü, ODTÜ, Bilkent, AYBÜ",
+    description: "Ankara üniversite yemek listeleri: Gazi, Hacettepe ve Ankü günlük menüsü; ODTÜ, Bilkent, AYBÜ, Hacı Bayram Veli, ASBÜ, MGÜ ve Gülhane yemek listesi bağlantıları.",
     h1: "Ankara Üniversite Yemek Listeleri",
     lead: "Ankara'daki üniversitelerin yemekhane menüleri tek sayfada. Gazi, Hacettepe ve Ankara Üniversitesi menüleri günlük olarak burada; diğer üniversiteler için resmi menü sayfalarına bağlantılar.",
     crumbs: [{ name: "Üniversite yemek listeleri", path: "/ankara-universite-yemek-listeleri/" }],
     body: `
-<section class="s-sec"><h2>Üniversiteler</h2><ul class="s-places">${D.universities
-      .map((u) => internal[u.inApp]
-        ? `<li><b>${esc(u.name)}</b><span>Günlük menü ÖğrenciYemek'te</span><a href="${internal[u.inApp]}">Yemek listesi</a></li>`
-        : `<li><b>${esc(u.name)}</b><span>${esc(u.note || "")}</span><a href="${esc(u.menuUrl)}" rel="noopener">Resmi menü sayfası</a></li>`)
+<section class="s-sec"><h2>Günlük menüsü ÖğrenciYemek'te olan üniversiteler</h2><ul class="s-places">${D.universities
+      .filter((u) => internal[u.inApp])
+      .map((u) => `<li><h3>${esc(short(u))} yemek listesi</h3><span>${esc(u.name)} — günlük menü, haftalık liste ve kalori</span><a href="${internal[u.inApp]}">${esc(short(u))} yemek listesine git</a></li>`)
+      .join("")}</ul></section>
+<section class="s-sec"><h2>Diğer Ankara üniversitelerinin yemek listeleri</h2><ul class="s-places">${others
+      .map((u) => `<li><h3>${esc(short(u))} yemek listesi</h3><span>${esc(u.note || "")}</span><a href="${esc(u.menuUrl)}" rel="noopener">${esc(short(u))} resmi yemek listesi (${esc(host(u.menuUrl))})</a></li>`)
       .join("")}</ul></section>`,
     app: { screen: "universities", ctaText: "Üniversite menülerini uygulamada aç" },
     faq: [
-      { q: "ODTÜ yemek listesine nereden bakılır?", a: "ODTÜ kafeterya menüsü kafeterya.metu.edu.tr adresinde yayımlanır; bu sayfadaki bağlantıdan ulaşabilirsin." },
-      { q: "Bilkent yemek listesi nerede?", a: "Bilkent'in haftalık tabldot menüsü kafemud.bilkent.edu.tr adresinde yayımlanır." },
-      { q: "Hangi üniversitelerin menüsü ÖğrenciYemek'te var?", a: "Gazi, Hacettepe (Beytepe ve Sıhhiye) ve Ankara Üniversitesi menüleri günlük olarak uygulamada ve bu sitede yer alır." },
+      { q: "Hangi üniversitelerin menüsü ÖğrenciYemek'te var?", a: "Gazi, Hacettepe (Beytepe ve Sıhhiye) ve Ankara Üniversitesi (Ankü) menüleri günlük olarak uygulamada ve bu sitede yer alır." },
+      ...others.map((u) => ({
+        q: `${short(u)} yemek listesine nereden bakılır?`,
+        a: `${u.name} yemek listesi resmi olarak ${host(u.menuUrl)} adresinde yayımlanır; bu sayfadaki bağlantıdan ulaşabilirsin.${u.note ? ` ${u.note}` : ""}`,
+      })),
     ],
     related: [
       { href: "/gazi-universitesi-yemek-listesi/", text: "Gazi Üniversitesi yemek listesi" },

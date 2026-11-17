@@ -9,7 +9,7 @@
 //    /genclik-sofrasi, /millet-kutuphanesi) her iki sayaca birebir
 //    Sayfa Görüntülemesi (Pageview) olarak gönderir.
 // 2) Özel olayları (uygulamadan-acilis, kurulum, uni-secim/*,
-//    uni-aktif/*, uni-menu/*, instagram-tiklama) her iki sayaca
+//    uni-aktif/*, uni-menu/*, simdi-acik/*, dis-link/*, instagram-tiklama) her iki sayaca
 //    birebir Olay (Event) olarak gönderir.
 // 3) İki sayacı iki bağımsız kuyrukla (kuyrukGC, kuyrukUmami)
 //    birbirinden tamamen izole çalıştırır; dış yönlendirmelerin
@@ -298,7 +298,9 @@
         universities: { sayfaYolu: '/universite-yemekleri', baslik: 'Üniversite Yemekleri' },
         kyk:          { sayfaYolu: '/kyk-yemekleri',        baslik: 'KYK Yemekleri' },
         genclik:      { sayfaYolu: '/genclik-sofrasi',      baslik: 'Gençlik Sofrası' },
-        millet:       { sayfaYolu: '/millet-kutuphanesi',   baslik: 'Millet Kütüphanesi' }
+        millet:       { sayfaYolu: '/millet-kutuphanesi',   baslik: 'Millet Kütüphanesi' },
+        'cankaya-genclik': { sayfaYolu: '/cankaya-genclik-sofrasi', baslik: 'Çankaya Gençlik Sofrası' },
+        'cankaya-kent':    { sayfaYolu: '/cankaya-kent-lokantasi',  baslik: 'Çankaya Kent Lokantası' }
     };
 
     function sayfaAcildi(ekranKodu) {
@@ -310,6 +312,45 @@
         var bilgi = SAYFA_HARITASI[ekranKodu];
         if (!bilgi) return;
         sayfaGoruntuleme(bilgi.sayfaYolu, bilgi.baslik);
+    }
+
+    // Ana ekrandaki "Şu an yiyebileceğin yerler" kartında bir satıra tıklandığında.
+    // Olay adları (GoatCounter yolu = Umami olay adı, ikisinde birebir aynı):
+    //   simdi-acik/kyk-kahvalti, simdi-acik/kyk-aksam, simdi-acik/universite,
+    //   simdi-acik/genclik-sofrasi, simdi-acik/millet-kutuphanesi,
+    //   simdi-acik/cankaya-genclik-sofrasi, simdi-acik/cankaya-kent-lokantasi,
+    //   simdi-acik/etimesgut-kent-lokantasi
+    var SIMDI_ACIK_KAYNAKLAR = {
+        'kyk-kahvalti':       'KYK Kahvaltı',
+        'kyk-aksam':          'KYK Akşam Yemeği',
+        'universite':         'Üniversite Yemekhanesi',
+        'genclik-sofrasi':    'Gençlik Sofrası',
+        'millet-kutuphanesi': 'Millet Kütüphanesi',
+        'cankaya-genclik-sofrasi': 'Çankaya Gençlik Sofrası',
+        'cankaya-kent-lokantasi':  'Çankaya Kent Lokantası',
+        'etimesgut-kent-lokantasi': 'Etimesgut Kent Lokantası'
+    };
+
+    function simdiAcikTiklandi(kaynak, gorunenAd) {
+        if (!kaynak || !SIMDI_ACIK_KAYNAKLAR[kaynak]) return;
+        var etiket = SIMDI_ACIK_KAYNAKLAR[kaynak];
+        var saat = new Date().getHours();
+        var veri = {
+            kaynak: etiket,
+            saat: (saat < 10 ? '0' : '') + saat + ':00'
+        };
+        // Üniversite satırında seçili okulun adı görünür ("ODTÜ Yemekhanesi")
+        if (gorunenAd && gorunenAd !== etiket) veri.satir = String(gorunenAd).slice(0, 80);
+        olay('simdi-acik/' + kaynak, 'Şu an açık kartı: ' + etiket, veri);
+    }
+
+    // Etimesgut Kent Lokantası ana menü kartına tıklandığında (belediye sitesi açılır).
+    // "Şu an açık" kartından gelen tıklama simdiAcikTiklandi ile sayılır;
+    // aynı tıklama iki kez sayılmasın diye burada yalnızca menü kartı sayılır.
+    function etimesgutKentTiklandi(kaynak) {
+        if (kaynak === 'simdi-acik') return;
+        olay('dis-link/etimesgut-kent-lokantasi', 'Etimesgut Kent Lokantası sayfası açıldı',
+            { kaynak: 'Ana menü kartı', hedef: 'etimesgut.bel.tr/ahi-kent-lokantasi' });
     }
 
     // Instagram takip kartına tıklandığında
@@ -481,7 +522,9 @@
         universiteSecildi: universiteSecildi,
         universiteMenuTiklandi: universiteMenuTiklandi,
         sayfaAcildi: sayfaAcildi,
-        instagramTiklandi: instagramTiklandi
+        instagramTiklandi: instagramTiklandi,
+        etimesgutKentTiklandi: etimesgutKentTiklandi,
+        simdiAcikTiklandi: simdiAcikTiklandi
     };
 
     var baslatildi = false;

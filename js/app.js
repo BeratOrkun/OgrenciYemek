@@ -55,6 +55,11 @@ var App = window.App = {
         this._historyDepth = 0;
         this._safeHistoryReplace({ oyScreen: 'home', oyDepth: 0 }, '');
 
+        // "Şu an açık" kartının tıklama ve dakika zamanlayıcısı
+        try {
+            if (window.NowOpen) NowOpen.init();
+        } catch { /* kart yoksa uygulama yine çalışır */ }
+
         // Karşılama ekranı yok; doğrudan ana ekran açılır
         this.showScreen('home');
 
@@ -74,14 +79,21 @@ var App = window.App = {
             const today = new Date();
             const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
+            // Menü gelince "Şu an açık" kartındaki yemek isimlerini tazele
+            const refreshNow = () => {
+                try {
+                    if (this.currentScreen === 'home' && window.NowOpen) NowOpen.render();
+                } catch { /* yoksay */ }
+            };
+
             // KYK — başarılı olursa hem belleğe hem localStorage'a yazılır
             try {
-                Screens._fetchKYKLive(dateStr, city).catch(() => {});
+                Screens._fetchKYKLive(dateStr, city).then(refreshNow).catch(() => {});
             } catch { /* yoksay */ }
 
             // Gençlik Sofrası — loadMenu kendi önbelleğine yazar
             try {
-                GenclikSofralariAPI.loadMenu().catch(() => {});
+                GenclikSofralariAPI.loadMenu().then(refreshNow).catch(() => {});
             } catch { /* yoksay */ }
         };
 
@@ -289,6 +301,14 @@ var App = window.App = {
                     Screens.renderMilletKutuphanesiScreen(targetEl);
                     break;
 
+                case 'cankaya-genclik':
+                    Screens.renderCankayaGenclikScreen(targetEl);
+                    break;
+
+                case 'cankaya-kent':
+                    Screens.renderCankayaKentScreen(targetEl);
+                    break;
+
                 default:
                     this.renderHome();
             }
@@ -353,12 +373,11 @@ var App = window.App = {
             }
         }
 
-        // Update quick info
-        const quickInfoEl = document.getElementById('quick-info-text');
-        if (quickInfoEl) {
-            const today = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            quickInfoEl.innerHTML = `<strong>${today.toLocaleDateString('tr-TR', options)}</strong> ${city}`;
+        // "Şu an yiyebileceğin yerler" kartı (tarih, saat ve açık yerler)
+        try {
+            if (window.NowOpen) NowOpen.render();
+        } catch (err) {
+            console.error('Şu an açık kartı çizilemedi:', err);
         }
 
         // Üstteki üniversite seçim butonu
@@ -451,6 +470,16 @@ var App = window.App = {
             </button>
         `;
         }).join('');
+    },
+
+    // Etimesgut Kent Lokantası: günün menüsü belediye sitesinde görsel olarak
+    // yayınlandığı için doğrudan o sayfa açılır. kaynak: 'menu-karti' | 'simdi-acik'
+    openEtimesgutKent(kaynak) {
+        const data = APP_DATA.etimesgutKentLokantasi;
+        try {
+            if (window.OYAnalytics) window.OYAnalytics.etimesgutKentTiklandi(kaynak);
+        } catch { /* sayaç asla uygulamayı bozmamalı */ }
+        window.open(data.pageUrl, '_blank', 'noopener,noreferrer');
     },
 
     pickUniversity(uniName) {

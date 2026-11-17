@@ -42,7 +42,7 @@
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=15">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="css/style.css?v=29">
+    <link rel="stylesheet" href="css/style.css?v=31">
 
     <!-- Acil durum kurtarma: Beklenmedik bir JS hatasinda dahi ana ekranin asla bos zeminde kalmamasini garanti eder -->
     <script>
@@ -89,45 +89,19 @@
                 </h1>
             </div>
 
-            <!-- Quick Info -->
-            <div class="quick-info">
-                <span class="quick-info-icon">📅</span>
-                <div class="quick-info-text" id="quick-info-text">
-                    <strong>Yükleniyor...</strong>
+            <!-- Şu an yiyebileceğin yerler (saate göre js/now.js doldurur) -->
+            <section class="now-card" id="now-card" aria-labelledby="now-card-title">
+                <div class="now-card-head">
+                    <h2 class="now-card-title" id="now-card-title">
+                        <span class="now-live-dot" aria-hidden="true"></span>
+                        Şu an yiyebileceğin yerler
+                    </h2>
+                    <span class="now-card-time" id="now-time"></span>
                 </div>
-            </div>
-
-            <!-- Telefona Yükle (PWA) -->
-            <div class="install-card" id="install-card" hidden>
-                <div class="install-card-top">
-                    <img class="install-card-icon" src="icons/icon-192.png?v=15" alt="" width="44" height="44" decoding="async">
-                    <div class="install-card-text">
-                        <h3 class="install-card-title">Telefonuna yükle</h3>
-                        <p class="install-card-desc" id="install-card-desc">
-                            ÖğrenciYemek'i uygulama gibi kullan — ana ekranından tek dokunuşla aç,
-                            internet yokken bile menülere bak. İndirme boyutu yalnızca ~100 KB.
-                        </p>
-                    </div>
-                </div>
-                <button type="button" class="install-card-btn" id="install-card-btn" onclick="App.triggerInstall()">
-                    <span aria-hidden="true">⬇️</span> Uygulamayı Yükle
-                </button>
-                <ol class="install-steps" id="install-steps" hidden>
-                    <li>
-                        Alttaki <strong>Paylaş</strong>
-                        <svg class="install-share-icon" viewBox="0 0 24 24" width="13" height="13" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                             aria-hidden="true" focusable="false">
-                            <path d="M12 15V3" />
-                            <path d="M8 7l4-4 4 4" />
-                            <path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6" />
-                        </svg>
-                        düğmesine dokun
-                    </li>
-                    <li><strong>Ana Ekrana Ekle</strong>'yi seç</li>
-                    <li><strong>Ekle</strong>'ye dokun — hazır!</li>
-                </ol>
-            </div>
+                <p class="now-card-lead" id="now-lead">Şu anda aşağıdaki yemeklerden faydalanabilirsin:</p>
+                <div class="now-list" id="now-list"></div>
+                <p class="now-next" id="now-next" hidden></p>
+            </section>
 
             <!-- Menu Cards -->
             <div class="menu-grid">
@@ -183,6 +157,47 @@
                     </div>
                 </div>
 
+                <!-- Çankaya Gençlik Sofrası -->
+                <div class="menu-card" data-accent="cyan" onclick="App.showScreen('cankaya-genclik')">
+                    <div class="menu-card-glow"></div>
+                    <div class="menu-card-inner">
+                        <div class="menu-card-icon">🥗</div>
+                        <div class="menu-card-content">
+                            <h3 class="menu-card-title">Çankaya Gençlik Sofrası</h3>
+                            <p class="menu-card-desc">Ücretsiz akşam yemeği · Hafta içi 17:30–19:00</p>
+                        </div>
+                        <span class="menu-card-arrow">›</span>
+                    </div>
+                </div>
+
+                <!-- Çankaya Kent Lokantası -->
+                <div class="menu-card" data-accent="yellow" onclick="App.showScreen('cankaya-kent')">
+                    <div class="menu-card-glow"></div>
+                    <div class="menu-card-inner">
+                        <div class="menu-card-icon">🍛</div>
+                        <div class="menu-card-content">
+                            <h3 class="menu-card-title">Çankaya Kent Lokantası</h3>
+                            <p class="menu-card-desc">4 çeşit yemek 115 ₺ · Hafta içi 11:00–16:00</p>
+                        </div>
+                        <span class="menu-card-arrow">›</span>
+                    </div>
+                </div>
+
+                <!-- Etimesgut Kent Lokantası (günün menüsü belediye sitesinde görsel olarak; doğrudan açılır) -->
+                <div class="menu-card" data-accent="pink" role="link" tabindex="0"
+                     onclick="App.openEtimesgutKent('menu-karti')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();App.openEtimesgutKent('menu-karti');}">
+                    <div class="menu-card-glow"></div>
+                    <div class="menu-card-inner">
+                        <div class="menu-card-icon">🍲</div>
+                        <div class="menu-card-content">
+                            <h3 class="menu-card-title">Etimesgut Kent Lokantası</h3>
+                            <p class="menu-card-desc">Sıcak yemek 80 ₺ · Hafta içi 12:00–14:00 · Günün menüsü</p>
+                        </div>
+                        <span class="menu-card-arrow menu-card-external" aria-hidden="true">↗</span>
+                    </div>
+                </div>
+
             </div>
 
             <!-- Instagram Takip Kartı -->
@@ -205,6 +220,38 @@
                 </span>
                 <span class="social-card-arrow" aria-hidden="true">›</span>
             </a>
+
+            <!-- Telefona Yükle (PWA) -->
+            <div class="install-card" id="install-card" hidden>
+                <div class="install-card-top">
+                    <img class="install-card-icon" src="icons/icon-192.png?v=15" alt="" width="44" height="44" decoding="async">
+                    <div class="install-card-text">
+                        <h3 class="install-card-title">Telefonuna yükle</h3>
+                        <p class="install-card-desc" id="install-card-desc">
+                            ÖğrenciYemek'i uygulama gibi kullan — ana ekranından tek dokunuşla aç,
+                            internet yokken bile menülere bak. İndirme boyutu yalnızca ~100 KB.
+                        </p>
+                    </div>
+                </div>
+                <button type="button" class="install-card-btn" id="install-card-btn" onclick="App.triggerInstall()">
+                    <span aria-hidden="true">⬇️</span> Uygulamayı Yükle
+                </button>
+                <ol class="install-steps" id="install-steps" hidden>
+                    <li>
+                        Alttaki <strong>Paylaş</strong>
+                        <svg class="install-share-icon" viewBox="0 0 24 24" width="13" height="13" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             aria-hidden="true" focusable="false">
+                            <path d="M12 15V3" />
+                            <path d="M8 7l4-4 4 4" />
+                            <path d="M4 13v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6" />
+                        </svg>
+                        düğmesine dokun
+                    </li>
+                    <li><strong>Ana Ekrana Ekle</strong>'yi seç</li>
+                    <li><strong>Ekle</strong>'ye dokun — hazır!</li>
+                </ol>
+            </div>
 
             <!-- Footer -->
             <div class="home-footer">
@@ -249,10 +296,11 @@
 </div>
 
 <!-- Scripts (order matters) -->
-<script src="js/storage.js?v=29"></script>
-<script src="js/data.js?v=29"></script>
-<script src="js/screens.js?v=29"></script>
-<script src="js/app.js?v=29"></script>
+<script src="js/storage.js?v=31"></script>
+<script src="js/data.js?v=31"></script>
+<script src="js/screens.js?v=31"></script>
+<script src="js/now.js?v=31"></script>
+<script src="js/app.js?v=31"></script>
 
 <!-- GoatCounter & Umami — cerezsiz ziyaret sayaclari. -->
 <script data-goatcounter="https://beratorkune.goatcounter.com/count"
@@ -261,7 +309,7 @@
         data-website-id="0fcc0f5a-49ce-4bdb-88b7-55492e04d394"
         data-exclude-search="true"
         data-exclude-hash="true"></script>
-<script src="js/analytics.js?v=29"></script>
+<script src="js/analytics.js?v=31"></script>
 
 </body>
 </html>

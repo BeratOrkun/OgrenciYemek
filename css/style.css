@@ -2939,3 +2939,481 @@ img.install-card-icon {
     color: var(--text-muted);
     text-align: center;
 }
+
+/* =====================================================
+   ŞU AN YİYEBİLECEĞİN YERLER (ana ekran)
+   ===================================================== */
+.now-card {
+    position: relative;
+    margin-bottom: var(--space-lg);
+    padding: 14px 14px 12px;
+    border-radius: var(--radius-lg);
+    background:
+        linear-gradient(160deg, rgba(34, 197, 94, 0.09) 0%, rgba(255, 255, 255, 0.03) 45%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid rgba(34, 197, 94, 0.22);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+    min-width: 0;
+}
+
+.now-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+}
+
+.now-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.25;
+}
+
+.now-live-dot {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 8px #4ade80;
+    animation: statusPulse 2s infinite;
+}
+
+.now-card-time {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: #4ade80;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.28);
+    padding: 3px 9px;
+    border-radius: var(--radius-full);
+}
+
+.now-card-lead {
+    margin: 8px 0 8px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.35;
+}
+
+.now-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.now-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+    padding: 9px 10px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--now-accent, var(--accent-green));
+    color: var(--text-primary);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.now-row[data-accent="green"]  { --now-accent: var(--accent-green); }
+.now-row[data-accent="orange"] { --now-accent: var(--accent-orange); }
+.now-row[data-accent="blue"]   { --now-accent: var(--accent-blue); }
+.now-row[data-accent="purple"] { --now-accent: var(--accent-purple); }
+.now-row[data-accent="cyan"]   { --now-accent: var(--accent-cyan); }
+.now-row[data-accent="yellow"] { --now-accent: var(--accent-yellow); }
+
+.now-row:hover {
+    background: rgba(255, 255, 255, 0.075);
+}
+
+.now-row:active {
+    transform: scale(0.985);
+}
+
+.now-row:focus-visible {
+    outline: 2px solid var(--now-accent, var(--accent-green));
+    outline-offset: 2px;
+}
+
+.now-row-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.now-row-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.now-row-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+}
+
+.now-row-name {
+    min-width: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.25;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+}
+
+.now-pill {
+    flex-shrink: 0;
+    font-size: 0.64rem;
+    font-weight: 700;
+    line-height: 1;
+    padding: 4px 6px;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.now-pill-open {
+    color: #86efac;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.now-pill-soon {
+    color: #fdba74;
+    background: rgba(249, 115, 22, 0.14);
+    border: 1px solid rgba(249, 115, 22, 0.35);
+}
+
+/* Yemek isimleri: en fazla 2 satır, taşan kısım "…" */
+.now-row-dishes {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    font-size: 0.76rem;
+    line-height: 1.4;
+    color: var(--text-secondary);
+}
+
+.now-row-dishes.is-hint {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.now-tag {
+    display: inline-block;
+    margin-right: 5px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.64rem;
+    font-weight: 700;
+    font-style: normal;
+    vertical-align: 1px;
+    letter-spacing: 0.01em;
+}
+
+.now-tag-free {
+    color: #93c5fd;
+    background: rgba(59, 130, 246, 0.16);
+}
+
+.now-tag-price {
+    color: #fde68a;
+    background: rgba(234, 179, 8, 0.16);
+}
+
+.now-tag-est {
+    color: #fcd34d;
+    background: rgba(234, 179, 8, 0.14);
+}
+
+.now-next {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 6px;
+    margin-top: 10px;
+    padding-top: 9px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.08);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.now-next[hidden] {
+    display: none;
+}
+
+.now-next strong {
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.now-next-label {
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 0.64rem;
+    letter-spacing: 0.06em;
+}
+
+.now-next-sep {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.now-empty {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    padding: 6px 2px;
+}
+
+/* Ana ekran kartları — "Şu an açık" kartı eklendiği için biraz sıkılaştırıldı,
+   böylece alttaki menü butonları ekranda görünmeye devam eder */
+.menu-grid {
+    gap: 10px;
+}
+
+.menu-card-inner {
+    padding: 14px var(--space-md);
+    gap: var(--space-md);
+}
+
+.menu-card-icon {
+    width: 46px;
+    height: 46px;
+    font-size: 1.5rem;
+}
+
+.menu-card-title {
+    font-size: 1.05rem;
+    margin-bottom: 2px;
+}
+
+.home-header {
+    margin-bottom: var(--space-md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .now-live-dot { animation: none; }
+    .now-row { transition: none; }
+}
+
+/* =====================================================
+   KYK — güven durumları (tahmini, yayımlanmadı, ücretsiz barınma)
+   ===================================================== */
+.kyk-status-pill.estimated {
+    border-color: rgba(234, 179, 8, 0.45);
+    color: #fcd34d;
+}
+
+.kyk-status-pill.empty {
+    border-color: rgba(255, 255, 255, 0.15);
+    color: var(--text-secondary);
+}
+
+.kyk-status-pill.synced .status-dot   { background: #60a5fa; box-shadow: 0 0 8px #60a5fa; }
+.kyk-status-pill.estimated .status-dot { background: #facc15; box-shadow: 0 0 8px #facc15; }
+.kyk-status-pill.offline .status-dot   { background: #fb923c; box-shadow: 0 0 8px #fb923c; }
+.kyk-status-pill.empty .status-dot     { background: #9ca3af; box-shadow: none; animation: none; }
+
+.kyk-estimate-note {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-bottom: var(--space-md);
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: rgba(234, 179, 8, 0.08);
+    border: 1px solid rgba(234, 179, 8, 0.28);
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
+.kyk-estimate-note strong {
+    color: #fcd34d;
+}
+
+.kyk-estimate-note-icon {
+    flex-shrink: 0;
+}
+
+.kyk-empty-state {
+    text-align: center;
+    padding: var(--space-xl) var(--space-lg);
+    margin-bottom: var(--space-lg);
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+    border: 1px dashed rgba(255, 255, 255, 0.14);
+}
+
+.kyk-empty-icon {
+    display: block;
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.kyk-empty-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.kyk-empty-text {
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+.kyk-meal-missing-text {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    padding: 4px 2px 2px;
+}
+
+.kyk-subsidy-free {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 4px 0 2px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    background: rgba(34, 197, 94, 0.07);
+    border: 1px solid rgba(34, 197, 94, 0.18);
+}
+
+.kyk-subsidy-free-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    min-width: 0;
+}
+
+.kyk-subsidy-free-value {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #4ade80;
+}
+
+.kyk-subsidy-free-note {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin: 4px 0 8px;
+    line-height: 1.4;
+}
+
+/* Sarı vurgu (Çankaya Kent Lokantası menü kartı) */
+.menu-card[data-accent="yellow"]:hover { border-color: rgba(234, 179, 8, 0.5); box-shadow: 0 8px 24px rgba(234, 179, 8, 0.15); }
+
+/* =====================================================
+   ÇANKAYA SAYFALARI (Gençlik Sofrası / Kent Lokantası)
+   ===================================================== */
+.place-facts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-top: var(--space-md);
+}
+
+.place-fact {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 11px;
+    border-radius: var(--radius-full);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.place-fact-price {
+    color: #4ade80;
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.place-note {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-bottom: var(--space-lg);
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
+.place-location {
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.place-location-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.place-location-map {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #60a5fa;
+    white-space: nowrap;
+}
+.menu-card[data-accent="cyan"]::after   { background: var(--accent-cyan); }
+.menu-card[data-accent="yellow"]::after { background: var(--accent-yellow); }
+.menu-card[data-accent="cyan"]   .menu-card-icon { background: rgba(6, 182, 212, 0.12); border-color: rgba(6, 182, 212, 0.18); }
+.menu-card[data-accent="yellow"] .menu-card-icon { background: rgba(234, 179, 8, 0.12); border-color: rgba(234, 179, 8, 0.18); }
+
+/* Pembe vurgu (Etimesgut Kent Lokantası) */
+.menu-card[data-accent="pink"]::after { background: #ec4899; }
+.menu-card[data-accent="pink"] .menu-card-icon { background: rgba(236, 72, 153, 0.12); border-color: rgba(236, 72, 153, 0.18); }
+.menu-card[data-accent="pink"]:hover { border-color: rgba(236, 72, 153, 0.5); box-shadow: 0 8px 24px rgba(236, 72, 153, 0.15); }
+.menu-card[role="link"]:focus-visible { outline: 2px solid #ec4899; outline-offset: 2px; }
+.menu-card-external { font-size: 1.1rem; }
+.now-row[data-accent="pink"] { --now-accent: #ec4899; }
